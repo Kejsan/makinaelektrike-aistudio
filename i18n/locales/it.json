@@ -1,0 +1,97 @@
+
+{
+    "header": {
+        "home": "Home",
+        "dealers": "Concessionari",
+        "models": "Modelli",
+        "blog": "Blog",
+        "about": "Chi Siamo"
+    },
+    "footer": {
+        "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
+        "explore": "Esplora",
+        "aboutUs": "Chi Siamo",
+        "contact": "Contatti",
+        "legal": "Legale",
+        "privacy": "Politica sulla Privacy",
+        "terms": "Termini di Servizio",
+        "rightsReserved": "Tutti i diritti riservati."
+    },
+    "home": {
+        "heroTitle": "Guida il Futuro.",
+        "heroSubtitle": "Scopri la Mobilità Elettrica in Albania.",
+        "heroCta": "Trova il Tuo EV",
+        "searchTitle": "Trova la Tua Auto Elettrica Perfetta",
+        "cityPlaceholder": "Città",
+        "brandPlaceholder": "Marca",
+        "typePlaceholder": "Tipo di Auto",
+        "searchButton": "Cerca",
+        "featuredDealers": "Concessionari in Evidenza",
+        "featuredModels": "Modelli Popolari"
+    },
+    "dealersPage": {
+        "title": "Concessionari in Albania",
+        "filters": "Filtri",
+        "city": "Città",
+        "brand": "Marca",
+        "language": "Lingua Parlata",
+        "noResults": "Nessun concessionario trovato che corrisponda ai tuoi criteri.",
+        "viewDetails": "Vedi Dettagli"
+    },
+    "dealerDetails": {
+        "brandsSold": "Marche Vendute",
+        "contactInfo": "Informazioni di Contatto",
+        "address": "Indirizzo",
+        "phone": "Telefono",
+        "email": "Email",
+        "website": "Sito Web",
+        "languagesSpoken": "Lingue Parlate",
+        "notes": "Note",
+        "modelsAvailable": "Modelli Disponibili presso questo Concessionario",
+        "backLink": "Torna a tutti i concessionari"
+    },
+    "modelsPage": {
+        "title": "Modelli Elettrici e Ibridi",
+        "filters": "Filtri",
+        "brand": "Marca",
+        "bodyType": "Tipo di Carrozzeria",
+        "range": "Autonomia (WLTP)",
+        "noResults": "Nessun modello trovato che corrisponda ai tuoi criteri.",
+        "viewDetails": "Vedi Dettagli"
+    },
+    "modelDetails": {
+        "specifications": "Specifiche",
+        "battery": "Batteria",
+        "range": "Autonomia (WLTP)",
+        "power": "Potenza",
+        "torque": "Coppia",
+        "acceleration": "0-100 km/h",
+        "topSpeed": "Velocità Massima",
+        "drive": "Trazione",
+        "seats": "Posti",
+        "chargingAC": "Ricarica AC",
+        "chargingDC": "Ricarica DC",
+        "notes": "Note",
+        "availableAt": "Disponibile presso questi Concessionari",
+        "contactDealer": "Contatta il Concessionario",
+        "backLink": "Torna a tutti i modelli"
+    },
+    "blogPage": {
+        "title": "Il Nostro Blog",
+        "subtitle": "Notizie, guide e approfondimenti sul mondo dei veicoli elettrici."
+    },
+    "aboutPage": {
+      "title": "Chi Siamo - Makina Elektrike",
+      "p1": "Makina Elektrike è la principale directory online per veicoli elettrici e ibridi in Albania. La nostra missione è accelerare l'adozione di trasporti sostenibili fornendo una piattaforma completa e facile da usare per i potenziali acquirenti.",
+      "p2": "Ti mettiamo in contatto con una vasta rete di concessionari e importatori ufficiali, offrendo informazioni dettagliate sugli ultimi modelli di veicoli elettrici disponibili nel paese. Dalle specifiche tecniche alle sedi dei concessionari, il nostro obiettivo è essere la tua risorsa unica per tutto ciò che è elettrico.",
+      "p3": "Che tu sia un appassionato di veicoli elettrici di lunga data o che tu stia appena iniziando a esplorare le tue opzioni, Makina Elektrike è qui per guidarti nel tuo viaggio verso un futuro più pulito e più verde sulla strada."
+    },
+    "contactPage": {
+      "title": "Contattaci",
+      "p1": "Hai una domanda, un feedback o una richiesta commerciale? Ci piacerebbe sentirti. Contattaci tramite i canali sottostanti e il nostro team ti risponderà il prima possibile.",
+      "email": "Email",
+      "phone": "Telefono",
+      "address": "Indirizzo",
+      "addressDetails": "Tirana, Albania"
+    }
+}

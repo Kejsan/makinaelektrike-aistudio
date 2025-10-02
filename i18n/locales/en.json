@@ -1,0 +1,97 @@
+
+{
+    "header": {
+        "home": "Home",
+        "dealers": "Dealers",
+        "models": "Models",
+        "blog": "Blog",
+        "about": "About"
+    },
+    "footer": {
+        "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
+        "explore": "Explore",
+        "aboutUs": "About Us",
+        "contact": "Contact",
+        "legal": "Legal",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "rightsReserved": "All rights reserved."
+    },
+    "home": {
+        "heroTitle": "Drive the Future.",
+        "heroSubtitle": "Discover Electric Mobility in Albania.",
+        "heroCta": "Find Your EV",
+        "searchTitle": "Find Your Perfect Electric Car",
+        "cityPlaceholder": "City",
+        "brandPlaceholder": "Brand",
+        "typePlaceholder": "Car Type",
+        "searchButton": "Search",
+        "featuredDealers": "Featured Dealerships",
+        "featuredModels": "Popular Models"
+    },
+    "dealersPage": {
+        "title": "Dealerships in Albania",
+        "filters": "Filters",
+        "city": "City",
+        "brand": "Brand",
+        "language": "Language Spoken",
+        "noResults": "No dealerships found matching your criteria.",
+        "viewDetails": "View Details"
+    },
+    "dealerDetails": {
+        "brandsSold": "Brands Sold",
+        "contactInfo": "Contact Information",
+        "address": "Address",
+        "phone": "Phone",
+        "email": "Email",
+        "website": "Website",
+        "languagesSpoken": "Languages Spoken",
+        "notes": "Notes",
+        "modelsAvailable": "Models Available at this Dealership",
+        "backLink": "Back to all dealers"
+    },
+    "modelsPage": {
+        "title": "Electric & Hybrid Models",
+        "filters": "Filters",
+        "brand": "Brand",
+        "bodyType": "Body Type",
+        "range": "Range (WLTP)",
+        "noResults": "No models found matching your criteria.",
+        "viewDetails": "View Details"
+    },
+    "modelDetails": {
+        "specifications": "Specifications",
+        "battery": "Battery",
+        "range": "Range (WLTP)",
+        "power": "Power",
+        "torque": "Torque",
+        "acceleration": "0-100 km/h",
+        "topSpeed": "Top Speed",
+        "drive": "Drive",
+        "seats": "Seats",
+        "chargingAC": "AC Charging",
+        "chargingDC": "DC Charging",
+        "notes": "Notes",
+        "availableAt": "Available at these Dealerships",
+        "contactDealer": "Contact Dealer",
+        "backLink": "Back to all models"
+    },
+    "blogPage": {
+        "title": "Our Blog",
+        "subtitle": "News, guides, and insights into the world of electric vehicles."
+    },
+    "aboutPage": {
+      "title": "About Makina Elektrike",
+      "p1": "Makina Elektrike is the premier online directory for electric and hybrid vehicles in Albania. Our mission is to accelerate the adoption of sustainable transportation by providing a comprehensive, user-friendly platform for prospective buyers.",
+      "p2": "We connect you with a wide network of official dealerships and importers, offering detailed information on the latest EV models available in the country. From technical specifications to dealership locations, we aim to be your one-stop resource for everything electric.",
+      "p3": "Whether you're a seasoned EV enthusiast or just starting to explore your options, Makina Elektrike is here to guide you on your journey towards a cleaner, greener future on the road."
+    },
+    "contactPage": {
+      "title": "Contact Us",
+      "p1": "Have a question, feedback, or a business inquiry? We'd love to hear from you. Reach out to us via the channels below, and our team will get back to you as soon as possible.",
+      "email": "Email",
+      "phone": "Phone",
+      "address": "Address",
+      "addressDetails": "Tirana, Albania"
+    }
+}

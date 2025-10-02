@@ -1,0 +1,97 @@
+
+{
+    "header": {
+        "home": "Kryefaqja",
+        "dealers": "Shitësit",
+        "models": "Modelet",
+        "blog": "Blogu",
+        "about": "Rreth Nesh"
+    },
+    "footer": {
+        "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
+        "explore": "Eksploro",
+        "aboutUs": "Rreth Nesh",
+        "contact": "Kontaktoni",
+        "legal": "Ligjore",
+        "privacy": "Politika e Privatësisë",
+        "terms": "Kushtet e Shërbimit",
+        "rightsReserved": "Të gjitha të drejtat e rezervuara."
+    },
+    "home": {
+        "heroTitle": "Ngisni të Ardhmen.",
+        "heroSubtitle": "Zbuloni Lëvizshmërinë Elektrike në Shqipëri.",
+        "heroCta": "Gjeni EV-në Tuaj",
+        "searchTitle": "Gjeni Makinën Tuaj Elektrike Perfekte",
+        "cityPlaceholder": "Qyteti",
+        "brandPlaceholder": "Marka",
+        "typePlaceholder": "Tipi i Makinës",
+        "searchButton": "Kërko",
+        "featuredDealers": "Shitësit e Përzgjedhur",
+        "featuredModels": "Modelet Popullore"
+    },
+    "dealersPage": {
+        "title": "Konçesionarët në Shqipëri",
+        "filters": "Filtrat",
+        "city": "Qyteti",
+        "brand": "Marka",
+        "language": "Gjuha e Folur",
+        "noResults": "Nuk u gjet asnjë konçesionar që përputhet me kriteret tuaja.",
+        "viewDetails": "Shiko Detajet"
+    },
+    "dealerDetails": {
+        "brandsSold": "Markat e Shitura",
+        "contactInfo": "Informacioni i Kontaktit",
+        "address": "Adresa",
+        "phone": "Telefoni",
+        "email": "Email",
+        "website": "Faqja e Internetit",
+        "languagesSpoken": "Gjuhët e Folura",
+        "notes": "Shënime",
+        "modelsAvailable": "Modelet e Disponueshme në këtë Konçesionar",
+        "backLink": "Kthehu te të gjithë shitësit"
+    },
+    "modelsPage": {
+        "title": "Modelet Elektrike & Hibride",
+        "filters": "Filtrat",
+        "brand": "Marka",
+        "bodyType": "Tipi i Karrocerisë",
+        "range": "Autonomia (WLTP)",
+        "noResults": "Nuk u gjet asnjë model që përputhet me kriteret tuaja.",
+        "viewDetails": "Shiko Detajet"
+    },
+    "modelDetails": {
+        "specifications": "Specifikimet",
+        "battery": "Bateria",
+        "range": "Autonomia (WLTP)",
+        "power": "Fuqia",
+        "torque": "Forca Rrotulluese",
+        "acceleration": "0-100 km/h",
+        "topSpeed": "Shpejtësia Maksimale",
+        "drive": "Tërheqja",
+        "seats": "Vende",
+        "chargingAC": "Karikimi AC",
+        "chargingDC": "Karikimi DC",
+        "notes": "Shënime",
+        "availableAt": "E disponueshme te këta Shitës",
+        "contactDealer": "Kontakto Shitësin",
+        "backLink": "Kthehu te të gjitha modelet"
+    },
+    "blogPage": {
+        "title": "Blogu Ynë",
+        "subtitle": "Lajme, udhëzues dhe njohuri nga bota e automjeteve elektrike."
+    },
+    "aboutPage": {
+      "title": "Rreth Makina Elektrike",
+      "p1": "Makina Elektrike është drejtoria kryesore online për automjetet elektrike dhe hibride në Shqipëri. Misioni ynë është të përshpejtojmë adoptimin e transportit të qëndrueshëm duke ofruar një platformë gjithëpërfshirëse dhe të lehtë për t'u përdorur për blerësit e ardhshëm.",
+      "p2": "Ne ju lidhim me një rrjet të gjerë konçesionarësh zyrtarë dhe importuesish, duke ofruar informacion të detajuar mbi modelet më të fundit EV të disponueshme në vend. Nga specifikimet teknike deri te vendndodhjet e konçesionarëve, ne synojmë të jemi burimi juaj i vetëm për gjithçka elektrike.",
+      "p3": "Pavarësisht nëse jeni një entuziast i hershëm i EV-ve apo sapo keni filluar të eksploroni opsionet tuaja, Makina Elektrike është këtu për t'ju udhëhequr në udhëtimin tuaj drejt një të ardhmeje më të pastër dhe më të gjelbër në rrugë."
+    },
+    "contactPage": {
+      "title": "Na Kontaktoni",
+      "p1": "Keni një pyetje, feedback, apo një kërkesë biznesi? Do të donim të dëgjonim nga ju. Na kontaktoni përmes kanaleve më poshtë, dhe ekipi ynë do t'ju kthejë përgjigje sa më shpejt të jetë e mundur.",
+      "email": "Email",
+      "phone": "Telefon",
+      "address": "Adresa",
+      "addressDetails": "Tiranë, Shqipëri"
+    }
+}

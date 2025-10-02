@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Makina Elektrike</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'gray-cyan': '#54a09b',
+              'navy-blue': '#000080',
+              'vivid-red': '#fb6163',
+            },
+            boxShadow: {
+              'neon-cyan': '0 0 15px rgba(84, 160, 155, 0.6), 0 0 5px rgba(84, 160, 155, 0.8)',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-image: 
+          linear-gradient(to bottom, rgba(0,0,26,0.95), rgba(0,0,51,0.95)),
+          linear-gradient(rgba(84, 160, 155, 0.07) 1.5px, transparent 1.5px),
+          linear-gradient(90deg, rgba(84, 160, 155, 0.07) 1.5px, transparent 1.5px);
+        background-size: 100% 100%, 50px 50px, 50px 50px;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.544.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.3",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "i18next-browser-languagedetector": "https://aistudiocdn.com/i18next-browser-languagedetector@^8.2.0",
+    "react-i18next": "https://aistudiocdn.com/react-i18next@^16.0.0",
+    "i18next": "https://aistudiocdn.com/i18next@^25.5.2"
+  }
+}
+</script>
+</head>
+  <body class="bg-gradient-to-br from-[#00001a] to-[#000033] text-gray-200 min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
