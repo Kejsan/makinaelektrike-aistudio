@@ -82,39 +82,255 @@ export const initialDealerModels: DealerModel[] = [
     { dealer_id: "12", model_id: "7" }, { dealer_id: "12", model_id: "10" }, { dealer_id: "12", model_id: "24" }, { dealer_id: "12", model_id: "30" }, { dealer_id: "12", model_id: "32" }, { dealer_id: "12", model_id: "33" },
 ];
 
-export const blogPosts: BlogPost[] = [
+export const initialBlogPosts: BlogPost[] = [
   { id: '1', title: 'Makina Elektrike vs. Makinë me Djegie të Brendshme: Cila Është Zgjedhja e Duhur për Ju?', excerpt: 'Një krahasim i thelluar i kostove, performancës dhe ndikimit mjedisor për t\'ju ndihmuar të merrni një vendim të informuar.', author: 'Admin', date: '2024-07-20', imageUrl: 'https://picsum.photos/seed/blog1/800/400' },
   { id: '2', title: '5 Mite Rreth Makinave Elektrike që Duhet t\'i Harroni', excerpt: 'Nga "ankthi i autonomisë" te kostot e larta, ne rrëzojmë keqkuptimet më të zakonshme rreth automjeteve elektrike.', author: 'Admin', date: '2024-07-15', imageUrl: 'https://picsum.photos/seed/blog2/800/400' },
   { id: '3', title: 'Si të Zgjidhni Stacionin e Duhur të Karikimit në Shtëpi?', excerpt: 'Një udhëzues praktik për llojet e ndryshme të karikuesve, shpejtësitë e karikimit dhe çfarë duhet të keni parasysh para instalimit.', author: 'Admin', date: '2024-07-10', imageUrl: 'https://picsum.photos/seed/blog3/800/400' },
   { id: '4', title: 'Top 7 Makinat Elektrike më të Përshtatshme për Familjet në Shqipëri', excerpt: 'Po kërkoni një EV të gjerë, të sigurt dhe efikas? Këtu janë zgjedhjet tona kryesore që mund t\'i gjeni në tregun shqiptar.', author: 'Admin', date: '2024-07-05', imageUrl: 'https://picsum.photos/seed/blog4/800/400' }
 ];
 
-const simulateDelay = <T,>(data: T): Promise<T> =>
-  new Promise(resolve => setTimeout(() => resolve(data), 500));
+type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
-export const getDealers = () => simulateDelay(initialDealers);
-export const getModels = () => simulateDelay(initialModels);
+const MEMORY_STORAGE_KEY = '__MAKINA_ELEKTRIKE_MEMORY_STORAGE__';
+const STORAGE_KEY = 'makinaelektrike:data';
+const MUTATION_DELAY = 500;
 
-export const getDealerById = (id: string) => 
-  simulateDelay(initialDealers.find(d => d.id === id));
+const createMemoryStorage = (): StorageLike => {
+  const globalScope = globalThis as typeof globalThis & {
+    [MEMORY_STORAGE_KEY]?: Map<string, string>;
+  };
 
-export const getModelById = (id: string) => 
-  simulateDelay(initialModels.find(m => m.id === id));
+  if (!globalScope[MEMORY_STORAGE_KEY]) {
+    globalScope[MEMORY_STORAGE_KEY] = new Map<string, string>();
+  }
 
-export const getModelsByDealerId = (dealerId: string) => {
-    const modelIds = initialDealerModels
-        .filter(dm => dm.dealer_id === dealerId)
-        .map(dm => dm.model_id);
-    const models = initialModels.filter(m => modelIds.includes(m.id));
-    return simulateDelay(models);
+  const store = globalScope[MEMORY_STORAGE_KEY]!;
+
+  return {
+    getItem(key: string) {
+      return store.has(key) ? store.get(key)! : null;
+    },
+    setItem(key: string, value: string) {
+      store.set(key, value);
+    },
+    removeItem(key: string) {
+      store.delete(key);
+    },
+  };
 };
 
-export const getDealersByModelId = (modelId: string) => {
-    const dealerIds = initialDealerModels
-        .filter(dm => dm.model_id === modelId)
-        .map(dm => dm.dealer_id);
-    const dealers = initialDealers.filter(d => dealerIds.includes(d.id));
-    return simulateDelay(dealers);
+const storage: StorageLike =
+  typeof window !== 'undefined' && window?.localStorage
+    ? window.localStorage
+    : createMemoryStorage();
+
+const clone = <T,>(data: T): T => {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(data);
+  }
+
+  if (data === undefined || data === null) {
+    return data;
+  }
+
+  return JSON.parse(JSON.stringify(data));
 };
-  
-export const getBlogPosts = () => simulateDelay(blogPosts);
+
+const simulateDelay = async <T,>(data: T): Promise<T> =>
+  new Promise(resolve => setTimeout(() => resolve(clone(data)), MUTATION_DELAY));
+
+interface DataState {
+  dealers: Dealer[];
+  models: Model[];
+  blogPosts: BlogPost[];
+  dealerModels: DealerModel[];
+}
+
+const createDefaultState = (): DataState => ({
+  dealers: initialDealers.map(dealer => clone(dealer)),
+  models: initialModels.map(model => clone(model)),
+  blogPosts: initialBlogPosts.map(post => clone(post)),
+  dealerModels: initialDealerModels.map(dm => ({ ...dm })),
+});
+
+const loadState = (): DataState => {
+  const saved = storage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved) as DataState;
+      return parsed;
+    } catch (error) {
+      console.warn('Failed to parse stored data, resetting to defaults.', error);
+    }
+  }
+
+  const defaultState = createDefaultState();
+  storage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
+  return defaultState;
+};
+
+let state: DataState = loadState();
+
+const persistState = (nextState: DataState) => {
+  state = {
+    dealers: nextState.dealers.map(dealer => clone(dealer)),
+    models: nextState.models.map(model => clone(model)),
+    blogPosts: nextState.blogPosts.map(post => clone(post)),
+    dealerModels: nextState.dealerModels.map(dm => ({ ...dm })),
+  };
+  storage.setItem(STORAGE_KEY, JSON.stringify(state));
+};
+
+const generateId = () =>
+  typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+
+export const getDealers = async () => simulateDelay(state.dealers);
+export const getModels = async () => simulateDelay(state.models);
+export const getBlogPosts = async () => simulateDelay(state.blogPosts);
+
+export const getDealerById = async (id: string) =>
+  simulateDelay(state.dealers.find(d => d.id === id));
+
+export const getModelById = async (id: string) =>
+  simulateDelay(state.models.find(m => m.id === id));
+
+export const getModelsByDealerId = async (dealerId: string) => {
+  const modelIds = state.dealerModels
+    .filter(dm => dm.dealer_id === dealerId)
+    .map(dm => dm.model_id);
+  const models = state.models.filter(model => modelIds.includes(model.id));
+  return simulateDelay(models);
+};
+
+export const getDealersByModelId = async (modelId: string) => {
+  const dealerIds = state.dealerModels
+    .filter(dm => dm.model_id === modelId)
+    .map(dm => dm.dealer_id);
+  const dealers = state.dealers.filter(dealer => dealerIds.includes(dealer.id));
+  return simulateDelay(dealers);
+};
+
+export const createDealer = async (dealer: Omit<Dealer, 'id'>): Promise<Dealer> => {
+  const newDealer: Dealer = { ...dealer, id: generateId() };
+  const nextState: DataState = {
+    ...state,
+    dealers: [...state.dealers, newDealer],
+  };
+  persistState(nextState);
+  return simulateDelay(newDealer);
+};
+
+export const updateDealer = async (id: string, updates: Partial<Dealer>): Promise<Dealer> => {
+  let updatedDealer: Dealer | undefined;
+  const dealers = state.dealers.map(dealer => {
+    if (dealer.id === id) {
+      updatedDealer = { ...dealer, ...updates };
+      return updatedDealer;
+    }
+    return dealer;
+  });
+
+  if (!updatedDealer) {
+    throw new Error('Dealer not found');
+  }
+
+  persistState({ ...state, dealers });
+  return simulateDelay(updatedDealer);
+};
+
+export const deleteDealer = async (id: string): Promise<void> => {
+  if (!state.dealers.some(dealer => dealer.id === id)) {
+    throw new Error('Dealer not found');
+  }
+
+  const nextState: DataState = {
+    ...state,
+    dealers: state.dealers.filter(dealer => dealer.id !== id),
+    dealerModels: state.dealerModels.filter(dm => dm.dealer_id !== id),
+  };
+
+  persistState(nextState);
+  await simulateDelay(undefined);
+};
+
+export const createModel = async (model: Omit<Model, 'id'>): Promise<Model> => {
+  const newModel: Model = { ...model, id: generateId() };
+  persistState({ ...state, models: [...state.models, newModel] });
+  return simulateDelay(newModel);
+};
+
+export const updateModel = async (id: string, updates: Partial<Model>): Promise<Model> => {
+  let updatedModel: Model | undefined;
+  const models = state.models.map(model => {
+    if (model.id === id) {
+      updatedModel = { ...model, ...updates };
+      return updatedModel;
+    }
+    return model;
+  });
+
+  if (!updatedModel) {
+    throw new Error('Model not found');
+  }
+
+  persistState({ ...state, models });
+  return simulateDelay(updatedModel);
+};
+
+export const deleteModel = async (id: string): Promise<void> => {
+  if (!state.models.some(model => model.id === id)) {
+    throw new Error('Model not found');
+  }
+
+  const nextState: DataState = {
+    ...state,
+    models: state.models.filter(model => model.id !== id),
+    dealerModels: state.dealerModels.filter(dm => dm.model_id !== id),
+  };
+
+  persistState(nextState);
+  await simulateDelay(undefined);
+};
+
+export const createBlogPost = async (post: Omit<BlogPost, 'id'>): Promise<BlogPost> => {
+  const newPost: BlogPost = { ...post, id: generateId() };
+  persistState({ ...state, blogPosts: [...state.blogPosts, newPost] });
+  return simulateDelay(newPost);
+};
+
+export const updateBlogPost = async (id: string, updates: Partial<BlogPost>): Promise<BlogPost> => {
+  let updatedPost: BlogPost | undefined;
+  const blogPosts = state.blogPosts.map(post => {
+    if (post.id === id) {
+      updatedPost = { ...post, ...updates };
+      return updatedPost;
+    }
+    return post;
+  });
+
+  if (!updatedPost) {
+    throw new Error('Blog post not found');
+  }
+
+  persistState({ ...state, blogPosts });
+  return simulateDelay(updatedPost);
+};
+
+export const deleteBlogPost = async (id: string): Promise<void> => {
+  if (!state.blogPosts.some(post => post.id === id)) {
+    throw new Error('Blog post not found');
+  }
+
+  persistState({ ...state, blogPosts: state.blogPosts.filter(post => post.id !== id) });
+  await simulateDelay(undefined);
+};
+
+export const resetDataStore = () => {
+  const defaultState = createDefaultState();
+  storage.removeItem(STORAGE_KEY);
+  persistState(defaultState);
+};
+
+export const getStoreSnapshot = (): DataState => clone(state);
