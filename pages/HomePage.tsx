@@ -66,7 +66,7 @@ const HomePage: React.FC = () => {
       <section className="relative h-[70vh] flex items-center justify-center text-center text-white overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center scale-110" 
-          style={{ backgroundImage: "url('https://raw.githubusercontent.com/Kejsan/makinaelektrike-aistudio/refs/heads/main/BYD%20SEAL.jpg?token=GHSAT0AAAAAADHR43C7YQC32PWA4FOJV7CE2G64O2A')" }}
+          style={{ backgroundImage: "url('https://raw.githubusercontent.com/Kejsan/makinaelektrike-aistudio/refs/heads/main/assets/BYD%20SEAL.jpg?token=GHSAT0AAAAAADHR43C64FJ4HU5JWNXVDXM42G67NRQ')" }}
         ></div>
         <div className="absolute inset-0 bg-[#00001a]/60"></div>
         <div className="relative z-10 px-4 flex flex-col items-center">
