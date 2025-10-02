@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -13,11 +13,30 @@ import ContactPage from './pages/ContactPage';
 import FavoritesPage from './pages/FavoritesPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import AdminPage from './pages/AdminPage';
-import { AuthProvider } from './contexts/AuthContext';
+import AdminLoginPage from './pages/AdminLoginPage';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { ToastProvider, ToastContainer } from './contexts/ToastContext';
 import ChatButton from './components/ChatButton';
 import ChatWidget from './components/ChatWidget';
+
+const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const { user, loading, initializing } = useAuth();
+
+  if (initializing || loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <span className="text-gray-300">Loading...</span>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  return children;
+};
 
 const App: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -40,7 +59,15 @@ const App: React.FC = () => {
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/admin/login" element={<AdminLoginPage />} />
+                  <Route
+                    path="/admin"
+                    element={(
+                      <RequireAuth>
+                        <AdminPage />
+                      </RequireAuth>
+                    )}
+                  />
                 </Routes>
               </main>
               <Footer />

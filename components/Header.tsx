@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Globe, Zap, Settings } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation();
@@ -50,6 +51,7 @@ const LanguageSwitcher: React.FC = () => {
 const Header: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const { user } = useAuth();
   
   const navLinkClasses = (path: string) => 
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -77,9 +79,15 @@ const Header: React.FC = () => {
             <Link to="/about" className={navLinkClasses('/about')}>{t('header.about')}</Link>
           </nav>
           <div className="flex items-center space-x-4">
-            <Link to="/admin" className="text-white hover:text-gray-cyan transition-colors" aria-label={t('header.admin') as string}>
+            {user && (
+              <Link
+                to="/admin"
+                className="text-white hover:text-gray-cyan transition-colors"
+                aria-label={t('header.admin') as string}
+              >
                 <Settings size={20} />
-            </Link>
+              </Link>
+            )}
             <LanguageSwitcher />
           </div>
         </div>

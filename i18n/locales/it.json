@@ -5,7 +5,8 @@
         "dealers": "Concessionari",
         "models": "Modelli",
         "blog": "Blog",
-        "about": "Chi Siamo"
+        "about": "Chi Siamo",
+        "admin": "Admin"
     },
     "footer": {
         "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
@@ -93,5 +94,14 @@
       "phone": "Telefono",
       "address": "Indirizzo",
       "addressDetails": "Tirana, Albania"
+    },
+    "admin": {
+        "loginTitle": "Accesso Admin",
+        "loginSubtitle": "Accedi al pannello di amministrazione",
+        "loginEmail": "Email",
+        "loginPassword": "Password",
+        "loginButton": "Accedi",
+        "loginError": "Le credenziali fornite non sono valide.",
+        "logout": "Esci"
     }
 }
