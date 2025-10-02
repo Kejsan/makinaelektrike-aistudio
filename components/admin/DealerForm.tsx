@@ -1,0 +1,320 @@
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Dealer } from '../../types';
+
+export interface DealerFormValues extends Omit<Dealer, 'id'> {
+  id?: string;
+}
+
+interface DealerFormProps {
+  initialValues?: Dealer;
+  onSubmit: (values: DealerFormValues) => void | Promise<void>;
+  onCancel: () => void;
+  isSubmitting?: boolean;
+}
+
+interface DealerFormState {
+  name: string;
+  address: string;
+  city: string;
+  lat: string;
+  lng: string;
+  phone: string;
+  email: string;
+  website: string;
+  brands: string;
+  languages: string;
+  notes: string;
+  typeOfCars: string;
+  priceRange: string;
+  image_url: string;
+  modelsAvailable: string;
+  socialFacebook: string;
+  socialInstagram: string;
+  socialTwitter: string;
+  socialYoutube: string;
+  isFeatured: boolean;
+}
+
+const defaultState: DealerFormState = {
+  name: '',
+  address: '',
+  city: '',
+  lat: '',
+  lng: '',
+  phone: '',
+  email: '',
+  website: '',
+  brands: '',
+  languages: '',
+  notes: '',
+  typeOfCars: '',
+  priceRange: '',
+  image_url: '',
+  modelsAvailable: '',
+  socialFacebook: '',
+  socialInstagram: '',
+  socialTwitter: '',
+  socialYoutube: '',
+  isFeatured: false,
+};
+
+const isValidUrl = (value: string) => {
+  if (!value) return true;
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const isValidEmail = (value: string) => {
+  if (!value) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+};
+
+const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting }) => {
+  const { t } = useTranslation();
+  const [formState, setFormState] = useState<DealerFormState>(defaultState);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!initialValues) {
+      setFormState(defaultState);
+      return;
+    }
+
+    setFormState({
+      name: initialValues.name ?? '',
+      address: initialValues.address ?? '',
+      city: initialValues.city ?? '',
+      lat: initialValues.lat !== undefined ? String(initialValues.lat) : '',
+      lng: initialValues.lng !== undefined ? String(initialValues.lng) : '',
+      phone: initialValues.phone ?? '',
+      email: initialValues.email ?? '',
+      website: initialValues.website ?? '',
+      brands: initialValues.brands?.join(', ') ?? '',
+      languages: initialValues.languages?.join(', ') ?? '',
+      notes: initialValues.notes ?? '',
+      typeOfCars: initialValues.typeOfCars ?? '',
+      priceRange: initialValues.priceRange ?? '',
+      image_url: initialValues.image_url ?? '',
+      modelsAvailable: initialValues.modelsAvailable?.join(', ') ?? '',
+      socialFacebook: initialValues.social_links?.facebook ?? '',
+      socialInstagram: initialValues.social_links?.instagram ?? '',
+      socialTwitter: initialValues.social_links?.twitter ?? '',
+      socialYoutube: initialValues.social_links?.youtube ?? '',
+      isFeatured: Boolean(initialValues.isFeatured),
+    });
+  }, [initialValues]);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type, checked } = event.target;
+    setFormState(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const validate = () => {
+    const nextErrors: Record<string, string> = {};
+
+    if (!formState.name.trim()) {
+      nextErrors.name = `${t('admin.name')} ${t('admin.required', { defaultValue: 'is required' })}`;
+    }
+
+    if (!formState.address.trim()) {
+      nextErrors.address = `${t('dealerDetails.address', { defaultValue: 'Address' })} ${t('admin.required', { defaultValue: 'is required' })}`;
+    }
+
+    if (!formState.city.trim()) {
+      nextErrors.city = `${t('admin.city')} ${t('admin.required', { defaultValue: 'is required' })}`;
+    }
+
+    if (formState.lat.trim() && Number.isNaN(Number(formState.lat))) {
+      nextErrors.lat = t('admin.invalidNumber', { defaultValue: 'Please enter a valid number' });
+    }
+
+    if (formState.lng.trim() && Number.isNaN(Number(formState.lng))) {
+      nextErrors.lng = t('admin.invalidNumber', { defaultValue: 'Please enter a valid number' });
+    }
+
+    if (!isValidUrl(formState.website)) {
+      nextErrors.website = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
+    }
+
+    if (!isValidUrl(formState.image_url)) {
+      nextErrors.image_url = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
+    }
+
+    if (!isValidEmail(formState.email)) {
+      nextErrors.email = t('admin.invalidEmail', { defaultValue: 'Enter a valid email' });
+    }
+
+    if (!isValidUrl(formState.socialFacebook)) {
+      nextErrors.socialFacebook = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
+    }
+
+    if (!isValidUrl(formState.socialInstagram)) {
+      nextErrors.socialInstagram = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
+    }
+
+    if (!isValidUrl(formState.socialTwitter)) {
+      nextErrors.socialTwitter = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
+    }
+
+    if (!isValidUrl(formState.socialYoutube)) {
+      nextErrors.socialYoutube = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!validate()) {
+      return;
+    }
+
+    const parseList = (value: string) =>
+      value
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+
+    const payload: DealerFormValues = {
+      id: initialValues?.id,
+      name: formState.name.trim(),
+      address: formState.address.trim(),
+      city: formState.city.trim(),
+      lat: formState.lat.trim() ? Number(formState.lat) : 0,
+      lng: formState.lng.trim() ? Number(formState.lng) : 0,
+      phone: formState.phone.trim() || undefined,
+      email: formState.email.trim() || undefined,
+      website: formState.website.trim() || undefined,
+      brands: parseList(formState.brands),
+      languages: parseList(formState.languages),
+      notes: formState.notes.trim() || undefined,
+      typeOfCars: formState.typeOfCars.trim() || 'Unknown',
+      priceRange: formState.priceRange.trim() || undefined,
+      image_url: formState.image_url.trim() || undefined,
+      modelsAvailable: parseList(formState.modelsAvailable),
+      social_links:
+        formState.socialFacebook ||
+        formState.socialInstagram ||
+        formState.socialTwitter ||
+        formState.socialYoutube
+          ? {
+              facebook: formState.socialFacebook.trim() || undefined,
+              instagram: formState.socialInstagram.trim() || undefined,
+              twitter: formState.socialTwitter.trim() || undefined,
+              youtube: formState.socialYoutube.trim() || undefined,
+            }
+          : undefined,
+      isFeatured: formState.isFeatured,
+    };
+
+    await onSubmit(payload);
+  };
+
+  const renderInput = (
+    label: string,
+    name: keyof DealerFormState,
+    type: string = 'text',
+    placeholder?: string,
+    options?: { isTextArea?: boolean; rows?: number }
+  ) => {
+    const error = errors[name as string];
+    const commonProps = {
+      name,
+      value: formState[name],
+      onChange: handleChange,
+      placeholder,
+      className:
+        'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan',
+    } as const;
+
+    return (
+      <label className="block text-sm text-gray-300">
+        <span className="mb-1 inline-block font-medium">{label}</span>
+        {options?.isTextArea ? (
+          <textarea rows={options.rows ?? 4} {...commonProps} />
+        ) : (
+          <input type={type} {...commonProps} />
+        )}
+        {error && <span className="mt-1 block text-xs text-red-400">{error}</span>}
+      </label>
+    );
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {renderInput(t('admin.name'), 'name')}
+        {renderInput(t('admin.city'), 'city')}
+        {renderInput(t('dealerDetails.address', { defaultValue: 'Address' }), 'address')}
+        {renderInput('Type of Cars', 'typeOfCars')}
+        {renderInput('Price Range', 'priceRange')}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {renderInput('Latitude', 'lat')}
+        {renderInput('Longitude', 'lng')}
+        {renderInput(t('dealerDetails.phone', { defaultValue: 'Phone' }), 'phone')}
+        {renderInput(t('dealerDetails.email', { defaultValue: 'Email' }), 'email')}
+        {renderInput(t('dealerDetails.website', { defaultValue: 'Website' }), 'website')}
+        {renderInput('Image URL', 'image_url')}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {renderInput(t('admin.brands'), 'brands', 'text', 'BYD, Tesla')}
+        {renderInput(t('dealerDetails.languagesSpoken', { defaultValue: 'Languages' }), 'languages', 'text', 'Albanian, English')}
+        {renderInput('Models Available', 'modelsAvailable', 'text', 'Model A, Model B')}
+      </div>
+
+      {renderInput(t('dealerDetails.notes', { defaultValue: 'Notes' }), 'notes', 'text', undefined, { isTextArea: true, rows: 4 })}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {renderInput('Facebook URL', 'socialFacebook')}
+        {renderInput('Instagram URL', 'socialInstagram')}
+        {renderInput('Twitter URL', 'socialTwitter')}
+        {renderInput('YouTube URL', 'socialYoutube')}
+      </div>
+
+      <div className="flex items-center space-x-3">
+        <input
+          id="dealer-featured"
+          name="isFeatured"
+          type="checkbox"
+          checked={formState.isFeatured}
+          onChange={handleChange}
+          className="h-4 w-4 rounded border-white/20 bg-gray-900 text-gray-cyan focus:ring-gray-cyan"
+        />
+        <label htmlFor="dealer-featured" className="text-sm text-gray-200">
+          {t('admin.featured')}
+        </label>
+      </div>
+
+      <div className="flex justify-end space-x-3">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/10"
+        >
+          {t('admin.cancel')}
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? `${t('admin.save')}...` : t('admin.save')}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default DealerForm;
