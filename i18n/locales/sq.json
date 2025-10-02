@@ -5,7 +5,8 @@
         "dealers": "Shitësit",
         "models": "Modelet",
         "blog": "Blogu",
-        "about": "Rreth Nesh"
+        "about": "Rreth Nesh",
+        "admin": "Admin"
     },
     "footer": {
         "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
@@ -93,5 +94,14 @@
       "phone": "Telefon",
       "address": "Adresa",
       "addressDetails": "Tiranë, Shqipëri"
+    },
+    "admin": {
+        "loginTitle": "Hyrje Admin",
+        "loginSubtitle": "Hyni në panelin e administrimit",
+        "loginEmail": "Email",
+        "loginPassword": "Fjalëkalimi",
+        "loginButton": "Hyr",
+        "loginError": "Kredencialet e dhëna janë të pasakta.",
+        "logout": "Dil"
     }
 }

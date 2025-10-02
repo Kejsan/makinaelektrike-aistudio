@@ -5,7 +5,8 @@
         "dealers": "Dealers",
         "models": "Models",
         "blog": "Blog",
-        "about": "About"
+        "about": "About",
+        "admin": "Admin"
     },
     "footer": {
         "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
@@ -93,5 +94,14 @@
       "phone": "Phone",
       "address": "Address",
       "addressDetails": "Tirana, Albania"
+    },
+    "admin": {
+        "loginTitle": "Admin Login",
+        "loginSubtitle": "Access the administration dashboard",
+        "loginEmail": "Email",
+        "loginPassword": "Password",
+        "loginButton": "Sign in",
+        "loginError": "The provided credentials are invalid.",
+        "logout": "Log out"
     }
 }
