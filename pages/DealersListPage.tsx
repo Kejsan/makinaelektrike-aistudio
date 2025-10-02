@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataContext } from '../contexts/DataContext';
 import DealerCard from '../components/DealerCard';
-import GoogleMap from '../components/GoogleMap';
 import CustomSelect from '../components/CustomSelect';
+import GoogleMap from '../components/GoogleMap';
 import { Building, Car, Globe, ListFilter } from 'lucide-react';
 
 const DealersListPage: React.FC = () => {
@@ -61,17 +61,17 @@ const DealersListPage: React.FC = () => {
         setSortBy('name_asc');
     };
 
-    const mapMarkers = useMemo(() => 
-        filteredDealers.map(d => ({ lat: d.lat, lng: d.lng, title: d.name })),
-        [filteredDealers]
-    );
-
     const sortOptions = [
         { value: 'name_asc', label: t('dealersPage.sortOptions.name_asc') },
         { value: 'name_desc', label: t('dealersPage.sortOptions.name_desc') },
         { value: 'city_asc', label: t('dealersPage.sortOptions.city_asc') },
         { value: 'city_desc', label: t('dealersPage.sortOptions.city_desc') },
     ];
+    
+    const mapMarkers = useMemo(() => 
+        filteredDealers.map(d => ({ lat: d.lat, lng: d.lng, title: d.name })),
+        [filteredDealers]
+    );
 
     if (loading) {
         return <div className="text-center py-10 text-white">Loading dealers...</div>;
@@ -121,6 +121,17 @@ const DealersListPage: React.FC = () => {
                     </div>
                 </div>
 
+                <div className="mb-12">
+                    <h2 className="text-2xl font-bold text-white mb-4 text-center">{t('dealersPage.mapTitle')}</h2>
+                    <GoogleMap 
+                        center={{ lat: 41.3275, lng: 19.8187 }} // Centered on Tirana
+                        zoom={8}
+                        markers={mapMarkers}
+                        className="h-[500px] w-full"
+                        enableClustering={true}
+                    />
+                </div>
+
                 {filteredDealers.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {filteredDealers.map(dealer => <DealerCard key={dealer.id} dealer={dealer} />)}
@@ -128,19 +139,6 @@ const DealersListPage: React.FC = () => {
                 ) : (
                     <p className="text-center text-gray-400 py-10">{t('dealersPage.noResults')}</p>
                 )}
-
-                <div className="mt-16">
-                    <h2 className="text-3xl font-bold text-center mb-8 text-white">{t('dealersPage.mapTitle')}</h2>
-                    <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-4">
-                        <GoogleMap 
-                            center={{ lat: 41.3275, lng: 19.8187 }} // Tirana center
-                            zoom={8}
-                            markers={mapMarkers}
-                            className="h-[60vh] w-full"
-                            enableClustering={true}
-                        />
-                    </div>
-                </div>
             </div>
         </div>
     );

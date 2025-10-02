@@ -91,5 +91,30 @@ export const blogPosts: BlogPost[] = [
 
 const simulateDelay = <T,>(data: T): Promise<T> =>
   new Promise(resolve => setTimeout(() => resolve(data), 500));
+
+export const getDealers = () => simulateDelay(initialDealers);
+export const getModels = () => simulateDelay(initialModels);
+
+export const getDealerById = (id: string) => 
+  simulateDelay(initialDealers.find(d => d.id === id));
+
+export const getModelById = (id: string) => 
+  simulateDelay(initialModels.find(m => m.id === id));
+
+export const getModelsByDealerId = (dealerId: string) => {
+    const modelIds = initialDealerModels
+        .filter(dm => dm.dealer_id === dealerId)
+        .map(dm => dm.model_id);
+    const models = initialModels.filter(m => modelIds.includes(m.id));
+    return simulateDelay(models);
+};
+
+export const getDealersByModelId = (modelId: string) => {
+    const dealerIds = initialDealerModels
+        .filter(dm => dm.model_id === modelId)
+        .map(dm => dm.dealer_id);
+    const dealers = initialDealers.filter(d => dealerIds.includes(d.id));
+    return simulateDelay(dealers);
+};
   
 export const getBlogPosts = () => simulateDelay(blogPosts);

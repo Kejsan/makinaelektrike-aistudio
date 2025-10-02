@@ -91,10 +91,12 @@ const enTranslations = {
             "range_asc": "Range (Low to High)"
         },
         "allBrands": "All Brands",
-        "allBodyTypes": "All Body Types"
+        "allBodyTypes": "All Body Types",
+        "compare": "Compare"
     },
     "modelDetails": {
         "specifications": "Specifications",
+        "brand": "Brand",
         "battery": "Battery",
         "range": "Range (WLTP)",
         "power": "Power",
@@ -164,6 +166,16 @@ const enTranslations = {
         "delete": "Delete",
         "edit": "Edit",
         "logout": "Logout"
+    },
+    "compare": {
+        "title": "Compare Models",
+        "selectPrompt": "Select up to 3 models to compare from the list.",
+        "maxSelected": "You can select a maximum of 3 models.",
+        "searchPlaceholder": "Search for a model...",
+        "clear": "Clear Selection",
+        "feature": "Feature",
+        "noModelsSelected": "Select models from the left to see a comparison.",
+        "remove": "Remove"
     }
 };
 const sqTranslations = {
@@ -255,10 +267,12 @@ const sqTranslations = {
             "range_asc": "Autonomia (Poshtë-Lartë)"
         },
         "allBrands": "Të gjitha Markat",
-        "allBodyTypes": "Të gjithë Tipet"
+        "allBodyTypes": "Të gjithë Tipet",
+        "compare": "Krahaso"
     },
     "modelDetails": {
         "specifications": "Specifikimet",
+        "brand": "Marka",
         "battery": "Bateria",
         "range": "Autonomia (WLTP)",
         "power": "Fuqia",
@@ -328,6 +342,16 @@ const sqTranslations = {
         "delete": "Fshi",
         "edit": "Modifiko",
         "logout": "Dil"
+    },
+    "compare": {
+        "title": "Krahaso Modelet",
+        "selectPrompt": "Zgjidhni deri në 3 modele për të krahasuar nga lista.",
+        "maxSelected": "Mund të zgjidhni maksimumi 3 modele.",
+        "searchPlaceholder": "Kërko për një model...",
+        "clear": "Pastro Zgjedhjen",
+        "feature": "Veçoria",
+        "noModelsSelected": "Zgjidhni modele nga e majta për të parë një krahasim.",
+        "remove": "Hiqe"
     }
 };
 const itTranslations = {
@@ -419,10 +443,12 @@ const itTranslations = {
             "range_asc": "Autonomia (Crescente)"
         },
         "allBrands": "Tutte le Marche",
-        "allBodyTypes": "Tutti i Tipi"
+        "allBodyTypes": "Tutti i Tipi",
+        "compare": "Confronta"
     },
     "modelDetails": {
         "specifications": "Specifiche",
+        "brand": "Marca",
         "battery": "Batteria",
         "range": "Autonomia (WLTP)",
         "power": "Potenza",
@@ -492,6 +518,16 @@ const itTranslations = {
         "delete": "Elimina",
         "edit": "Modifica",
         "logout": "Esci"
+    },
+    "compare": {
+        "title": "Confronta Modelli",
+        "selectPrompt": "Seleziona fino a 3 modelli da confrontare dalla lista.",
+        "maxSelected": "Puoi selezionare un massimo di 3 modelli.",
+        "searchPlaceholder": "Cerca un modello...",
+        "clear": "Cancella Selezione",
+        "feature": "Caratteristica",
+        "noModelsSelected": "Seleziona i modelli a sinistra per vedere un confronto.",
+        "remove": "Rimuovi"
     }
 };
 

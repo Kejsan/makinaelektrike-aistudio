@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -16,8 +16,12 @@ import AdminPage from './pages/AdminPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { ToastProvider, ToastContainer } from './contexts/ToastContext';
+import ChatButton from './components/ChatButton';
+import ChatWidget from './components/ChatWidget';
 
 const App: React.FC = () => {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
     <HashRouter>
       <ToastProvider>
@@ -41,6 +45,8 @@ const App: React.FC = () => {
               </main>
               <Footer />
               <ScrollToTopButton />
+              <ChatButton onClick={() => setIsChatOpen(true)} />
+              <ChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
               <ToastContainer />
             </div>
           </DataProvider>

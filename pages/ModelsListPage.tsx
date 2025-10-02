@@ -4,13 +4,15 @@ import { getModels } from '../services/api';
 import { Model } from '../types';
 import ModelCard from '../components/ModelCard';
 import CustomSelect from '../components/CustomSelect';
-import { Car, Tag, Gauge, ListFilter } from 'lucide-react';
+import { Car, Tag, Gauge, ListFilter, Scale } from 'lucide-react';
+import ComparisonModal from '../components/ComparisonModal';
 
 const ModelsListPage: React.FC = () => {
     const { t } = useTranslation();
     const [allModels, setAllModels] = useState<Model[]>([]);
     const [filteredModels, setFilteredModels] = useState<Model[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
 
     // Filter states
     const [selectedBrand, setSelectedBrand] = useState('');
@@ -95,58 +97,69 @@ const ModelsListPage: React.FC = () => {
     }
 
     return (
-        <div className="py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-extrabold text-white">{t('modelsPage.title')}</h1>
-                </div>
-
-                <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-6 mb-12">
-                    <h2 className="text-xl font-bold text-white mb-4">{t('modelsPage.filters')}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                        <CustomSelect
-                            icon={<Car size={16} />}
-                            placeholder={t('modelsPage.allBrands')}
-                            options={[{ value: '', label: t('modelsPage.allBrands') }, ...filterOptions.brands.map(b => ({ value: b, label: b }))]}
-                            value={selectedBrand}
-                            onChange={setSelectedBrand}
-                        />
-                         <CustomSelect
-                            icon={<Tag size={16} />}
-                            placeholder={t('modelsPage.allBodyTypes')}
-                            options={[{ value: '', label: t('modelsPage.allBodyTypes') }, ...filterOptions.bodyTypes.map(bt => ({ value: bt, label: bt }))]}
-                            value={selectedBodyType}
-                            onChange={setSelectedBodyType}
-                        />
-                         <CustomSelect
-                            icon={<Gauge size={16} />}
-                            placeholder={t('modelsPage.range')}
-                            options={rangeOptions}
-                            value={minRange}
-                            onChange={setMinRange}
-                        />
-                        <CustomSelect
-                            icon={<ListFilter size={16} />}
-                            placeholder={t('modelsPage.sortBy')}
-                            options={sortOptions}
-                            value={sortBy}
-                            onChange={setSortBy}
-                        />
-                        <button onClick={clearFilters} className="bg-vivid-red text-white font-bold py-2.5 px-6 rounded-md hover:bg-opacity-90 transition-colors h-[46px]">
-                            {t('modelsPage.clearFilters')}
-                        </button>
+        <>
+            <div className="py-12">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <h1 className="text-4xl font-extrabold text-white">{t('modelsPage.title')}</h1>
                     </div>
-                </div>
 
-                {filteredModels.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {filteredModels.map(model => <ModelCard key={model.id} model={model} />)}
+                    <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-6 mb-12">
+                        <h2 className="text-xl font-bold text-white mb-4">{t('modelsPage.filters')}</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+                            <CustomSelect
+                                icon={<Car size={16} />}
+                                placeholder={t('modelsPage.allBrands')}
+                                options={[{ value: '', label: t('modelsPage.allBrands') }, ...filterOptions.brands.map(b => ({ value: b, label: b }))]}
+                                value={selectedBrand}
+                                onChange={setSelectedBrand}
+                            />
+                            <CustomSelect
+                                icon={<Tag size={16} />}
+                                placeholder={t('modelsPage.allBodyTypes')}
+                                options={[{ value: '', label: t('modelsPage.allBodyTypes') }, ...filterOptions.bodyTypes.map(bt => ({ value: bt, label: bt }))]}
+                                value={selectedBodyType}
+                                onChange={setSelectedBodyType}
+                            />
+                            <CustomSelect
+                                icon={<Gauge size={16} />}
+                                placeholder={t('modelsPage.range')}
+                                options={rangeOptions}
+                                value={minRange}
+                                onChange={setMinRange}
+                            />
+                            <CustomSelect
+                                icon={<ListFilter size={16} />}
+                                placeholder={t('modelsPage.sortBy')}
+                                options={sortOptions}
+                                value={sortBy}
+                                onChange={setSortBy}
+                            />
+                            <button onClick={() => setIsCompareModalOpen(true)} className="bg-gray-cyan text-white font-bold py-2.5 px-6 rounded-md hover:bg-opacity-90 transition-colors h-[46px] flex items-center justify-center gap-2">
+                                <Scale size={16} />
+                                {t('modelsPage.compare')}
+                            </button>
+                            <button onClick={clearFilters} className="bg-vivid-red text-white font-bold py-2.5 px-6 rounded-md hover:bg-opacity-90 transition-colors h-[46px]">
+                                {t('modelsPage.clearFilters')}
+                            </button>
+                        </div>
                     </div>
-                ) : (
-                    <p className="text-center text-gray-400 py-10">{t('modelsPage.noResults')}</p>
-                )}
+
+                    {filteredModels.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                            {filteredModels.map(model => <ModelCard key={model.id} model={model} />)}
+                        </div>
+                    ) : (
+                        <p className="text-center text-gray-400 py-10">{t('modelsPage.noResults')}</p>
+                    )}
+                </div>
             </div>
-        </div>
+            <ComparisonModal 
+                isOpen={isCompareModalOpen}
+                onClose={() => setIsCompareModalOpen(false)}
+                allModels={allModels}
+            />
+        </>
     );
 };
 

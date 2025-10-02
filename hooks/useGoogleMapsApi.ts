@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // IMPORTANT: This key should be set in the environment variables as GOOGLE_MAPS_API_KEY.
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY; 
+const GOOGLE_MAPS_API_KEY = 'AIzaSyB7j8tjYnSW69sG1D4yLpNVdoIKdzht3HY'; 
 
 // This object holds the script loading status globally to prevent multiple loads.
 const scriptStatus = {
