@@ -2,6 +2,8 @@
 export interface Dealer {
   id: string;
   name: string;
+  companyName?: string;
+  contactName?: string;
   address: string;
   city: string;
   lat: number;
@@ -19,12 +21,17 @@ export interface Dealer {
   image_url?: string;
   isFeatured?: boolean;
   approved?: boolean;
+  ownerUid?: string;
+  imageGallery?: string[];
 }
 
 export interface Model {
   id: string;
   brand: string;
   model_name: string;
+  ownerDealerId?: string;
+  createdBy?: string;
+  updatedBy?: string;
   body_type?: string;
   battery_capacity?: number; // in kWh
   range_wltp?: number; // in km
