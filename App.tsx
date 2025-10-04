@@ -11,6 +11,8 @@ import BlogPage from './pages/BlogPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import FavoritesPage from './pages/FavoritesPage';
+import RegisterUserPage from './pages/RegisterUserPage';
+import RegisterDealerPage from './pages/RegisterDealerPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import AdminPage from './pages/AdminPage';
 import AdminLoginPage from './pages/AdminLoginPage';
@@ -92,6 +94,8 @@ const App: React.FC = () => {
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />
+                  <Route path="/register" element={<RegisterUserPage />} />
+                  <Route path="/register-dealer" element={<RegisterDealerPage />} />
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/awaiting-approval" element={<AwaitingApprovalPage />} />
                   <Route
