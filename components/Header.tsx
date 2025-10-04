@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Zap, Settings, LogOut } from 'lucide-react';
+import { Globe, Zap, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const LanguageSwitcher: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const languages = {
     en: 'English',
@@ -27,7 +27,7 @@ const LanguageSwitcher: React.FC = () => {
         aria-expanded={isOpen}
       >
         <Globe size={20} />
-        <span className="hidden md:inline">Language</span>
+        <span className="hidden md:inline">{t('header.language')}</span>
       </button>
       {isOpen && (
         <div className="absolute right-0 mt-2 w-32 bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-md shadow-lg py-1 z-20">
@@ -53,6 +53,7 @@ const Header: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, role, logout, loading } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -63,17 +64,37 @@ const Header: React.FC = () => {
     }
   };
   
-  const navLinkClasses = (path: string) => 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  const navLinkClasses = (path: string) =>
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-      location.pathname === path 
-        ? 'text-gray-cyan' 
+      location.pathname === path
+        ? 'text-gray-cyan'
         : 'text-white hover:text-gray-cyan'
     }`;
+
+  const mobileNavLinkClasses = (path: string) =>
+    `block rounded-md px-3 py-2 text-base font-medium transition-colors ${
+      location.pathname === path
+        ? 'text-gray-cyan bg-white/5'
+        : 'text-white hover:text-gray-cyan hover:bg-white/5'
+    }`;
+
+  const navigationItems = [
+    { to: '/', label: t('header.home') },
+    { to: '/dealers', label: t('header.dealers') },
+    { to: '/models', label: t('header.models') },
+    { to: '/favorites', label: t('header.favorites') },
+    { to: '/blog', label: t('header.blog') },
+    { to: '/about', label: t('header.about') },
+  ];
 
   return (
     <header className="sticky top-0 z-50 bg-navy-blue/50 backdrop-blur-md border-b border-gray-cyan/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="relative flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center text-white space-x-2">
               <Zap className="text-gray-cyan" size={28}/>
@@ -81,56 +102,106 @@ const Header: React.FC = () => {
             </Link>
           </div>
           <nav className="hidden md:flex items-center space-x-4">
-            <Link to="/" className={navLinkClasses('/')}>{t('header.home')}</Link>
-            <Link to="/dealers" className={navLinkClasses('/dealers')}>{t('header.dealers')}</Link>
-            <Link to="/models" className={navLinkClasses('/models')}>{t('header.models')}</Link>
-            <Link to="/favorites" className={navLinkClasses('/favorites')}>{t('header.favorites')}</Link>
-            <Link to="/blog" className={navLinkClasses('/blog')}>{t('header.blog')}</Link>
-            <Link to="/about" className={navLinkClasses('/about')}>{t('header.about')}</Link>
-            <Link to="/register" className={navLinkClasses('/register')}>Register</Link>
-            <Link to="/register-dealer" className={navLinkClasses('/register-dealer')}>
-              Dealer Signup
-            </Link>
-          </nav>
-          <div className="flex items-center space-x-4">
-            {!user && (
-              <>
-                <Link
-                  to="/register"
-                  className="hidden md:inline-flex items-center rounded-md border border-gray-cyan/60 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-cyan/20"
-                >
-                  Join Now
-                </Link>
-                <Link
-                  to="/register-dealer"
-                  className="hidden md:inline-flex items-center rounded-md bg-gray-cyan px-3 py-1.5 text-sm font-semibold text-navy-blue transition-colors hover:bg-gray-cyan/80"
-                >
-                  Become a Dealer
-                </Link>
-              </>
-            )}
-            {user && role === 'admin' && (
-              <Link
-                to="/admin"
-                className="text-white hover:text-gray-cyan transition-colors"
-                aria-label={t('header.admin') as string}
-              >
-                <Settings size={20} />
+            {navigationItems.map((item) => (
+              <Link key={item.to} to={item.to} className={navLinkClasses(item.to)}>
+                {item.label}
               </Link>
-            )}
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-1 text-white hover:text-gray-cyan transition-colors disabled:opacity-60"
-                disabled={loading}
-                aria-label={t('header.logout', 'Logout') as string}
-              >
-                <LogOut size={18} />
-                <span className="hidden md:inline text-sm font-medium">{t('header.logout', 'Logout')}</span>
-              </button>
-            )}
-            <LanguageSwitcher />
+            ))}
+          </nav>
+          <div className="flex items-center space-x-3">
+            <div className="hidden md:flex items-center space-x-3">
+              {!user ? (
+                <>
+                  <Link to="/register" className="btn btn-outline">
+                    {t('header.register')}
+                  </Link>
+                  <Link to="/register-dealer" className="btn btn-outline">
+                    {t('header.becomeDealer')}
+                  </Link>
+                  <Link to="/admin/login" className="btn btn-primary">
+                    {t('header.login')}
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      className="inline-flex items-center text-white hover:text-gray-cyan transition-colors"
+                      aria-label={t('header.admin') as string}
+                    >
+                      <Settings size={20} />
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleLogout}
+                    type="button"
+                    className="inline-flex items-center space-x-1 text-white hover:text-gray-cyan transition-colors disabled:opacity-60"
+                    disabled={loading}
+                    aria-label={t('header.logout') as string}
+                  >
+                    <LogOut size={18} />
+                    <span className="hidden md:inline text-sm font-medium">{t('header.logout')}</span>
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="inline-flex items-center justify-center rounded-md p-2 text-white hover:text-gray-cyan hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-gray-cyan md:hidden"
+              aria-expanded={mobileMenuOpen}
+              aria-label={mobileMenuOpen ? (t('header.closeMenu') as string) : (t('header.openMenu') as string)}
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
           </div>
+          {mobileMenuOpen && (
+            <div className="absolute left-0 top-16 w-full rounded-b-lg border border-t-0 border-gray-cyan/20 bg-navy-blue/95 backdrop-blur-md shadow-xl md:hidden">
+              <nav className="px-4 pt-4 pb-6 space-y-3">
+                {navigationItems.map((item) => (
+                  <Link key={item.to} to={item.to} className={mobileNavLinkClasses(item.to)}>
+                    {item.label}
+                  </Link>
+                ))}
+                {!user ? (
+                  <div className="pt-2 space-y-3">
+                    <Link to="/admin/login" className="btn btn-primary w-full justify-center">
+                      {t('header.login')}
+                    </Link>
+                    <Link to="/register" className="btn btn-outline w-full justify-center">
+                      {t('header.register')}
+                    </Link>
+                    <Link to="/register-dealer" className="btn btn-outline w-full justify-center">
+                      {t('header.becomeDealer')}
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="pt-2 space-y-3">
+                    {role === 'admin' && (
+                      <Link to="/admin" className="btn btn-outline w-full justify-center">
+                        {t('header.admin')}
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      type="button"
+                      className="btn btn-outline w-full justify-center disabled:opacity-60"
+                      disabled={loading}
+                    >
+                      {t('header.logout')}
+                    </button>
+                  </div>
+                )}
+              </nav>
+              <div className="border-t border-white/10 px-4 py-3">
+                <LanguageSwitcher />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>
