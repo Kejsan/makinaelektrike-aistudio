@@ -23,6 +23,7 @@ import {
   type DocumentData,
 } from 'firebase/firestore';
 import { auth, firestore } from '../services/firebase';
+import { useToast } from './ToastContext';
 
 export type UserRole = 'admin' | 'dealer' | 'user' | 'pending';
 
@@ -89,6 +90,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { addToast } = useToast();
 
   const loadProfile = useCallback(
     async (firebaseUser: User | null) => {
@@ -232,26 +234,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const approveDealer = useCallback(async (uid: string) => {
-    const userRef = doc(firestore, 'users', uid);
-    await updateDoc(userRef, {
-      role: 'dealer',
-      status: 'approved',
-      approvedAt: serverTimestamp(),
-    });
-
-    if (user?.uid === uid) {
-      setRole('dealer');
-      setProfile((current) =>
-        current
-          ? {
-              ...current,
-              role: 'dealer',
-              status: 'approved',
-            }
-          : null
-      );
+    if (role !== 'admin') {
+      const message = 'Only administrators can approve dealers.';
+      setError(message);
+      addToast(message, 'error');
+      throw new Error(message);
     }
-  }, [user]);
+
+    try {
+      const userRef = doc(firestore, 'users', uid);
+      await updateDoc(userRef, {
+        role: 'dealer',
+        status: 'approved',
+        approvedAt: serverTimestamp(),
+      });
+
+      addToast('Dealer approved successfully.', 'success');
+
+      if (user?.uid === uid) {
+        setRole('dealer');
+        setProfile(current =>
+          current
+            ? {
+                ...current,
+                role: 'dealer',
+                status: 'approved',
+              }
+            : null
+        );
+      }
+    } catch (approveError) {
+      console.error('Failed to approve dealer', approveError);
+      const message = 'Failed to approve dealer. Please try again.';
+      setError(message);
+      addToast(message, 'error');
+      throw approveError;
+    }
+  }, [addToast, role, user]);
 
   const refreshProfile = useCallback(async () => {
     await loadProfile(auth.currentUser);

@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getModels } from '../services/api';
 import { Model } from '../types';
 import ModelCard from '../components/ModelCard';
 import CustomSelect from '../components/CustomSelect';
 import { Car, Tag, Gauge, ListFilter, Scale } from 'lucide-react';
 import ComparisonModal from '../components/ComparisonModal';
+import { DataContext } from '../contexts/DataContext';
 
 const ModelsListPage: React.FC = () => {
     const { t } = useTranslation();
-    const [allModels, setAllModels] = useState<Model[]>([]);
+    const { models, loading } = useContext(DataContext);
+    const [allModels, setAllModels] = useState<Model[]>(models);
     const [filteredModels, setFilteredModels] = useState<Model[]>([]);
-    const [loading, setLoading] = useState(true);
     const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
 
     // Filter states
@@ -21,12 +21,8 @@ const ModelsListPage: React.FC = () => {
     const [sortBy, setSortBy] = useState('model_asc');
 
     useEffect(() => {
-        setLoading(true);
-        getModels().then(data => {
-            setAllModels(data);
-            setLoading(false);
-        });
-    }, []);
+        setAllModels(models);
+    }, [models]);
 
     const filterOptions = useMemo(() => {
         const brands = [...new Set(allModels.map(m => m.brand))].sort();

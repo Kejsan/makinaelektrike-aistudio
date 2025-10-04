@@ -6,10 +6,12 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
+import type { Dealer, Model, BlogPost, DealerModel } from '../types';
 import {
-  getDealers,
-  getModels,
-  getBlogPosts,
+  subscribeToDealers,
+  subscribeToModels,
+  subscribeToBlogPosts,
+  subscribeToDealerModels,
   createDealer as apiCreateDealer,
   updateDealer as apiUpdateDealer,
   deleteDealer as apiDeleteDealer,
@@ -20,7 +22,9 @@ import {
   updateBlogPost as apiUpdateBlogPost,
   deleteBlogPost as apiDeleteBlogPost,
 } from '../services/api';
-import { Dealer, Model, BlogPost } from '../types';
+import { useAuth, type UserRole } from './AuthContext';
+import { useToast } from './ToastContext';
+import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
 
 type DealerInput = Omit<Dealer, 'id'>;
 type DealerUpdate = Partial<Dealer>;
@@ -32,10 +36,10 @@ type BlogPostUpdate = Partial<BlogPost>;
 type EntityKey = 'dealers' | 'models' | 'blogPosts';
 type Operation = 'create' | 'update' | 'delete';
 
-interface MutationFlag {
+type MutationFlag = {
   loading: boolean;
   error: string | null;
-}
+};
 
 type EntityMutations = Record<Operation, MutationFlag>;
 
@@ -45,19 +49,29 @@ interface DataState {
   dealers: Dealer[];
   models: Model[];
   blogPosts: BlogPost[];
+  dealerModels: DealerModel[];
+  loadError: string | null;
   loading: boolean;
-  error: string | null;
+  loaded: {
+    dealers: boolean;
+    models: boolean;
+    blogPosts: boolean;
+    dealerModels: boolean;
+  };
 }
 
 interface DataContextType {
   dealers: Dealer[];
   models: Model[];
   blogPosts: BlogPost[];
+  dealerModels: DealerModel[];
   loading: boolean;
   loadError: string | null;
   dealerMutations: EntityMutations;
   modelMutations: EntityMutations;
   blogPostMutations: EntityMutations;
+  getModelsForDealer: (dealerId: string) => Model[];
+  getDealersForModel: (modelId: string) => Dealer[];
   addDealer: (dealer: DealerInput) => Promise<Dealer>;
   updateDealer: (id: string, updates: DealerUpdate) => Promise<Dealer>;
   deleteDealer: (id: string) => Promise<void>;
@@ -88,87 +102,92 @@ type MutationAction =
   | { type: 'success'; entity: EntityKey; operation: Operation }
   | { type: 'error'; entity: EntityKey; operation: Operation; error: string };
 
-const mutationReducer = (state: MutationState, action: MutationAction): MutationState => {
-  const entityState = state[action.entity];
-  const nextOperationState: MutationFlag = (() => {
-    switch (action.type) {
-      case 'start':
-        return { loading: true, error: null };
-      case 'success':
-        return { loading: false, error: null };
-      case 'error':
-        return { loading: false, error: action.error };
-      default:
-        return entityState[action.operation];
-    }
-  })();
-
-  return {
-    ...state,
-    [action.entity]: {
-      ...entityState,
-      [action.operation]: nextOperationState,
-    },
-  };
-};
-
 type DataAction =
   | { type: 'LOAD_START' }
-  | { type: 'LOAD_SUCCESS'; payload: { dealers: Dealer[]; models: Model[]; blogPosts: BlogPost[] } }
   | { type: 'LOAD_ERROR'; payload: string }
-  | { type: 'ADD_DEALER'; payload: Dealer }
-  | { type: 'UPDATE_DEALER'; payload: Dealer }
-  | { type: 'DELETE_DEALER'; payload: string }
-  | { type: 'ADD_MODEL'; payload: Model }
-  | { type: 'UPDATE_MODEL'; payload: Model }
-  | { type: 'DELETE_MODEL'; payload: string }
-  | { type: 'ADD_BLOG_POST'; payload: BlogPost }
-  | { type: 'UPDATE_BLOG_POST'; payload: BlogPost }
-  | { type: 'DELETE_BLOG_POST'; payload: string };
+  | { type: 'SET_DEALERS'; payload: Dealer[] }
+  | { type: 'SET_MODELS'; payload: Model[] }
+  | { type: 'SET_BLOG_POSTS'; payload: BlogPost[] }
+  | { type: 'SET_DEALER_MODELS'; payload: DealerModel[] };
+
+const areCollectionsLoaded = (loaded: DataState['loaded']) =>
+  loaded.dealers && loaded.models && loaded.blogPosts && loaded.dealerModels;
+
+const mutationReducer = (state: MutationState, action: MutationAction): MutationState => {
+  const entityState = state[action.entity];
+
+  switch (action.type) {
+    case 'start':
+      return {
+        ...state,
+        [action.entity]: {
+          ...entityState,
+          [action.operation]: { loading: true, error: null },
+        },
+      };
+    case 'success':
+      return {
+        ...state,
+        [action.entity]: {
+          ...entityState,
+          [action.operation]: { loading: false, error: null },
+        },
+      };
+    case 'error':
+      return {
+        ...state,
+        [action.entity]: {
+          ...entityState,
+          [action.operation]: { loading: false, error: action.error },
+        },
+      };
+    default:
+      return state;
+  }
+};
 
 const dataReducer = (state: DataState, action: DataAction): DataState => {
   switch (action.type) {
     case 'LOAD_START':
-      return { ...state, loading: true, error: null };
-    case 'LOAD_SUCCESS':
-      return {
-        dealers: action.payload.dealers,
-        models: action.payload.models,
-        blogPosts: action.payload.blogPosts,
-        loading: false,
-        error: null,
-      };
+      return { ...state, loading: true, loadError: null };
     case 'LOAD_ERROR':
-      return { ...state, loading: false, error: action.payload };
-    case 'ADD_DEALER':
-      return { ...state, dealers: [...state.dealers, action.payload] };
-    case 'UPDATE_DEALER':
+      return { ...state, loading: false, loadError: action.payload };
+    case 'SET_DEALERS': {
+      const loaded = { ...state.loaded, dealers: true };
       return {
         ...state,
-        dealers: state.dealers.map(dealer =>
-          dealer.id === action.payload.id ? action.payload : dealer
-        ),
+        dealers: action.payload,
+        loaded,
+        loading: !areCollectionsLoaded(loaded),
       };
-    case 'DELETE_DEALER':
-      return { ...state, dealers: state.dealers.filter(dealer => dealer.id !== action.payload) };
-    case 'ADD_MODEL':
-      return { ...state, models: [...state.models, action.payload] };
-    case 'UPDATE_MODEL':
+    }
+    case 'SET_MODELS': {
+      const loaded = { ...state.loaded, models: true };
       return {
         ...state,
-        models: state.models.map(model => (model.id === action.payload.id ? action.payload : model)),
+        models: action.payload,
+        loaded,
+        loading: !areCollectionsLoaded(loaded),
       };
-    case 'DELETE_MODEL':
-      return { ...state, models: state.models.filter(model => model.id !== action.payload) };
-    case 'ADD_BLOG_POST':
-      return { ...state, blogPosts: [...state.blogPosts, action.payload] };
-    case 'UPDATE_BLOG_POST':
+    }
+    case 'SET_BLOG_POSTS': {
+      const loaded = { ...state.loaded, blogPosts: true };
       return {
         ...state,
-        blogPosts: state.blogPosts.map(post => (post.id === action.payload.id ? action.payload : post)),
+        blogPosts: action.payload,
+        loaded,
+        loading: !areCollectionsLoaded(loaded),
       };
-    case 'DELETE_BLOG_POST':
-      return { ...state, blogPosts: state.blogPosts.filter(post => post.id !== action.payload) };
+    }
+    case 'SET_DEALER_MODELS': {
+      const loaded = { ...state.loaded, dealerModels: true };
+      return {
+        ...state,
+        dealerModels: action.payload,
+        loaded,
+        loading: !areCollectionsLoaded(loaded),
+      };
+    }
     default:
       return state;
   }
@@ -184,11 +203,14 @@ export const DataContext = createContext<DataContextType>({
   dealers: [],
   models: [],
   blogPosts: [],
+  dealerModels: [],
   loading: true,
   loadError: null,
   dealerMutations: defaultMutationState.dealers,
   modelMutations: defaultMutationState.models,
   blogPostMutations: defaultMutationState.blogPosts,
+  getModelsForDealer: () => [],
+  getDealersForModel: () => [],
   addDealer: rejectUsage as DataContextType['addDealer'],
   updateDealer: rejectUsage as DataContextType['updateDealer'],
   deleteDealer: rejectUsage as DataContextType['deleteDealer'],
@@ -208,163 +230,269 @@ const initialDataState: DataState = {
   dealers: [],
   models: [],
   blogPosts: [],
+  dealerModels: [],
+  loadError: null,
   loading: true,
-  error: null,
+  loaded: {
+    dealers: false,
+    models: false,
+    blogPosts: false,
+    dealerModels: false,
+  },
 };
+
+interface MutationRequest<T> {
+  entity: EntityKey;
+  operation: Operation;
+  action: () => Promise<T>;
+  successMessage: string;
+  errorMessage: string;
+  allowedRoles?: UserRole[];
+}
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [dataState, dataDispatch] = useReducer(dataReducer, initialDataState);
   const [mutationState, mutationDispatch] = useReducer(mutationReducer, createInitialMutationState());
+  const { role } = useAuth();
+  const { addToast } = useToast();
+
+  const handleSubscriptionError = useCallback(
+    (resource: string) => (error: FirestoreError) => {
+      console.error(`Failed to subscribe to ${resource}`, error);
+      const message = `Failed to load ${resource}. Please try again later.`;
+      dataDispatch({ type: 'LOAD_ERROR', payload: message });
+      addToast(message, 'error');
+    },
+    [addToast],
+  );
 
   useEffect(() => {
-    let isMounted = true;
+    dataDispatch({ type: 'LOAD_START' });
 
-    const fetchData = async () => {
-      dataDispatch({ type: 'LOAD_START' });
-
-      try {
-        const [dealersData, modelsData, blogPostsData] = await Promise.all([
-          getDealers(),
-          getModels(),
-          getBlogPosts(),
-        ]);
-
-        if (!isMounted) {
-          return;
-        }
-
-        dataDispatch({
-          type: 'LOAD_SUCCESS',
-          payload: {
-            dealers: dealersData,
-            models: modelsData,
-            blogPosts: blogPostsData,
-          },
-        });
-      } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-
-        const message = error instanceof Error ? error.message : 'Failed to load data';
-        dataDispatch({ type: 'LOAD_ERROR', payload: message });
-      }
-    };
-
-    fetchData();
+    const unsubscribers: Unsubscribe[] = [
+      subscribeToDealers({
+        onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
+        onError: handleSubscriptionError('dealers'),
+      }),
+      subscribeToModels({
+        onData: models => dataDispatch({ type: 'SET_MODELS', payload: models }),
+        onError: handleSubscriptionError('vehicle models'),
+      }),
+      subscribeToBlogPosts({
+        onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
+        onError: handleSubscriptionError('blog posts'),
+      }),
+      subscribeToDealerModels({
+        onData: mappings => dataDispatch({ type: 'SET_DEALER_MODELS', payload: mappings }),
+        onError: handleSubscriptionError('dealer relationships'),
+      }),
+    ];
 
     return () => {
-      isMounted = false;
+      unsubscribers.forEach(unsubscribe => unsubscribe());
     };
-  }, []);
+  }, [handleSubscriptionError]);
 
   const runMutation = useCallback(
-    async <T,>(
-      entity: EntityKey,
-      operation: Operation,
-      request: () => Promise<T>,
-      onSuccess: (result: T) => void,
-    ) => {
+    async <T,>({
+      entity,
+      operation,
+      action,
+      successMessage,
+      errorMessage,
+      allowedRoles = ['admin'],
+    }: MutationRequest<T>) => {
+      if (!role || !allowedRoles.includes(role)) {
+        const permissionMessage = 'You do not have permission to perform this action.';
+        mutationDispatch({ type: 'error', entity, operation, error: permissionMessage });
+        addToast(permissionMessage, 'error');
+        throw new Error(permissionMessage);
+      }
+
       mutationDispatch({ type: 'start', entity, operation });
 
       try {
-        const result = await request();
-        onSuccess(result);
+        const result = await action();
         mutationDispatch({ type: 'success', entity, operation });
+        addToast(successMessage, 'success');
         return result;
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
         mutationDispatch({ type: 'error', entity, operation, error: message });
+        addToast(errorMessage, 'error');
         throw error;
       }
     },
-    [mutationDispatch],
+    [addToast, role],
   );
 
   const addDealer = useCallback(
     (dealer: DealerInput) =>
-      runMutation('dealers', 'create', () => apiCreateDealer(dealer), createdDealer => {
-        dataDispatch({ type: 'ADD_DEALER', payload: createdDealer });
+      runMutation({
+        entity: 'dealers',
+        operation: 'create',
+        action: () => apiCreateDealer(dealer),
+        successMessage: 'Dealer created successfully.',
+        errorMessage: 'Failed to create dealer.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const updateDealer = useCallback(
     (id: string, updates: DealerUpdate) =>
-      runMutation('dealers', 'update', () => apiUpdateDealer(id, updates), updatedDealer => {
-        dataDispatch({ type: 'UPDATE_DEALER', payload: updatedDealer });
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiUpdateDealer(id, updates),
+        successMessage: 'Dealer updated successfully.',
+        errorMessage: 'Failed to update dealer.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const deleteDealer = useCallback(
     (id: string) =>
-      runMutation('dealers', 'delete', () => apiDeleteDealer(id), () => {
-        dataDispatch({ type: 'DELETE_DEALER', payload: id });
+      runMutation({
+        entity: 'dealers',
+        operation: 'delete',
+        action: () => apiDeleteDealer(id),
+        successMessage: 'Dealer deleted successfully.',
+        errorMessage: 'Failed to delete dealer.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const addModel = useCallback(
     (model: ModelInput) =>
-      runMutation('models', 'create', () => apiCreateModel(model), createdModel => {
-        dataDispatch({ type: 'ADD_MODEL', payload: createdModel });
+      runMutation({
+        entity: 'models',
+        operation: 'create',
+        action: () => apiCreateModel(model),
+        successMessage: 'Model created successfully.',
+        errorMessage: 'Failed to create model.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const updateModel = useCallback(
     (id: string, updates: ModelUpdate) =>
-      runMutation('models', 'update', () => apiUpdateModel(id, updates), updatedModel => {
-        dataDispatch({ type: 'UPDATE_MODEL', payload: updatedModel });
+      runMutation({
+        entity: 'models',
+        operation: 'update',
+        action: () => apiUpdateModel(id, updates),
+        successMessage: 'Model updated successfully.',
+        errorMessage: 'Failed to update model.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const deleteModel = useCallback(
     (id: string) =>
-      runMutation('models', 'delete', () => apiDeleteModel(id), () => {
-        dataDispatch({ type: 'DELETE_MODEL', payload: id });
+      runMutation({
+        entity: 'models',
+        operation: 'delete',
+        action: () => apiDeleteModel(id),
+        successMessage: 'Model deleted successfully.',
+        errorMessage: 'Failed to delete model.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const addBlogPost = useCallback(
     (post: BlogPostInput) =>
-      runMutation('blogPosts', 'create', () => apiCreateBlogPost(post), createdPost => {
-        dataDispatch({ type: 'ADD_BLOG_POST', payload: createdPost });
+      runMutation({
+        entity: 'blogPosts',
+        operation: 'create',
+        action: () => apiCreateBlogPost(post),
+        successMessage: 'Blog post created successfully.',
+        errorMessage: 'Failed to create blog post.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const updateBlogPost = useCallback(
     (id: string, updates: BlogPostUpdate) =>
-      runMutation('blogPosts', 'update', () => apiUpdateBlogPost(id, updates), updatedPost => {
-        dataDispatch({ type: 'UPDATE_BLOG_POST', payload: updatedPost });
+      runMutation({
+        entity: 'blogPosts',
+        operation: 'update',
+        action: () => apiUpdateBlogPost(id, updates),
+        successMessage: 'Blog post updated successfully.',
+        errorMessage: 'Failed to update blog post.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
   const deleteBlogPost = useCallback(
     (id: string) =>
-      runMutation('blogPosts', 'delete', () => apiDeleteBlogPost(id), () => {
-        dataDispatch({ type: 'DELETE_BLOG_POST', payload: id });
+      runMutation({
+        entity: 'blogPosts',
+        operation: 'delete',
+        action: () => apiDeleteBlogPost(id),
+        successMessage: 'Blog post deleted successfully.',
+        errorMessage: 'Failed to delete blog post.',
       }),
-    [runMutation, dataDispatch],
+    [runMutation],
   );
 
-  const { dealers, models, blogPosts, loading, error } = dataState;
+  const { dealers, models, blogPosts, dealerModels, loading, loadError } = dataState;
+
+  const dealerToModelMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    dealerModels.forEach(({ dealer_id, model_id }) => {
+      if (!map.has(dealer_id)) {
+        map.set(dealer_id, new Set());
+      }
+      map.get(dealer_id)!.add(model_id);
+    });
+    return map;
+  }, [dealerModels]);
+
+  const modelToDealerMap = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    dealerModels.forEach(({ dealer_id, model_id }) => {
+      if (!map.has(model_id)) {
+        map.set(model_id, new Set());
+      }
+      map.get(model_id)!.add(dealer_id);
+    });
+    return map;
+  }, [dealerModels]);
+
+  const getModelsForDealer = useCallback(
+    (dealerId: string) => {
+      const modelIds = dealerToModelMap.get(dealerId);
+      if (!modelIds) {
+        return [];
+      }
+      return models.filter(model => modelIds.has(model.id));
+    },
+    [dealerToModelMap, models],
+  );
+
+  const getDealersForModel = useCallback(
+    (modelId: string) => {
+      const dealerIds = modelToDealerMap.get(modelId);
+      if (!dealerIds) {
+        return [];
+      }
+      return dealers.filter(dealer => dealerIds.has(dealer.id));
+    },
+    [dealers, modelToDealerMap],
+  );
 
   const contextValue = useMemo(
     () => ({
       dealers,
       models,
       blogPosts,
+      dealerModels,
       loading,
-      loadError: error,
+      loadError,
       dealerMutations: mutationState.dealers,
       modelMutations: mutationState.models,
       blogPostMutations: mutationState.blogPosts,
+      getModelsForDealer,
+      getDealersForModel,
       addDealer,
       updateDealer,
       deleteDealer,
@@ -379,11 +507,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       dealers,
       models,
       blogPosts,
+      dealerModels,
       loading,
-      error,
+      loadError,
       mutationState.dealers,
       mutationState.models,
       mutationState.blogPosts,
+      getModelsForDealer,
+      getDealersForModel,
       addDealer,
       updateDealer,
       deleteDealer,

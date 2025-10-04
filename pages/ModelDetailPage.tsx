@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getModelById, getDealersByModelId } from '../services/api';
 import { Model, Dealer } from '../types';
 import { Battery, Zap, Gauge, ChevronsRight, ArrowUpRight, ArrowLeft, Car, Users, Power, Bolt, Heart } from 'lucide-react';
 import { useFavorites } from '../hooks/useFavorites';
+import { DataContext } from '../contexts/DataContext';
 
 const SpecItem: React.FC<{ icon: React.ReactNode, label: string, value?: string | number | null }> = ({ icon, label, value }) => (
     <div className="flex flex-col items-center justify-center p-4 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 text-center transition-all duration-300 hover:bg-white/10 hover:border-gray-cyan/50">
@@ -17,9 +17,9 @@ const SpecItem: React.FC<{ icon: React.ReactNode, label: string, value?: string 
 const ModelDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
-    const [model, setModel] = useState<Model | null>(null);
-    const [dealers, setDealers] = useState<Dealer[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { models, getDealersForModel, loading } = useContext(DataContext);
+    const model = useMemo<Model | null>(() => (models.find(m => m.id === id) ?? null), [models, id]);
+    const dealers = useMemo<Dealer[]>(() => (model ? getDealersForModel(model.id) : []), [getDealersForModel, model]);
     const [scrollY, setScrollY] = useState(0);
     const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -32,20 +32,6 @@ const ModelDetailPage: React.FC = () => {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
-
-    useEffect(() => {
-        if (id) {
-            setLoading(true);
-            Promise.all([
-                getModelById(id),
-                getDealersByModelId(id)
-            ]).then(([modelData, dealersData]) => {
-                setModel(modelData || null);
-                setDealers(dealersData);
-                setLoading(false);
-            });
-        }
-    }, [id]);
 
     if (loading) return <div className="text-center py-10 text-white">Loading...</div>;
     if (!model) return <div className="text-center py-10 text-white">Model not found.</div>;
