@@ -87,8 +87,28 @@ const Header: React.FC = () => {
             <Link to="/favorites" className={navLinkClasses('/favorites')}>{t('header.favorites')}</Link>
             <Link to="/blog" className={navLinkClasses('/blog')}>{t('header.blog')}</Link>
             <Link to="/about" className={navLinkClasses('/about')}>{t('header.about')}</Link>
+            <Link to="/register" className={navLinkClasses('/register')}>Register</Link>
+            <Link to="/register-dealer" className={navLinkClasses('/register-dealer')}>
+              Dealer Signup
+            </Link>
           </nav>
           <div className="flex items-center space-x-4">
+            {!user && (
+              <>
+                <Link
+                  to="/register"
+                  className="hidden md:inline-flex items-center rounded-md border border-gray-cyan/60 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-cyan/20"
+                >
+                  Join Now
+                </Link>
+                <Link
+                  to="/register-dealer"
+                  className="hidden md:inline-flex items-center rounded-md bg-gray-cyan px-3 py-1.5 text-sm font-semibold text-navy-blue transition-colors hover:bg-gray-cyan/80"
+                >
+                  Become a Dealer
+                </Link>
+              </>
+            )}
             {user && role === 'admin' && (
               <Link
                 to="/admin"

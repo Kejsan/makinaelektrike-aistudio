@@ -32,6 +32,8 @@ const Footer: React.FC = () => {
                   <li><Link to="/dealers" className="text-base text-gray-300 hover:text-white">{t('header.dealers')}</Link></li>
                   <li><Link to="/models" className="text-base text-gray-300 hover:text-white">{t('header.models')}</Link></li>
                   <li><Link to="/blog" className="text-base text-gray-300 hover:text-white">{t('header.blog')}</Link></li>
+                  <li><Link to="/register" className="text-base text-gray-300 hover:text-white">Sign Up</Link></li>
+                  <li><Link to="/register-dealer" className="text-base text-gray-300 hover:text-white">Dealer Signup</Link></li>
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
