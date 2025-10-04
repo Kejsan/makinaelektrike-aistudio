@@ -18,6 +18,9 @@
         "terms": "Terms of Service",
         "rightsReserved": "All rights reserved."
     },
+    "common": {
+        "unknownCity": "Unknown location"
+    },
     "home": {
         "heroTitle": "Drive the Future.",
         "heroSubtitle": "Discover Electric Mobility in Albania.",
@@ -37,7 +40,8 @@
         "brand": "Brand",
         "language": "Language Spoken",
         "noResults": "No dealerships found matching your criteria.",
-        "viewDetails": "View Details"
+        "viewDetails": "View Details",
+        "pendingApproval": "Pending approval"
     },
     "dealerDetails": {
         "brandsSold": "Brands Sold",
@@ -47,9 +51,12 @@
         "email": "Email",
         "website": "Website",
         "languagesSpoken": "Languages Spoken",
+        "noLanguages": "No languages specified",
         "notes": "Notes",
         "modelsAvailable": "Models Available at this Dealership",
-        "backLink": "Back to all dealers"
+        "backLink": "Back to all dealers",
+        "approved": "Approved dealer",
+        "pendingApproval": "Pending approval"
     },
     "modelsPage": {
         "title": "Electric & Hybrid Models",
@@ -58,7 +65,8 @@
         "bodyType": "Body Type",
         "range": "Range (WLTP)",
         "noResults": "No models found matching your criteria.",
-        "viewDetails": "View Details"
+        "viewDetails": "View Details",
+        "rangeUnknown": "Unknown"
     },
     "modelDetails": {
         "specifications": "Specifications",

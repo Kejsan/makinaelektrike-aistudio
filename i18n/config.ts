@@ -22,6 +22,9 @@ const enTranslations = {
         "terms": "Terms of Service",
         "rightsReserved": "All rights reserved."
     },
+    "common": {
+        "unknownCity": "Unknown location"
+    },
     "home": {
         "heroTitle": "Drive the Future.",
         "heroSubtitle": "Discover Electric Mobility in Albania.",
@@ -46,6 +49,7 @@ const enTranslations = {
         "language": "Language Spoken",
         "noResults": "No dealerships found matching your criteria.",
         "viewDetails": "View Details",
+        "pendingApproval": "Pending approval",
         "clearFilters": "Clear Filters",
         "mapTitle": "Dealer Locations on Map",
         "sortBy": "Sort by",
@@ -67,10 +71,13 @@ const enTranslations = {
         "email": "Email",
         "website": "Website",
         "languagesSpoken": "Languages Spoken",
+        "noLanguages": "No languages specified",
         "notes": "Notes",
         "modelsAvailable": "Models Available at this Dealership",
         "backLink": "Back to all dealers",
-        "locationOnMap": "Location on Map"
+        "locationOnMap": "Location on Map",
+        "approved": "Approved dealer",
+        "pendingApproval": "Pending approval"
     },
     "modelsPage": {
         "title": "Electric & Hybrid Models",
@@ -92,7 +99,8 @@ const enTranslations = {
         },
         "allBrands": "All Brands",
         "allBodyTypes": "All Body Types",
-        "compare": "Compare"
+        "compare": "Compare",
+        "rangeUnknown": "Unknown"
     },
     "modelDetails": {
         "specifications": "Specifications",
@@ -173,6 +181,9 @@ const enTranslations = {
         "noBrands": "No brands listed",
         "approve": "Approve",
         "reject": "Reject",
+        "ownerUid": "Owner UID: {{uid}}",
+        "createdOn": "Created on {{date}}",
+        "updatedOn": "Updated on {{date}}",
         "modelsList": "Models",
         "noModels": "No models available yet.",
         "rangeUnknown": "Range unknown",
@@ -216,6 +227,9 @@ const sqTranslations = {
         "terms": "Kushtet e Shërbimit",
         "rightsReserved": "Të gjitha të drejtat e rezervuara."
     },
+    "common": {
+        "unknownCity": "Lokacion i panjohur"
+    },
     "home": {
         "heroTitle": "Ngisni të Ardhmen.",
         "heroSubtitle": "Zbuloni Lëvizshmërinë Elektrike në Shqipëri.",
@@ -240,6 +254,7 @@ const sqTranslations = {
         "language": "Gjuha e Folur",
         "noResults": "Nuk u gjet asnjë konçesionar që përputhet me kriteret tuaja.",
         "viewDetails": "Shiko Detajet",
+        "pendingApproval": "Në pritje të aprovimit",
         "clearFilters": "Pastro Filtrat",
         "mapTitle": "Vendndodhjet e Shitësve në Hartë",
         "sortBy": "Rendit sipas",
@@ -261,10 +276,13 @@ const sqTranslations = {
         "email": "Email",
         "website": "Faqja e Internetit",
         "languagesSpoken": "Gjuhët e Folura",
+        "noLanguages": "Nuk janë specifikuar gjuhë",
         "notes": "Shënime",
         "modelsAvailable": "Modelet e Disponueshme në këtë Konçesionar",
         "backLink": "Kthehu te të gjithë shitësit",
-        "locationOnMap": "Vendndodhja në Hartë"
+        "locationOnMap": "Vendndodhja në Hartë",
+        "approved": "Shitës i aprovuar",
+        "pendingApproval": "Në pritje të aprovimit"
     },
     "modelsPage": {
         "title": "Modelet Elektrike & Hibride",
@@ -286,7 +304,8 @@ const sqTranslations = {
         },
         "allBrands": "Të gjitha Markat",
         "allBodyTypes": "Të gjithë Tipet",
-        "compare": "Krahaso"
+        "compare": "Krahaso",
+        "rangeUnknown": "Autonomia e panjohur"
     },
     "modelDetails": {
         "specifications": "Specifikimet",
@@ -367,6 +386,9 @@ const sqTranslations = {
         "noBrands": "Asnjë markë e listuar",
         "approve": "Aprovo",
         "reject": "Refuzo",
+        "ownerUid": "UID i pronarit: {{uid}}",
+        "createdOn": "Krijuar më {{date}}",
+        "updatedOn": "Përditësuar më {{date}}",
         "modelsList": "Modelet",
         "noModels": "Nuk ka ende modele.",
         "rangeUnknown": "Autonomia e panjohur",
@@ -410,6 +432,9 @@ const itTranslations = {
         "terms": "Termini di Servizio",
         "rightsReserved": "Tutti i diritti riservati."
     },
+    "common": {
+        "unknownCity": "Località sconosciuta"
+    },
     "home": {
         "heroTitle": "Guida il Futuro.",
         "heroSubtitle": "Scopri la Mobilità Elettrica in Albania.",
@@ -434,6 +459,7 @@ const itTranslations = {
         "language": "Lingua Parlata",
         "noResults": "Nessun concessionario trovato che corrisponda ai tuoi criteri.",
         "viewDetails": "Vedi Dettagli",
+        "pendingApproval": "In attesa di approvazione",
         "clearFilters": "Cancella Filtri",
         "mapTitle": "Posizioni dei Concessionari sulla Mappa",
         "sortBy": "Ordina per",
@@ -455,10 +481,13 @@ const itTranslations = {
         "email": "Email",
         "website": "Sito Web",
         "languagesSpoken": "Lingue Parlate",
+        "noLanguages": "Nessuna lingua specificata",
         "notes": "Note",
         "modelsAvailable": "Modelli Disponibili presso questo Concessionario",
         "backLink": "Torna a tutti i concessionari",
-        "locationOnMap": "Posizione sulla Mappa"
+        "locationOnMap": "Posizione sulla Mappa",
+        "approved": "Concessionario approvato",
+        "pendingApproval": "In attesa di approvazione"
     },
     "modelsPage": {
         "title": "Modelli Elettrici e Ibridi",
@@ -480,7 +509,8 @@ const itTranslations = {
         },
         "allBrands": "Tutte le Marche",
         "allBodyTypes": "Tutti i Tipi",
-        "compare": "Confronta"
+        "compare": "Confronta",
+        "rangeUnknown": "Autonomia sconosciuta"
     },
     "modelDetails": {
         "specifications": "Specifiche",
@@ -561,6 +591,9 @@ const itTranslations = {
         "noBrands": "Nessun marchio indicato",
         "approve": "Approva",
         "reject": "Rifiuta",
+        "ownerUid": "UID proprietario: {{uid}}",
+        "createdOn": "Creato il {{date}}",
+        "updatedOn": "Aggiornato il {{date}}",
         "modelsList": "Modelli",
         "noModels": "Nessun modello disponibile.",
         "rangeUnknown": "Autonomia sconosciuta",

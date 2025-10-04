@@ -1,14 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Model } from '../types';
-import { Heart, ArrowRight, Battery, Gauge } from 'lucide-react';
+import type { Model } from '../types';
+import { Heart, ArrowRight, Battery, Gauge, ShieldCheck } from 'lucide-react';
 import { useFavorites } from '../hooks/useFavorites';
 
 const ModelCard: React.FC<{ model: Model }> = ({ model }) => {
     const { t } = useTranslation();
     const { isFavorite, toggleFavorite } = useFavorites();
     const favorited = isFavorite(model.id);
+    const imageUrl = model.image_url || 'https://picsum.photos/seed/model-placeholder/800/600';
+    const battery = model.battery_capacity ? `${model.battery_capacity} kWh` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
+    const range = model.range_wltp ? `${model.range_wltp} km` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
 
     return (
         <div className="relative bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-lg overflow-hidden group transition-all duration-300 transform hover:-translate-y-1 hover:shadow-neon-cyan h-full flex flex-col">
@@ -21,8 +24,16 @@ const ModelCard: React.FC<{ model: Model }> = ({ model }) => {
             </button>
             <Link to={`/models/${model.id}`} className="flex flex-col h-full">
                 <div className="relative overflow-hidden h-48">
-                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={model.image_url} alt={`${model.brand} ${model.model_name}`} />
-                    <div className="absolute top-4 left-4 bg-gray-cyan/80 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">{model.body_type}</div>
+                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" src={imageUrl} alt={`${model.brand} ${model.model_name}`} />
+                    {model.body_type && (
+                        <div className="absolute top-4 left-4 bg-gray-cyan/80 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">{model.body_type}</div>
+                    )}
+                    {model.ownerDealerId && (
+                        <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-emerald-500/80 px-3 py-1 text-xs font-semibold text-black">
+                            <ShieldCheck size={14} />
+                            {t('modelDetails.availableAt', { defaultValue: 'Available at these Dealerships' })}
+                        </div>
+                    )}
                 </div>
                 <div className="p-6 flex flex-col flex-grow">
                     <div className="flex-grow">
@@ -31,11 +42,11 @@ const ModelCard: React.FC<{ model: Model }> = ({ model }) => {
                         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                             <div className="text-center p-3 bg-white/5 rounded-lg">
                                 <Battery className="mx-auto text-gray-cyan mb-1" size={20}/>
-                                <p className="font-bold text-white">{model.battery_capacity} kWh</p>
+                                <p className="font-bold text-white">{battery}</p>
                             </div>
                             <div className="text-center p-3 bg-white/5 rounded-lg">
                                 <Gauge className="mx-auto text-gray-cyan mb-1" size={20}/>
-                                <p className="font-bold text-white">{model.range_wltp} km</p>
+                                <p className="font-bold text-white">{range}</p>
                             </div>
                         </div>
                     </div>

@@ -10,7 +10,7 @@ import { DataContext } from '../contexts/DataContext';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
-  const { dealers, models, blogPosts } = useContext(DataContext);
+  const { dealers, models, blogPosts, loading: dataLoading } = useContext(DataContext);
 
   const [featuredDealers, setFeaturedDealers] = useState(dealers.filter(d => d.isFeatured));
   const [featuredModels, setFeaturedModels] = useState(models.filter(m => m.isFeatured));
@@ -108,10 +108,14 @@ const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12 text-white">{t('home.featuredDealers')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {filteredDealersForSearch.length > 0 ? (
-                filteredDealersForSearch.map(dealer => <DealerCard key={dealer.id} dealer={dealer} />)
+            {dataLoading ? (
+              Array.from({ length: 4 }).map((_, index) => (
+                <DealerCard key={`featured-dealer-skeleton-${index}`} isLoading />
+              ))
+            ) : filteredDealersForSearch.length > 0 ? (
+              filteredDealersForSearch.map(dealer => <DealerCard key={dealer.id} dealer={dealer} />)
             ) : (
-                <p className="col-span-full text-center text-gray-400">No dealers found matching your search.</p>
+              <p className="col-span-full text-center text-gray-400">No dealers found matching your search.</p>
             )}
           </div>
           <div className="mt-12 text-center">

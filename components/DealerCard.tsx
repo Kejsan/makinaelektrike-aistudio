@@ -1,58 +1,95 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Dealer } from '../types';
-import { MapPin, Heart, ArrowRight } from 'lucide-react';
+import type { Dealer } from '../types';
+import { MapPin, Heart, ArrowRight, ShieldAlert } from 'lucide-react';
 import { useFavorites } from '../hooks/useFavorites';
 
-const DealerCard: React.FC<{ dealer: Dealer }> = ({ dealer }) => {
-    const { t } = useTranslation();
-    const { isFavorite, toggleFavorite } = useFavorites();
-    const favorited = isFavorite(dealer.id);
+interface DealerCardProps {
+  dealer?: Dealer | null;
+  isLoading?: boolean;
+}
 
+const DealerCard: React.FC<DealerCardProps> = ({ dealer, isLoading = false }) => {
+  const { t } = useTranslation();
+  const { isFavorite, toggleFavorite } = useFavorites();
+
+  if (isLoading || !dealer) {
     return (
-        <div className="relative bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-lg group transition-all duration-300 transform hover:-translate-y-1 hover:shadow-neon-cyan h-full flex flex-col overflow-hidden">
-            <button
-                onClick={() => toggleFavorite(dealer.id)}
-                className="absolute top-4 right-4 z-10 p-2 bg-black/50 rounded-full text-white hover:text-vivid-red transition-colors"
-                aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
-            >
-                <Heart size={20} className={`${favorited ? 'fill-vivid-red text-vivid-red' : 'fill-transparent'}`} />
-            </button>
-            <Link to={`/dealers/${dealer.id}`} className="flex flex-col h-full">
-                <div className="relative h-48 overflow-hidden">
-                    <img 
-                        src={dealer.image_url || 'https://picsum.photos/seed/placeholder/800/600'} 
-                        alt={dealer.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                    />
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                    <div className="flex-grow">
-                        <h3 className="text-xl font-bold text-white pr-10">{dealer.name}</h3>
-                        <p className="text-gray-400 flex items-center mt-2 text-sm">
-                            <MapPin size={14} className="mr-2 text-gray-cyan" />
-                            {dealer.city}
-                        </p>
-                        <div className="mt-4">
-                            <h4 className="text-sm font-semibold text-gray-400 mb-2">Brands</h4>
-                            <div className="flex flex-wrap gap-2">
-                                {dealer.brands.slice(0, 3).map(brand => (
-                                    <span key={brand} className="text-xs bg-gray-700/50 rounded-full px-3 py-1">{brand}</span>
-                                ))}
-                                {dealer.brands.length > 3 && <span className="text-xs bg-gray-700/50 rounded-full px-3 py-1">+{dealer.brands.length - 3} more</span>}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="mt-6 pt-4 border-t border-white/10 text-right">
-                        <span className="text-gray-cyan font-semibold group-hover:text-white transition-colors flex items-center justify-end text-sm">
-                            {t('dealersPage.viewDetails')} <ArrowRight size={16} className="ml-2 transform group-hover:translate-x-1 transition-transform" />
-                        </span>
-                    </div>
-                </div>
-            </Link>
+      <div className="relative flex h-full animate-pulse flex-col overflow-hidden rounded-xl border border-white/5 bg-white/5 p-6 backdrop-blur-md">
+        <div className="mb-4 h-40 w-full rounded-lg bg-white/10" />
+        <div className="h-6 w-3/4 rounded bg-white/10" />
+        <div className="mt-3 h-4 w-1/2 rounded bg-white/10" />
+        <div className="mt-5 flex flex-wrap gap-2">
+          <span className="h-6 w-16 rounded-full bg-white/10" />
+          <span className="h-6 w-20 rounded-full bg-white/10" />
+          <span className="h-6 w-14 rounded-full bg-white/10" />
         </div>
+      </div>
     );
+  }
+
+  const favorited = isFavorite(dealer.id);
+  const imageUrl = dealer.image_url || 'https://picsum.photos/seed/placeholder/800/600';
+  const city = dealer.city || t('common.unknownCity', { defaultValue: 'Unknown location' });
+  const approved = dealer.approved ?? true;
+
+  return (
+    <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 shadow-lg backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-neon-cyan">
+      <button
+        onClick={() => toggleFavorite(dealer.id)}
+        className="absolute right-4 top-4 z-10 rounded-full bg-black/50 p-2 text-white transition-colors hover:text-vivid-red"
+        aria-label={favorited ? 'Remove from favorites' : 'Add to favorites'}
+      >
+        <Heart size={20} className={`${favorited ? 'fill-vivid-red text-vivid-red' : 'fill-transparent'}`} />
+      </button>
+      <Link to={`/dealers/${dealer.id}`} className="flex h-full flex-col">
+        <div className="relative h-48 overflow-hidden">
+          <img
+            src={imageUrl}
+            alt={dealer.name}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          {!approved && (
+            <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-black">
+              <ShieldAlert size={14} />
+              {t('dealersPage.pendingApproval', { defaultValue: 'Pending approval' })}
+            </div>
+          )}
+        </div>
+        <div className="flex flex-grow flex-col p-6">
+          <div className="flex-grow">
+            <h3 className="pr-10 text-xl font-bold text-white">{dealer.name}</h3>
+            <p className="mt-2 flex items-center text-sm text-gray-400">
+              <MapPin size={14} className="mr-2 text-gray-cyan" />
+              {city}
+            </p>
+            {dealer.brands?.length ? (
+              <div className="mt-4">
+                <h4 className="mb-2 text-sm font-semibold text-gray-400">{t('dealerDetails.brandsSold')}</h4>
+                <div className="flex flex-wrap gap-2">
+                  {dealer.brands.slice(0, 3).map(brand => (
+                    <span key={brand} className="rounded-full bg-gray-700/50 px-3 py-1 text-xs">
+                      {brand}
+                    </span>
+                  ))}
+                  {dealer.brands.length > 3 && (
+                    <span className="rounded-full bg-gray-700/50 px-3 py-1 text-xs">+{dealer.brands.length - 3}</span>
+                  )}
+                </div>
+              </div>
+            ) : null}
+          </div>
+          <div className="mt-6 border-t border-white/10 pt-4 text-right">
+            <span className="flex items-center justify-end text-sm font-semibold text-gray-cyan transition-colors group-hover:text-white">
+              {t('dealersPage.viewDetails')}{' '}
+              <ArrowRight size={16} className="ml-2 transition-transform group-hover:-translate-x-1" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
 };
 
 export default DealerCard;

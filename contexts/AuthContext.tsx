@@ -24,17 +24,7 @@ import {
 } from 'firebase/firestore';
 import { auth, firestore } from '../services/firebase';
 import { useToast } from './ToastContext';
-
-export type UserRole = 'admin' | 'dealer' | 'user' | 'pending';
-
-export interface UserProfile {
-  uid: string;
-  email?: string | null;
-  role: UserRole;
-  displayName?: string | null;
-  status?: 'pending' | 'approved';
-  [key: string]: unknown;
-}
+import type { UserProfile, UserRole } from '../types';
 
 interface AuthContextType {
   user: User | null;

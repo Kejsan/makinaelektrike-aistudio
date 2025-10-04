@@ -2,7 +2,7 @@ import React, { useMemo, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Dealer, Model } from '../types';
-import { MapPin, Phone, Mail, Globe, ArrowLeft, Heart } from 'lucide-react';
+import { MapPin, Phone, Mail, Globe, ArrowLeft, Heart, ShieldAlert, ShieldCheck } from 'lucide-react';
 import ModelCard from '../components/ModelCard';
 import GoogleMap from '../components/GoogleMap';
 import { useFavorites } from '../hooks/useFavorites';
@@ -20,6 +20,8 @@ const DealerDetailPage: React.FC = () => {
     if (!dealer) return <div className="text-center py-10 text-white">Dealer not found.</div>;
 
     const favorited = isFavorite(dealer.id);
+    const heroImage = dealer.image_url || 'https://picsum.photos/seed/placeholder/1200/800';
+    const isApproved = dealer.approved ?? true;
 
     return (
         <div className="py-12">
@@ -32,7 +34,7 @@ const DealerDetailPage: React.FC = () => {
                 <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden">
                     <div className="lg:grid lg:grid-cols-3">
                         <div className="lg:col-span-2 relative">
-                             <img src={dealer.image_url} alt={dealer.name} className="w-full h-64 lg:h-full object-cover"/>
+                             <img src={heroImage} alt={dealer.name} className="w-full h-64 lg:h-full object-cover"/>
                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent lg:bg-gradient-to-r"></div>
                         </div>
 
@@ -45,6 +47,24 @@ const DealerDetailPage: React.FC = () => {
                                 <Heart size={24} className={`${favorited ? 'fill-vivid-red text-vivid-red' : 'fill-transparent'}`} />
                             </button>
                             <h1 className="text-3xl font-extrabold text-white pr-12">{dealer.name}</h1>
+                            <div className="flex flex-wrap gap-3">
+                                {isApproved ? (
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                                        <ShieldCheck size={14} />
+                                        {t('dealerDetails.approved', { defaultValue: 'Approved dealer' })}
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-300">
+                                        <ShieldAlert size={14} />
+                                        {t('dealerDetails.pendingApproval', { defaultValue: 'Pending approval' })}
+                                    </span>
+                                )}
+                                {dealer.ownerUid && (
+                                    <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-200">
+                                        UID: {dealer.ownerUid}
+                                    </span>
+                                )}
+                            </div>
                             <div className="space-y-4">
                                 <h2 className="text-xl font-bold text-white">{t('dealerDetails.contactInfo')}</h2>
                                 <p className="flex items-start text-gray-300"><MapPin className="text-gray-cyan mt-1 mr-3 flex-shrink-0" size={20} /><span>{dealer.address}</span></p>
@@ -62,7 +82,7 @@ const DealerDetailPage: React.FC = () => {
                             
                             <div>
                                 <h3 className="font-semibold text-white">{t('dealerDetails.languagesSpoken')}</h3>
-                                <p className="text-gray-300">{dealer.languages.join(', ')}</p>
+                                <p className="text-gray-300">{dealer.languages?.length ? dealer.languages.join(', ') : t('dealerDetails.noLanguages', { defaultValue: 'No languages specified' })}</p>
                             </div>
                              {dealer.notes && <div>
                                 <h3 className="font-semibold text-white">{t('dealerDetails.notes')}</h3>

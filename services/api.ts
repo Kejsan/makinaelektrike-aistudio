@@ -19,7 +19,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { firestore } from './firebase';
-import type { Dealer, Model, DealerModel, BlogPost } from '../types';
+import type { Dealer, DealerDocument, Model, DealerModel, BlogPost } from '../types';
 
 type WithId<T> = T & { id: string };
 
@@ -74,7 +74,7 @@ export const getDealerById = async (id: string): Promise<Dealer | null> => {
   return { id: snapshot.id, ...(snapshot.data() as Omit<Dealer, 'id'>) };
 };
 
-export const createDealer = async (payload: Omit<Dealer, 'id'>): Promise<Dealer> => {
+export const createDealer = async (payload: DealerDocument): Promise<Dealer> => {
   const docRef = await addDoc(dealersCollection, {
     ...payload,
     createdAt: serverTimestamp(),
@@ -82,17 +82,14 @@ export const createDealer = async (payload: Omit<Dealer, 'id'>): Promise<Dealer>
   });
 
   const snapshot = await getDoc(docRef);
-  const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = snapshot.data() as Record<string, unknown>;
-
-  return { id: snapshot.id, ...(rest as Omit<Dealer, 'id'>) };
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
 };
 
-export const updateDealer = async (id: string, updates: Partial<Dealer>): Promise<Dealer> => {
+export const updateDealer = async (id: string, updates: Partial<DealerDocument>): Promise<Dealer> => {
   const dealerRef = doc(dealersCollection, id);
   await updateDoc(dealerRef, { ...updates, updatedAt: serverTimestamp() });
   const snapshot = await getDoc(dealerRef);
-  const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = snapshot.data() as Record<string, unknown>;
-  return { id: snapshot.id, ...(rest as Omit<Dealer, 'id'>) };
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
 };
 
 export const deleteDealer = async (id: string): Promise<void> => {
@@ -131,17 +128,14 @@ export const createModel = async (payload: Omit<Model, 'id'>): Promise<Model> =>
   });
 
   const snapshot = await getDoc(docRef);
-  const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = snapshot.data() as Record<string, unknown>;
-
-  return { id: snapshot.id, ...(rest as Omit<Model, 'id'>) };
+  return { id: snapshot.id, ...(snapshot.data() as Omit<Model, 'id'>) };
 };
 
-export const updateModel = async (id: string, updates: Partial<Model>): Promise<Model> => {
+export const updateModel = async (id: string, updates: Partial<Omit<Model, 'id'>>): Promise<Model> => {
   const modelRef = doc(modelsCollection, id);
   await updateDoc(modelRef, { ...updates, updatedAt: serverTimestamp() });
   const snapshot = await getDoc(modelRef);
-  const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = snapshot.data() as Record<string, unknown>;
-  return { id: snapshot.id, ...(rest as Omit<Model, 'id'>) };
+  return { id: snapshot.id, ...(snapshot.data() as Omit<Model, 'id'>) };
 };
 
 export const deleteModel = async (id: string): Promise<void> => {
