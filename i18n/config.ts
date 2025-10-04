@@ -10,7 +10,14 @@ const enTranslations = {
         "blog": "Blog",
         "about": "About",
         "favorites": "Favorites",
-        "admin": "Admin"
+        "admin": "Admin",
+        "login": "Log in",
+        "register": "Register",
+        "becomeDealer": "Become a Dealer",
+        "logout": "Log out",
+        "language": "Language",
+        "openMenu": "Open menu",
+        "closeMenu": "Close menu"
     },
     "footer": {
         "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
@@ -215,7 +222,14 @@ const sqTranslations = {
         "blog": "Blogu",
         "about": "Rreth Nesh",
         "favorites": "Të Preferuarat",
-        "admin": "Admin"
+        "admin": "Admin",
+        "login": "Hyni",
+        "register": "Regjistrohu",
+        "becomeDealer": "Bëhu Konçesionar",
+        "logout": "Dil",
+        "language": "Gjuha",
+        "openMenu": "Hap menunë",
+        "closeMenu": "Mbyll menunë"
     },
     "footer": {
         "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
@@ -420,7 +434,14 @@ const itTranslations = {
         "blog": "Blog",
         "about": "Chi Siamo",
         "favorites": "Preferiti",
-        "admin": "Admin"
+        "admin": "Admin",
+        "login": "Accedi",
+        "register": "Registrati",
+        "becomeDealer": "Diventa Concessionario",
+        "logout": "Esci",
+        "language": "Lingua",
+        "openMenu": "Apri menu",
+        "closeMenu": "Chiudi menu"
     },
     "footer": {
         "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
