@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Dealer, Model } from '../types';
@@ -7,31 +7,14 @@ import ModelCard from '../components/ModelCard';
 import GoogleMap from '../components/GoogleMap';
 import { useFavorites } from '../hooks/useFavorites';
 import { DataContext } from '../contexts/DataContext';
-import { initialDealerModels } from '../services/api';
 
 const DealerDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
-    const { dealers, models, loading } = useContext(DataContext);
-    const [dealer, setDealer] = useState<Dealer | null>(null);
-    const [dealerModels, setDealerModels] = useState<Model[]>([]);
+    const { dealers, loading, getModelsForDealer } = useContext(DataContext);
+    const dealer = useMemo<Dealer | null>(() => (dealers.find(d => d.id === id) ?? null), [dealers, id]);
+    const dealerModels = useMemo<Model[]>(() => (dealer ? getModelsForDealer(dealer.id) : []), [dealer, getModelsForDealer]);
     const { isFavorite, toggleFavorite } = useFavorites();
-
-    useEffect(() => {
-        if (id && !loading) {
-            const currentDealer = dealers.find(d => d.id === id) || null;
-            setDealer(currentDealer);
-
-            if (currentDealer) {
-                // This logic should ideally be in the data layer, but for now we simulate the join
-                const modelIds = initialDealerModels
-                    .filter(dm => dm.dealer_id === id)
-                    .map(dm => dm.model_id);
-                const availableModels = models.filter(m => modelIds.includes(m.id));
-                setDealerModels(availableModels);
-            }
-        }
-    }, [id, loading, dealers, models]);
 
     if (loading) return <div className="text-center py-10 text-white">Loading...</div>;
     if (!dealer) return <div className="text-center py-10 text-white">Dealer not found.</div>;

@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFavorites } from '../hooks/useFavorites';
-import { getDealers, getModels } from '../services/api';
 import { Dealer, Model } from '../types';
 import DealerCard from '../components/DealerCard';
 import ModelCard from '../components/ModelCard';
 import { Heart } from 'lucide-react';
+import { DataContext } from '../contexts/DataContext';
 
 const FavoritesPage: React.FC = () => {
     const { t } = useTranslation();
     const { favorites } = useFavorites();
+    const { dealers, models, loading } = useContext(DataContext);
     const [favoriteDealers, setFavoriteDealers] = useState<Dealer[]>([]);
     const [favoriteModels, setFavoriteModels] = useState<Model[]>([]);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setLoading(true);
-        Promise.all([getDealers(), getModels()]).then(([allDealers, allModels]) => {
-            setFavoriteDealers(allDealers.filter(d => favorites.includes(d.id)));
-            setFavoriteModels(allModels.filter(m => favorites.includes(m.id)));
-            setLoading(false);
-        });
-    }, [favorites]);
+        setFavoriteDealers(dealers.filter(d => favorites.includes(d.id)));
+        setFavoriteModels(models.filter(m => favorites.includes(m.id)));
+    }, [favorites, dealers, models]);
 
     return (
         <div className="min-h-screen py-12">

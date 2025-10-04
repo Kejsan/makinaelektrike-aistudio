@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { getBlogPosts } from '../services/api';
 import { BlogPost } from '../types';
 import { Car, Building } from 'lucide-react';
 import DealerCard from '../components/DealerCard';
@@ -11,7 +10,7 @@ import { DataContext } from '../contexts/DataContext';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
-  const { dealers, models } = useContext(DataContext);
+  const { dealers, models, blogPosts } = useContext(DataContext);
 
   const [featuredDealers, setFeaturedDealers] = useState(dealers.filter(d => d.isFeatured));
   const [featuredModels, setFeaturedModels] = useState(models.filter(m => m.isFeatured));
@@ -30,8 +29,8 @@ const HomePage: React.FC = () => {
   }, [dealers, models]);
 
   useEffect(() => {
-    getBlogPosts().then(allPosts => setLatestPosts(allPosts.slice(0, 3)));
-  }, []);
+    setLatestPosts(blogPosts.slice(0, 3));
+  }, [blogPosts]);
 
   useEffect(() => {
     let results = dealers;

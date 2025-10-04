@@ -8,7 +8,6 @@ import { Dealer, Model, BlogPost } from '../types';
 import DealerForm, { DealerFormValues } from '../components/admin/DealerForm';
 import ModelForm, { ModelFormValues } from '../components/admin/ModelForm';
 import BlogPostForm, { BlogPostFormValues } from '../components/admin/BlogPostForm';
-import { useToast } from '../contexts/ToastContext';
 
 interface ModalProps {
   title: string;
@@ -42,7 +41,6 @@ const AdminPage: React.FC = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { addToast } = useToast();
   const {
     dealers,
     models,
@@ -97,16 +95,13 @@ const AdminPage: React.FC = () => {
       if (dealerFormState?.mode === 'edit' && dealerFormState.entity) {
         const { id, ...rest } = values;
         await updateDealer(dealerFormState.entity.id, rest);
-        addToast('Dealer updated successfully.', 'success');
       } else {
         const { id: _omit, ...rest } = values;
         await addDealer(rest);
-        addToast('Dealer added successfully.', 'success');
       }
       closeAllModals();
     } catch (error) {
       console.error(error);
-      addToast('Failed to save dealer. Please try again.', 'error');
     } finally {
       setDealerSubmitting(false);
     }
@@ -118,16 +113,13 @@ const AdminPage: React.FC = () => {
       if (modelFormState?.mode === 'edit' && modelFormState.entity) {
         const { id, ...rest } = values;
         await updateModel(modelFormState.entity.id, rest);
-        addToast('Model updated successfully.', 'success');
       } else {
         const { id: _omit, ...rest } = values;
         await addModel(rest);
-        addToast('Model added successfully.', 'success');
       }
       closeAllModals();
     } catch (error) {
       console.error(error);
-      addToast('Failed to save model. Please try again.', 'error');
     } finally {
       setModelSubmitting(false);
     }
@@ -139,31 +131,26 @@ const AdminPage: React.FC = () => {
       if (blogFormState?.mode === 'edit' && blogFormState.entity) {
         const { id, ...rest } = values;
         await updateBlogPost(blogFormState.entity.id, rest);
-        addToast('Blog post updated successfully.', 'success');
       } else {
         const { id: _omit, ...rest } = values;
         await addBlogPost(rest);
-        addToast('Blog post created successfully.', 'success');
       }
       closeAllModals();
     } catch (error) {
       console.error(error);
-      addToast('Failed to save blog post. Please try again.', 'error');
     } finally {
       setBlogSubmitting(false);
     }
   };
 
-  const confirmAndDelete = async (action: () => Promise<void>, successMessage: string) => {
+  const confirmAndDelete = async (action: () => Promise<void>) => {
     const confirmation = window.confirm(t('admin.deleteConfirm'));
     if (!confirmation) return;
 
     try {
       await action();
-      addToast(successMessage, 'success');
     } catch (error) {
       console.error(error);
-      addToast('Deletion failed. Please try again.', 'error');
     }
   };
 
@@ -217,10 +204,7 @@ const AdminPage: React.FC = () => {
                       </button>
                       <button
                         onClick={() =>
-                          confirmAndDelete(
-                            () => deleteDealer(dealer.id),
-                            'Dealer deleted successfully.'
-                          )
+                          confirmAndDelete(() => deleteDealer(dealer.id))
                         }
                         className="inline-flex items-center rounded-lg border border-white/10 bg-red-500/20 p-2 text-red-300 transition hover:bg-red-500/30 hover:text-red-100"
                         aria-label={t('admin.delete')}
@@ -287,12 +271,7 @@ const AdminPage: React.FC = () => {
                         <Pencil size={16} />
                       </button>
                       <button
-                        onClick={() =>
-                          confirmAndDelete(
-                            () => deleteModel(model.id),
-                            'Model deleted successfully.'
-                          )
-                        }
+                        onClick={() => confirmAndDelete(() => deleteModel(model.id))}
                         className="inline-flex items-center rounded-lg border border-white/10 bg-red-500/20 p-2 text-red-300 transition hover:bg-red-500/30 hover:text-red-100"
                         aria-label={t('admin.delete')}
                       >
@@ -348,12 +327,7 @@ const AdminPage: React.FC = () => {
                         <Pencil size={16} />
                       </button>
                       <button
-                        onClick={() =>
-                          confirmAndDelete(
-                            () => deleteBlogPost(post.id),
-                            'Blog post deleted successfully.'
-                          )
-                        }
+                        onClick={() => confirmAndDelete(() => deleteBlogPost(post.id))}
                         className="inline-flex items-center rounded-lg border border-white/10 bg-red-500/20 p-2 text-red-300 transition hover:bg-red-500/30 hover:text-red-100"
                         aria-label={t('admin.delete')}
                       >

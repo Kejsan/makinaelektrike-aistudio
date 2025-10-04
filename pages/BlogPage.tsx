@@ -1,23 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getBlogPosts } from '../services/api';
-import { BlogPost } from '../types';
 import BlogCard from '../components/BlogCard';
+import { DataContext } from '../contexts/DataContext';
 
 const BlogPage: React.FC = () => {
   const { t } = useTranslation();
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(true);
-    getBlogPosts()
-      .then(data => {
-        setPosts(data);
-        setLoading(false);
-      });
-  }, []);
+  const { blogPosts, loading } = useContext(DataContext);
 
   if (loading) {
     return <div className="text-center py-10 text-white">Loading posts...</div>;
@@ -31,7 +20,7 @@ const BlogPage: React.FC = () => {
           <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-400">{t('blogPage.subtitle')}</p>
         </div>
         <div className="mt-12 max-w-lg mx-auto grid gap-8 lg:grid-cols-3 lg:max-w-none">
-          {posts.map(post => (
+          {blogPosts.map(post => (
             <BlogCard key={post.id} post={post} />
           ))}
         </div>
