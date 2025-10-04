@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 const AdminLoginPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login, loading, error, user, initializing } = useAuth();
+  const { login, loading, error, user, role, initializing } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
@@ -20,8 +20,16 @@ const AdminLoginPage: React.FC = () => {
     );
   }
 
-  if (user) {
+  if (user && role === 'pending') {
+    return <Navigate to="/awaiting-approval" replace />;
+  }
+
+  if (user && role === 'admin') {
     return <Navigate to="/admin" replace />;
+  }
+
+  if (user) {
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -54,7 +62,7 @@ const AdminLoginPage: React.FC = () => {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {(formError || error) && (
               <div className="rounded-md bg-red-500/20 border border-red-500/40 px-4 py-3 text-sm text-red-100">
-                {t('admin.loginError')}
+                {formError || error || t('admin.loginError')}
               </div>
             )}
 

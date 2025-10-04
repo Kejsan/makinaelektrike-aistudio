@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Zap, Settings } from 'lucide-react';
+import { Globe, Zap, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const LanguageSwitcher: React.FC = () => {
@@ -51,7 +51,17 @@ const LanguageSwitcher: React.FC = () => {
 const Header: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, role, logout, loading } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to logout', error);
+    }
+  };
   
   const navLinkClasses = (path: string) => 
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -79,7 +89,7 @@ const Header: React.FC = () => {
             <Link to="/about" className={navLinkClasses('/about')}>{t('header.about')}</Link>
           </nav>
           <div className="flex items-center space-x-4">
-            {user && (
+            {user && role === 'admin' && (
               <Link
                 to="/admin"
                 className="text-white hover:text-gray-cyan transition-colors"
@@ -87,6 +97,17 @@ const Header: React.FC = () => {
               >
                 <Settings size={20} />
               </Link>
+            )}
+            {user && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-1 text-white hover:text-gray-cyan transition-colors disabled:opacity-60"
+                disabled={loading}
+                aria-label={t('header.logout', 'Logout') as string}
+              >
+                <LogOut size={18} />
+                <span className="hidden md:inline text-sm font-medium">{t('header.logout', 'Logout')}</span>
+              </button>
             )}
             <LanguageSwitcher />
           </div>

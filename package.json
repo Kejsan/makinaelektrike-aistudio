@@ -12,6 +12,7 @@
   "dependencies": {
     "@google/genai": "^1.21.0",
     "lucide-react": "^0.544.0",
+    "firebase": "^11.1.0",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.9.3",
     "react": "^19.1.1",
