@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { Shield, LogOut, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Shield, LogOut, Plus, Pencil, Trash2, X, Check, XCircle, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -38,7 +38,7 @@ type FormState<T> = { mode: 'create' | 'edit'; entity?: T } | null;
 type TabKey = 'dealers' | 'models' | 'blog';
 
 const AdminPage: React.FC = () => {
-  const { logout, user } = useAuth();
+  const { logout, user, role } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const {
@@ -46,9 +46,15 @@ const AdminPage: React.FC = () => {
     models,
     blogPosts,
     loading,
+    loadError,
+    dealerMutations,
+    modelMutations,
+    blogPostMutations,
     addDealer,
     updateDealer,
     deleteDealer,
+    approveDealer,
+    rejectDealer,
     addModel,
     updateModel,
     deleteModel,
@@ -64,6 +70,7 @@ const AdminPage: React.FC = () => {
   const [dealerSubmitting, setDealerSubmitting] = useState(false);
   const [modelSubmitting, setModelSubmitting] = useState(false);
   const [blogSubmitting, setBlogSubmitting] = useState(false);
+  const [dealerAction, setDealerAction] = useState<{ id: string; type: 'approve' | 'reject' } | null>(null);
 
   const tabs = useMemo(
     () => [
@@ -87,6 +94,48 @@ const AdminPage: React.FC = () => {
     setDealerFormState(null);
     setModelFormState(null);
     setBlogFormState(null);
+  };
+
+  const pendingDealers = useMemo(
+    () => dealers.filter(dealer => dealer.approved === false),
+    [dealers],
+  );
+
+  const approvedDealers = useMemo(
+    () => dealers.filter(dealer => dealer.approved !== false),
+    [dealers],
+  );
+
+  const isAdmin = role === 'admin';
+
+  const handleApproveDealer = async (dealerId: string) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setDealerAction({ id: dealerId, type: 'approve' });
+    try {
+      await approveDealer(dealerId);
+    } catch (error) {
+      console.error('Failed to approve dealer', error);
+    } finally {
+      setDealerAction(null);
+    }
+  };
+
+  const handleRejectDealer = async (dealerId: string) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setDealerAction({ id: dealerId, type: 'reject' });
+    try {
+      await rejectDealer(dealerId);
+    } catch (error) {
+      console.error('Failed to reject dealer', error);
+    } finally {
+      setDealerAction(null);
+    }
   };
 
   const handleDealerSubmit = async (values: DealerFormValues) => {
@@ -154,195 +203,314 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const renderDealersTable = () => (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-white">{t('admin.manageDealers')}</h2>
-        <button
-          onClick={() => setDealerFormState({ mode: 'create' })}
-          className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
-        >
-          <Plus size={16} />
-          <span>{t('admin.addNewDealer')}</span>
-        </button>
-      </div>
-      <div className="overflow-hidden rounded-xl border border-white/10">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-white/10 text-left text-sm text-gray-200">
-            <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
-              <tr>
-                <th className="px-4 py-3">{t('admin.name')}</th>
-                <th className="px-4 py-3">{t('admin.city')}</th>
-                <th className="px-4 py-3">{t('admin.brands')}</th>
-                <th className="px-4 py-3">{t('admin.featured')}</th>
-                <th className="px-4 py-3 text-right">{t('admin.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {dealers.map(dealer => (
-                <tr key={dealer.id} className="hover:bg-white/5">
-                  <td className="px-4 py-3 font-medium text-white">{dealer.name}</td>
-                  <td className="px-4 py-3">{dealer.city}</td>
-                  <td className="px-4 py-3 text-sm text-gray-300">{dealer.brands?.join(', ') || '-'}</td>
-                  <td className="px-4 py-3">
-                    {dealer.isFeatured ? (
-                      <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
-                        {t('admin.featured')}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end space-x-2">
+  const renderEmptyState = (message: string) => (
+    <div className="rounded-xl border border-dashed border-white/10 bg-white/5 px-4 py-10 text-center text-sm text-gray-300">
+      {message}
+    </div>
+  );
+
+  const renderLoadingState = () => (
+    <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-white/10 bg-white/5 py-16 text-gray-300">
+      <Loader2 className="h-8 w-8 animate-spin text-gray-cyan" />
+      <p className="text-sm font-medium">{t('admin.loading')}</p>
+    </div>
+  );
+
+  const renderErrorState = () => (
+    <div className="rounded-2xl border border-red-500/40 bg-red-500/10 px-6 py-10 text-center text-sm text-red-200">
+      <p className="text-base font-semibold">{t('admin.errorTitle')}</p>
+      {loadError && <p className="mt-2 text-sm text-red-100/80">{loadError}</p>}
+      <button
+        onClick={() => window.location.reload()}
+        className="mt-6 inline-flex items-center justify-center rounded-lg bg-red-500/30 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-red-100 transition hover:bg-red-500/40"
+      >
+        {t('admin.tryAgain')}
+      </button>
+    </div>
+  );
+
+  const renderDealersPanel = () => {
+    const dealerUpdateLoading = dealerMutations.update.loading;
+    const dealerDeleteLoading = dealerMutations.delete.loading;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold text-white">{t('admin.manageDealers')}</h2>
+          <button
+            onClick={() => setDealerFormState({ mode: 'create' })}
+            className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
+          >
+            <Plus size={16} />
+            <span>{t('admin.addNewDealer')}</span>
+          </button>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
+            <header className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-lg font-semibold text-white">{t('admin.pendingDealers')}</h3>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">
+                {pendingDealers.length}
+              </span>
+            </header>
+
+            {pendingDealers.length === 0 ? (
+              renderEmptyState(t('admin.noPendingDealers'))
+            ) : (
+              <ul className="divide-y divide-white/5">
+                {pendingDealers.map(dealer => {
+                  const isProcessing =
+                    dealerUpdateLoading && dealerAction?.id === dealer.id;
+
+                  return (
+                    <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+                      <div>
+                        <p className="font-semibold text-white">{dealer.name}</p>
+                        <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
+                        <p className="mt-2 text-xs text-gray-400">
+                          {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <button
+                          onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
+                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
+                          aria-label={t('admin.editDealer')}
+                        >
+                          <Pencil size={14} />
+                          <span>{t('admin.edit')}</span>
+                        </button>
+                        <button
+                          onClick={() => handleApproveDealer(dealer.id)}
+                          disabled={!isAdmin || dealerUpdateLoading}
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label={t('admin.approve')}
+                        >
+                          {isProcessing && dealerAction?.type === 'approve' ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check size={14} />
+                          )}
+                          <span>{t('admin.approve')}</span>
+                        </button>
+                        <button
+                          onClick={() => handleRejectDealer(dealer.id)}
+                          disabled={!isAdmin || dealerUpdateLoading}
+                          className="inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label={t('admin.reject')}
+                        >
+                          {isProcessing && dealerAction?.type === 'reject' ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <XCircle size={14} />
+                          )}
+                          <span>{t('admin.reject')}</span>
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
+            <header className="mb-4 flex items-center justify-between gap-3">
+              <h3 className="text-lg font-semibold text-white">{t('admin.approvedDealers')}</h3>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">
+                {approvedDealers.length}
+              </span>
+            </header>
+
+            {approvedDealers.length === 0 ? (
+              renderEmptyState(t('admin.noApprovedDealers'))
+            ) : (
+              <ul className="divide-y divide-white/5">
+                {approvedDealers.map(dealer => (
+                  <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+                    <div>
+                      <p className="font-semibold text-white">{dealer.name}</p>
+                      <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
+                      <p className="mt-2 text-xs text-gray-400">
+                        {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-2">
                       <button
                         onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
-                        className="inline-flex items-center rounded-lg border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+                        className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
                         aria-label={t('admin.editDealer')}
                       >
-                        <Pencil size={16} />
+                        <Pencil size={14} />
+                        <span>{t('admin.edit')}</span>
                       </button>
                       <button
-                        onClick={() =>
-                          confirmAndDelete(() => deleteDealer(dealer.id))
-                        }
-                        className="inline-flex items-center rounded-lg border border-white/10 bg-red-500/20 p-2 text-red-300 transition hover:bg-red-500/30 hover:text-red-100"
+                        onClick={() => handleRejectDealer(dealer.id)}
+                        disabled={!isAdmin || dealerUpdateLoading}
+                        className="inline-flex items-center gap-1 rounded-lg bg-amber-500/20 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/30 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        aria-label={t('admin.reject')}
+                      >
+                        <XCircle size={14} />
+                        <span>{t('admin.reject')}</span>
+                      </button>
+                      <button
+                        onClick={() => confirmAndDelete(() => deleteDealer(dealer.id))}
+                        disabled={!isAdmin || dealerDeleteLoading}
+                        className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                         aria-label={t('admin.delete')}
                       >
-                        <Trash2 size={16} />
+                        {dealerDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
+                        <span>{t('admin.delete')}</span>
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
-  const renderModelsTable = () => (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-white">{t('admin.manageModels')}</h2>
-        <button
-          onClick={() => setModelFormState({ mode: 'create' })}
-          className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
-        >
-          <Plus size={16} />
-          <span>{t('admin.addNewModel')}</span>
-        </button>
-      </div>
-      <div className="overflow-hidden rounded-xl border border-white/10">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-white/10 text-left text-sm text-gray-200">
-            <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
-              <tr>
-                <th className="px-4 py-3">{t('admin.name')}</th>
-                <th className="px-4 py-3">{t('admin.brand')}</th>
-                <th className="px-4 py-3">{t('modelsPage.range', { defaultValue: 'Range (WLTP)' })}</th>
-                <th className="px-4 py-3">{t('admin.featured')}</th>
-                <th className="px-4 py-3 text-right">{t('admin.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
+  const renderModelsPanel = () => {
+    const modelUpdateLoading = modelMutations.update.loading;
+    const modelDeleteLoading = modelMutations.delete.loading;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold text-white">{t('admin.manageModels')}</h2>
+          <button
+            onClick={() => setModelFormState({ mode: 'create' })}
+            className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
+          >
+            <Plus size={16} />
+            <span>{t('admin.addNewModel')}</span>
+          </button>
+        </div>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
+          <header className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold text-white">{t('admin.modelsList', { defaultValue: 'Models' })}</h3>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">{models.length}</span>
+          </header>
+
+          {models.length === 0 ? (
+            renderEmptyState(t('admin.noModels'))
+          ) : (
+            <ul className="divide-y divide-white/5">
               {models.map(model => (
-                <tr key={model.id} className="hover:bg-white/5">
-                  <td className="px-4 py-3 font-medium text-white">{model.model_name}</td>
-                  <td className="px-4 py-3">{model.brand}</td>
-                  <td className="px-4 py-3">{model.range_wltp ? `${model.range_wltp} km` : '-'}</td>
-                  <td className="px-4 py-3">
-                    {model.isFeatured ? (
-                      <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
+                <li key={model.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+                  <div>
+                    <p className="font-semibold text-white">{model.brand} {model.model_name}</p>
+                    <p className="mt-1 text-xs text-gray-400">
+                      {model.range_wltp
+                        ? t('modelsPage.range', { defaultValue: 'Range (WLTP)' }) + ': ' + model.range_wltp + ' km'
+                        : t('admin.rangeUnknown', { defaultValue: 'Range unknown' })}
+                    </p>
+                    {model.isFeatured && (
+                      <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-200">
                         {t('admin.featured')}
                       </span>
-                    ) : (
-                      <span className="text-xs text-gray-400">-</span>
                     )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => setModelFormState({ mode: 'edit', entity: model })}
-                        className="inline-flex items-center rounded-lg border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
-                        aria-label={t('admin.editModel')}
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={() => confirmAndDelete(() => deleteModel(model.id))}
-                        className="inline-flex items-center rounded-lg border border-white/10 bg-red-500/20 p-2 text-red-300 transition hover:bg-red-500/30 hover:text-red-100"
-                        aria-label={t('admin.delete')}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <button
+                      onClick={() => setModelFormState({ mode: 'edit', entity: model })}
+                      disabled={modelUpdateLoading}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={t('admin.editModel')}
+                    >
+                      <Pencil size={14} />
+                      <span>{t('admin.edit')}</span>
+                    </button>
+                    <button
+                      onClick={() => confirmAndDelete(() => deleteModel(model.id))}
+                      disabled={modelDeleteLoading}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={t('admin.delete')}
+                    >
+                      {modelDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
+                      <span>{t('admin.delete')}</span>
+                    </button>
+                  </div>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </ul>
+          )}
+        </section>
       </div>
-    </div>
-  );
+    );
+  };
 
-  const renderBlogTable = () => (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-white">{t('admin.manageBlog')}</h2>
-        <button
-          onClick={() => setBlogFormState({ mode: 'create' })}
-          className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
-        >
-          <Plus size={16} />
-          <span>Add Blog Post</span>
-        </button>
-      </div>
-      <div className="overflow-hidden rounded-xl border border-white/10">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-white/10 text-left text-sm text-gray-200">
-            <thead className="bg-white/5 text-xs uppercase tracking-wider text-gray-400">
-              <tr>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Author</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3 text-right">{t('admin.actions')}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {blogPosts.map(post => (
-                <tr key={post.id} className="hover:bg-white/5">
-                  <td className="px-4 py-3 font-medium text-white">{post.title}</td>
-                  <td className="px-4 py-3">{post.author}</td>
-                  <td className="px-4 py-3">{post.date ? new Date(post.date).toLocaleDateString() : '-'}</td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end space-x-2">
-                      <button
-                        onClick={() => setBlogFormState({ mode: 'edit', entity: post })}
-                        className="inline-flex items-center rounded-lg border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
-                        aria-label={t('admin.edit')}
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={() => confirmAndDelete(() => deleteBlogPost(post.id))}
-                        className="inline-flex items-center rounded-lg border border-white/10 bg-red-500/20 p-2 text-red-300 transition hover:bg-red-500/30 hover:text-red-100"
-                        aria-label={t('admin.delete')}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  const renderBlogPanel = () => {
+    const blogUpdateLoading = blogPostMutations.update.loading;
+    const blogDeleteLoading = blogPostMutations.delete.loading;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold text-white">{t('admin.manageBlog')}</h2>
+          <button
+            onClick={() => setBlogFormState({ mode: 'create' })}
+            className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
+          >
+            <Plus size={16} />
+            <span>{t('admin.addBlogPost')}</span>
+          </button>
         </div>
+
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
+          <header className="mb-4 flex items-center justify-between gap-3">
+            <h3 className="text-lg font-semibold text-white">{t('admin.blogPosts')}</h3>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">{blogPosts.length}</span>
+          </header>
+
+          {blogPosts.length === 0 ? (
+            renderEmptyState(t('admin.noBlogPosts'))
+          ) : (
+            <ul className="divide-y divide-white/5">
+              {blogPosts.map(post => (
+                <li key={post.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+                  <div>
+                    <p className="font-semibold text-white">{post.title}</p>
+                    <p className="mt-1 text-sm text-gray-300">{post.author}</p>
+                    <p className="mt-2 text-xs text-gray-400">
+                      {post.date
+                        ? new Date(post.date).toLocaleDateString()
+                        : t('admin.dateUnknown', { defaultValue: 'Date unknown' })}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <button
+                      onClick={() => setBlogFormState({ mode: 'edit', entity: post })}
+                      disabled={blogUpdateLoading}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={t('admin.editBlogPost')}
+                    >
+                      <Pencil size={14} />
+                      <span>{t('admin.edit')}</span>
+                    </button>
+                    <button
+                      onClick={() => confirmAndDelete(() => deleteBlogPost(post.id))}
+                      disabled={blogDeleteLoading}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={t('admin.delete')}
+                    >
+                      {blogDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
+                      <span>{t('admin.delete')}</span>
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
-    </div>
-  );
+    );
+  };
 
   if (!user) {
     return null;
@@ -390,12 +558,14 @@ const AdminPage: React.FC = () => {
 
             <div className="mt-8">
               {loading ? (
-                <div className="flex items-center justify-center py-16 text-gray-300">Loading...</div>
+                renderLoadingState()
+              ) : loadError ? (
+                renderErrorState()
               ) : (
                 <>
-                  {activeTab === 'dealers' && renderDealersTable()}
-                  {activeTab === 'models' && renderModelsTable()}
-                  {activeTab === 'blog' && renderBlogTable()}
+                  {activeTab === 'dealers' && renderDealersPanel()}
+                  {activeTab === 'models' && renderModelsPanel()}
+                  {activeTab === 'blog' && renderBlogPanel()}
                 </>
               )}
             </div>
@@ -433,7 +603,9 @@ const AdminPage: React.FC = () => {
 
       {blogFormState && (
         <AdminModal
-          title={blogFormState.mode === 'edit' ? 'Edit Blog Post' : 'Add Blog Post'}
+          title={
+            blogFormState.mode === 'edit' ? t('admin.editBlogPost') : t('admin.addBlogPost')
+          }
           onClose={closeAllModals}
         >
           <BlogPostForm

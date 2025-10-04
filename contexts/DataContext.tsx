@@ -75,6 +75,8 @@ interface DataContextType {
   addDealer: (dealer: DealerInput) => Promise<Dealer>;
   updateDealer: (id: string, updates: DealerUpdate) => Promise<Dealer>;
   deleteDealer: (id: string) => Promise<void>;
+  approveDealer: (id: string) => Promise<Dealer>;
+  rejectDealer: (id: string) => Promise<Dealer>;
   addModel: (model: ModelInput) => Promise<Model>;
   updateModel: (id: string, updates: ModelUpdate) => Promise<Model>;
   deleteModel: (id: string) => Promise<void>;
@@ -214,6 +216,8 @@ export const DataContext = createContext<DataContextType>({
   addDealer: rejectUsage as DataContextType['addDealer'],
   updateDealer: rejectUsage as DataContextType['updateDealer'],
   deleteDealer: rejectUsage as DataContextType['deleteDealer'],
+  approveDealer: rejectUsage as DataContextType['approveDealer'],
+  rejectDealer: rejectUsage as DataContextType['rejectDealer'],
   addModel: rejectUsage as DataContextType['addModel'],
   updateModel: rejectUsage as DataContextType['updateModel'],
   deleteModel: rejectUsage as DataContextType['deleteModel'],
@@ -362,6 +366,30 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     [runMutation],
   );
 
+  const approveDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiUpdateDealer(id, { approved: true }),
+        successMessage: 'Dealer approved successfully.',
+        errorMessage: 'Failed to approve dealer.',
+      }),
+    [runMutation],
+  );
+
+  const rejectDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiUpdateDealer(id, { approved: false }),
+        successMessage: 'Dealer rejected successfully.',
+        errorMessage: 'Failed to reject dealer.',
+      }),
+    [runMutation],
+  );
+
   const addModel = useCallback(
     (model: ModelInput) =>
       runMutation({
@@ -496,6 +524,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       addDealer,
       updateDealer,
       deleteDealer,
+      approveDealer,
+      rejectDealer,
       addModel,
       updateModel,
       deleteModel,
@@ -518,6 +548,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       addDealer,
       updateDealer,
       deleteDealer,
+      approveDealer,
+      rejectDealer,
       addModel,
       updateModel,
       deleteModel,
