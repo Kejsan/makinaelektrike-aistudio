@@ -18,6 +18,7 @@ export interface Dealer {
   modelsAvailable: string[];
   image_url?: string;
   isFeatured?: boolean;
+  approved?: boolean;
 }
 
 export interface Model {
