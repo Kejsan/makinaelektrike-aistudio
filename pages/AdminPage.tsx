@@ -76,9 +76,13 @@ const AdminPage: React.FC = () => {
     [t]
   );
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Failed to logout', error);
+    }
   };
 
   const closeAllModals = () => {

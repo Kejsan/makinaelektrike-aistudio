@@ -14,25 +14,58 @@ import FavoritesPage from './pages/FavoritesPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import AdminPage from './pages/AdminPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import AwaitingApprovalPage from './pages/AwaitingApprovalPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 import { ToastProvider, ToastContainer } from './contexts/ToastContext';
 import ChatButton from './components/ChatButton';
 import ChatWidget from './components/ChatWidget';
 
-const RequireAuth: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const { user, loading, initializing } = useAuth();
+const LoadingScreen = () => (
+  <div className="flex items-center justify-center py-24">
+    <span className="text-gray-300">Loading...</span>
+  </div>
+);
+
+const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const { user, role, loading, initializing } = useAuth();
 
   if (initializing || loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <span className="text-gray-300">Loading...</span>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!user) {
     return <Navigate to="/admin/login" replace />;
+  }
+
+  if (role === 'pending') {
+    return <Navigate to="/awaiting-approval" replace />;
+  }
+
+  if (role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+const DealerRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const { user, role, loading, initializing } = useAuth();
+
+  if (initializing || loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  if (role === 'pending') {
+    return <Navigate to="/awaiting-approval" replace />;
+  }
+
+  if (role !== 'dealer') {
+    return <Navigate to="/" replace />;
   }
 
   return children;
@@ -60,12 +93,13 @@ const App: React.FC = () => {
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />
                   <Route path="/admin/login" element={<AdminLoginPage />} />
+                  <Route path="/awaiting-approval" element={<AwaitingApprovalPage />} />
                   <Route
                     path="/admin"
                     element={(
-                      <RequireAuth>
+                      <AdminRoute>
                         <AdminPage />
-                      </RequireAuth>
+                      </AdminRoute>
                     )}
                   />
                 </Routes>
