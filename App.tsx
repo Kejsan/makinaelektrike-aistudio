@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -17,8 +17,9 @@ import ScrollToTopButton from './components/ScrollToTopButton';
 import AdminPage from './pages/AdminPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AwaitingApprovalPage from './pages/AwaitingApprovalPage';
+import DealerDashboardPage from './pages/DealerDashboardPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { DataProvider } from './contexts/DataContext';
+import { DataContext, DataProvider } from './contexts/DataContext';
 import { ToastProvider, ToastContainer } from './contexts/ToastContext';
 import ChatButton from './components/ChatButton';
 import ChatWidget from './components/ChatWidget';
@@ -52,9 +53,17 @@ const AdminRoute: React.FC<{ children: React.ReactElement }> = ({ children }) =>
 };
 
 const DealerRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
-  const { user, role, loading, initializing } = useAuth();
+  const { user, role, loading: authLoading, initializing } = useAuth();
+  const { dealers, loading: dataLoading } = useContext(DataContext);
 
-  if (initializing || loading) {
+  const dealerRecord = useMemo(() => {
+    if (!user) {
+      return null;
+    }
+    return dealers.find(dealer => dealer.id === user.uid) ?? null;
+  }, [dealers, user]);
+
+  if (initializing || authLoading || dataLoading) {
     return <LoadingScreen />;
   }
 
@@ -62,12 +71,12 @@ const DealerRoute: React.FC<{ children: React.ReactElement }> = ({ children }) =
     return <Navigate to="/admin/login" replace />;
   }
 
-  if (role === 'pending') {
-    return <Navigate to="/awaiting-approval" replace />;
-  }
-
   if (role !== 'dealer') {
     return <Navigate to="/" replace />;
+  }
+
+  if (!dealerRecord || dealerRecord.approved !== true) {
+    return <Navigate to="/awaiting-approval" replace />;
   }
 
   return children;
@@ -98,6 +107,14 @@ const App: React.FC = () => {
                   <Route path="/register-dealer" element={<RegisterDealerPage />} />
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/awaiting-approval" element={<AwaitingApprovalPage />} />
+                  <Route
+                    path="/dealer/dashboard"
+                    element={(
+                      <DealerRoute>
+                        <DealerDashboardPage />
+                      </DealerRoute>
+                    )}
+                  />
                   <Route
                     path="/admin"
                     element={(

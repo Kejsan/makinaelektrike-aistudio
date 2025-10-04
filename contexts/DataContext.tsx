@@ -21,6 +21,8 @@ import {
   createBlogPost as apiCreateBlogPost,
   updateBlogPost as apiUpdateBlogPost,
   deleteBlogPost as apiDeleteBlogPost,
+  createDealerModel as apiCreateDealerModel,
+  deleteDealerModel as apiDeleteDealerModel,
 } from '../services/api';
 import { useAuth, type UserRole } from './AuthContext';
 import { useToast } from './ToastContext';
@@ -83,6 +85,8 @@ interface DataContextType {
   addBlogPost: (post: BlogPostInput) => Promise<BlogPost>;
   updateBlogPost: (id: string, updates: BlogPostUpdate) => Promise<BlogPost>;
   deleteBlogPost: (id: string) => Promise<void>;
+  linkModelToDealer: (dealerId: string, modelId: string) => Promise<DealerModel>;
+  unlinkModelFromDealer: (dealerId: string, modelId: string) => Promise<{ dealer_id: string; model_id: string }>;
 }
 
 const createMutationFlag = (): MutationFlag => ({ loading: false, error: null });
@@ -224,6 +228,8 @@ export const DataContext = createContext<DataContextType>({
   addBlogPost: rejectUsage as DataContextType['addBlogPost'],
   updateBlogPost: rejectUsage as DataContextType['updateBlogPost'],
   deleteBlogPost: rejectUsage as DataContextType['deleteBlogPost'],
+  linkModelToDealer: rejectUsage as DataContextType['linkModelToDealer'],
+  unlinkModelFromDealer: rejectUsage as DataContextType['unlinkModelFromDealer'],
 });
 
 interface DataProviderProps {
@@ -350,6 +356,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         action: () => apiUpdateDealer(id, updates),
         successMessage: 'Dealer updated successfully.',
         errorMessage: 'Failed to update dealer.',
+        allowedRoles: ['admin', 'dealer'],
       }),
     [runMutation],
   );
@@ -398,6 +405,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         action: () => apiCreateModel(model),
         successMessage: 'Model created successfully.',
         errorMessage: 'Failed to create model.',
+        allowedRoles: ['admin', 'dealer'],
       }),
     [runMutation],
   );
@@ -410,6 +418,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         action: () => apiUpdateModel(id, updates),
         successMessage: 'Model updated successfully.',
         errorMessage: 'Failed to update model.',
+        allowedRoles: ['admin', 'dealer'],
       }),
     [runMutation],
   );
@@ -422,6 +431,35 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         action: () => apiDeleteModel(id),
         successMessage: 'Model deleted successfully.',
         errorMessage: 'Failed to delete model.',
+      }),
+    [runMutation],
+  );
+
+  const linkModelToDealer = useCallback(
+    (dealerId: string, modelId: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiCreateDealerModel(dealerId, modelId),
+        successMessage: 'Model linked to dealer successfully.',
+        errorMessage: 'Failed to link model to dealer.',
+        allowedRoles: ['admin', 'dealer'],
+      }),
+    [runMutation],
+  );
+
+  const unlinkModelFromDealer = useCallback(
+    (dealerId: string, modelId: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: async () => {
+          await apiDeleteDealerModel(dealerId, modelId);
+          return { dealer_id: dealerId, model_id: modelId };
+        },
+        successMessage: 'Model removed from dealer successfully.',
+        errorMessage: 'Failed to remove model from dealer.',
+        allowedRoles: ['admin', 'dealer'],
       }),
     [runMutation],
   );
@@ -532,6 +570,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       addBlogPost,
       updateBlogPost,
       deleteBlogPost,
+      linkModelToDealer,
+      unlinkModelFromDealer,
     }),
     [
       dealers,
@@ -556,6 +596,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       addBlogPost,
       updateBlogPost,
       deleteBlogPost,
+      linkModelToDealer,
+      unlinkModelFromDealer,
     ],
   );
 
