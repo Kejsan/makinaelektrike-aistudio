@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFavorites } from '../hooks/useFavorites';
 import { Dealer, Model } from '../types';
@@ -9,15 +9,26 @@ import { DataContext } from '../contexts/DataContext';
 
 const FavoritesPage: React.FC = () => {
     const { t } = useTranslation();
-    const { favorites } = useFavorites();
-    const { dealers, models, loading } = useContext(DataContext);
-    const [favoriteDealers, setFavoriteDealers] = useState<Dealer[]>([]);
-    const [favoriteModels, setFavoriteModels] = useState<Model[]>([]);
+    const { favorites, loading: favoritesLoading } = useFavorites();
+    const { dealers, models, loading: dataLoading } = useContext(DataContext);
 
-    useEffect(() => {
-        setFavoriteDealers(dealers.filter(d => favorites.includes(d.id)));
-        setFavoriteModels(models.filter(m => favorites.includes(m.id)));
-    }, [favorites, dealers, models]);
+    const favoriteDealers = useMemo<Dealer[]>(() => {
+        if (!favorites.length) {
+            return [];
+        }
+
+        const favoriteIds = new Set(favorites);
+        return dealers.filter(dealer => favoriteIds.has(dealer.id));
+    }, [dealers, favorites]);
+
+    const favoriteModels = useMemo<Model[]>(() => {
+        if (!favorites.length) {
+            return [];
+        }
+
+        const favoriteIds = new Set(favorites);
+        return models.filter(model => favoriteIds.has(model.id));
+    }, [favorites, models]);
 
     return (
         <div className="min-h-screen py-12">
@@ -27,7 +38,7 @@ const FavoritesPage: React.FC = () => {
                     <p className="mt-4 text-lg text-gray-400">{t('favoritesPage.subtitle')}</p>
                 </div>
 
-                {loading ? (
+                {dataLoading || favoritesLoading ? (
                     <div className="text-center text-white">Loading favorites...</div>
                 ) : (
                     <>
