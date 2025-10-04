@@ -37,6 +37,26 @@ type FormState<T> = { mode: 'create' | 'edit'; entity?: T } | null;
 
 type TabKey = 'dealers' | 'models' | 'blog';
 
+const formatDate = (value: Dealer['createdAt']) => {
+  if (!value) {
+    return null;
+  }
+
+  if (value instanceof Date) {
+    return value.toLocaleDateString();
+  }
+
+  if (typeof value === 'object' && 'toDate' in value && typeof value.toDate === 'function') {
+    try {
+      return value.toDate().toLocaleDateString();
+    } catch (error) {
+      console.error('Failed to format timestamp', error);
+    }
+  }
+
+  return null;
+};
+
 const AdminPage: React.FC = () => {
   const { logout, user, role } = useAuth();
   const navigate = useNavigate();
@@ -262,6 +282,8 @@ const AdminPage: React.FC = () => {
                 {pendingDealers.map(dealer => {
                   const isProcessing =
                     dealerUpdateLoading && dealerAction?.id === dealer.id;
+                  const createdAt = formatDate(dealer.createdAt);
+                  const updatedAt = formatDate(dealer.updatedAt);
 
                   return (
                     <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
@@ -271,6 +293,21 @@ const AdminPage: React.FC = () => {
                         <p className="mt-2 text-xs text-gray-400">
                           {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
                         </p>
+                        {dealer.ownerUid && (
+                          <p className="mt-2 text-xs text-gray-500">
+                            {t('admin.ownerUid', { defaultValue: 'Owner UID: {{uid}}', uid: dealer.ownerUid })}
+                          </p>
+                        )}
+                        {createdAt && (
+                          <p className="mt-1 text-xs text-gray-500">
+                            {t('admin.createdOn', { defaultValue: 'Created on {{date}}', date: createdAt })}
+                          </p>
+                        )}
+                        {updatedAt && (
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {t('admin.updatedOn', { defaultValue: 'Updated on {{date}}', date: updatedAt })}
+                          </p>
+                        )}
                       </div>
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         <button
@@ -327,45 +364,65 @@ const AdminPage: React.FC = () => {
               renderEmptyState(t('admin.noApprovedDealers'))
             ) : (
               <ul className="divide-y divide-white/5">
-                {approvedDealers.map(dealer => (
-                  <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
-                    <div>
-                      <p className="font-semibold text-white">{dealer.name}</p>
-                      <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
-                      <p className="mt-2 text-xs text-gray-400">
-                        {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-center justify-end gap-2">
-                      <button
-                        onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
-                        className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
-                        aria-label={t('admin.editDealer')}
-                      >
-                        <Pencil size={14} />
-                        <span>{t('admin.edit')}</span>
-                      </button>
-                      <button
-                        onClick={() => handleRejectDealer(dealer.id)}
-                        disabled={!isAdmin || dealerUpdateLoading}
-                        className="inline-flex items-center gap-1 rounded-lg bg-amber-500/20 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/30 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
-                        aria-label={t('admin.reject')}
-                      >
-                        <XCircle size={14} />
-                        <span>{t('admin.reject')}</span>
-                      </button>
-                      <button
-                        onClick={() => confirmAndDelete(() => deleteDealer(dealer.id))}
-                        disabled={!isAdmin || dealerDeleteLoading}
-                        className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                        aria-label={t('admin.delete')}
-                      >
-                        {dealerDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
-                        <span>{t('admin.delete')}</span>
-                      </button>
-                    </div>
-                  </li>
-                ))}
+                {approvedDealers.map(dealer => {
+                  const createdAt = formatDate(dealer.createdAt);
+                  const updatedAt = formatDate(dealer.updatedAt);
+
+                  return (
+                    <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
+                      <div>
+                        <p className="font-semibold text-white">{dealer.name}</p>
+                        <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
+                        <p className="mt-2 text-xs text-gray-400">
+                          {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
+                        </p>
+                        {dealer.ownerUid && (
+                          <p className="mt-2 text-xs text-gray-500">
+                            {t('admin.ownerUid', { defaultValue: 'Owner UID: {{uid}}', uid: dealer.ownerUid })}
+                          </p>
+                        )}
+                        {createdAt && (
+                          <p className="mt-1 text-xs text-gray-500">
+                            {t('admin.createdOn', { defaultValue: 'Created on {{date}}', date: createdAt })}
+                          </p>
+                        )}
+                        {updatedAt && (
+                          <p className="mt-0.5 text-xs text-gray-500">
+                            {t('admin.updatedOn', { defaultValue: 'Updated on {{date}}', date: updatedAt })}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <button
+                          onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
+                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
+                          aria-label={t('admin.editDealer')}
+                        >
+                          <Pencil size={14} />
+                          <span>{t('admin.edit')}</span>
+                        </button>
+                        <button
+                          onClick={() => handleRejectDealer(dealer.id)}
+                          disabled={!isAdmin || dealerUpdateLoading}
+                          className="inline-flex items-center gap-1 rounded-lg bg-amber-500/20 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/30 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label={t('admin.reject')}
+                        >
+                          <XCircle size={14} />
+                          <span>{t('admin.reject')}</span>
+                        </button>
+                        <button
+                          onClick={() => confirmAndDelete(() => deleteDealer(dealer.id))}
+                          disabled={!isAdmin || dealerDeleteLoading}
+                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label={t('admin.delete')}
+                        >
+                          {dealerDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
+                          <span>{t('admin.delete')}</span>
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </section>

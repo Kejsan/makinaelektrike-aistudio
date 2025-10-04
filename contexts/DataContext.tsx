@@ -6,7 +6,7 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import type { Dealer, Model, BlogPost, DealerModel } from '../types';
+import type { Dealer, DealerDocument, Model, BlogPost, DealerModel } from '../types';
 import {
   subscribeToDealers,
   subscribeToModels,
@@ -24,14 +24,15 @@ import {
   createDealerModel as apiCreateDealerModel,
   deleteDealerModel as apiDeleteDealerModel,
 } from '../services/api';
-import { useAuth, type UserRole } from './AuthContext';
+import { useAuth } from './AuthContext';
+import type { UserRole } from '../types';
 import { useToast } from './ToastContext';
 import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
 
-type DealerInput = Omit<Dealer, 'id'>;
-type DealerUpdate = Partial<Dealer>;
+type DealerInput = DealerDocument;
+type DealerUpdate = Partial<DealerDocument>;
 type ModelInput = Omit<Model, 'id'>;
-type ModelUpdate = Partial<Model>;
+type ModelUpdate = Partial<Omit<Model, 'id'>>;
 type BlogPostInput = Omit<BlogPost, 'id'>;
 type BlogPostUpdate = Partial<BlogPost>;
 

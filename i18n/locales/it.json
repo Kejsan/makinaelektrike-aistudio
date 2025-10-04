@@ -18,6 +18,9 @@
         "terms": "Termini di Servizio",
         "rightsReserved": "Tutti i diritti riservati."
     },
+    "common": {
+        "unknownCity": "Località sconosciuta"
+    },
     "home": {
         "heroTitle": "Guida il Futuro.",
         "heroSubtitle": "Scopri la Mobilità Elettrica in Albania.",
@@ -37,7 +40,8 @@
         "brand": "Marca",
         "language": "Lingua Parlata",
         "noResults": "Nessun concessionario trovato che corrisponda ai tuoi criteri.",
-        "viewDetails": "Vedi Dettagli"
+        "viewDetails": "Vedi Dettagli",
+        "pendingApproval": "In attesa di approvazione"
     },
     "dealerDetails": {
         "brandsSold": "Marche Vendute",
@@ -47,9 +51,12 @@
         "email": "Email",
         "website": "Sito Web",
         "languagesSpoken": "Lingue Parlate",
+        "noLanguages": "Nessuna lingua specificata",
         "notes": "Note",
         "modelsAvailable": "Modelli Disponibili presso questo Concessionario",
-        "backLink": "Torna a tutti i concessionari"
+        "backLink": "Torna a tutti i concessionari",
+        "approved": "Concessionario approvato",
+        "pendingApproval": "In attesa di approvazione"
     },
     "modelsPage": {
         "title": "Modelli Elettrici e Ibridi",
@@ -58,7 +65,8 @@
         "bodyType": "Tipo di Carrozzeria",
         "range": "Autonomia (WLTP)",
         "noResults": "Nessun modello trovato che corrisponda ai tuoi criteri.",
-        "viewDetails": "Vedi Dettagli"
+        "viewDetails": "Vedi Dettagli",
+        "rangeUnknown": "Autonomia sconosciuta"
     },
     "modelDetails": {
         "specifications": "Specifiche",

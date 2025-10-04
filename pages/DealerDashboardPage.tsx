@@ -93,6 +93,7 @@ const DealerDashboardPage: React.FC = () => {
     unlinkModelFromDealer,
     dealerMutations,
     modelMutations,
+    loading: dataLoading,
   } = useContext(DataContext);
   const { addToast } = useToast();
 
@@ -107,7 +108,9 @@ const DealerDashboardPage: React.FC = () => {
     if (!user) {
       return null;
     }
-    return dealers.find(entry => entry.id === user.uid) ?? null;
+    return (
+      dealers.find(entry => entry.id === user.uid || entry.ownerUid === user.uid) ?? null
+    );
   }, [dealers, user]);
 
   const assignedModels: Model[] = useMemo(() => {
@@ -336,6 +339,16 @@ const DealerDashboardPage: React.FC = () => {
   };
 
   if (!dealer) {
+    if (dataLoading) {
+      return (
+        <div className="py-16">
+          <div className="max-w-3xl mx-auto px-4 text-center text-white">
+            <p>Loading your dealer profile…</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="py-16">
         <div className="max-w-3xl mx-auto px-4 text-center text-white">
@@ -345,6 +358,7 @@ const DealerDashboardPage: React.FC = () => {
     );
   }
 
+  const isApprovedDealer = dealer.approved ?? false;
   const isUpdatingDealer = savingProfile || dealerMutations.update.loading || uploadingImage;
   const isCreatingModel = creatingModel || modelMutations.create.loading;
 
@@ -358,9 +372,19 @@ const DealerDashboardPage: React.FC = () => {
               Manage your public dealer profile, contact information, imagery, and the models you represent.
             </p>
           </div>
-          <div className="inline-flex items-center gap-3 rounded-full border border-emerald-500/60 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Approved Dealer
+          <div
+            className={`inline-flex items-center gap-3 rounded-full px-4 py-2 text-sm ${
+              isApprovedDealer
+                ? 'border border-emerald-500/60 bg-emerald-500/10 text-emerald-200'
+                : 'border border-amber-500/60 bg-amber-500/10 text-amber-200'
+            }`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                isApprovedDealer ? 'bg-emerald-400' : 'bg-amber-400'
+              }`}
+            />
+            {isApprovedDealer ? 'Approved Dealer' : 'Awaiting approval'}
           </div>
         </div>
 

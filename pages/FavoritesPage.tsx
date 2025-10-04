@@ -38,39 +38,49 @@ const FavoritesPage: React.FC = () => {
                     <p className="mt-4 text-lg text-gray-400">{t('favoritesPage.subtitle')}</p>
                 </div>
 
-                {dataLoading || favoritesLoading ? (
-                    <div className="text-center text-white">Loading favorites...</div>
-                ) : (
-                    <>
-                        <section>
-                            <h2 className="text-3xl font-bold text-white mb-8">{t('favoritesPage.dealers')}</h2>
-                            {favoriteDealers.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {favoriteDealers.map(dealer => <DealerCard key={dealer.id} dealer={dealer} />)}
-                                </div>
-                            ) : (
-                                <div className="text-center py-10 bg-white/5 rounded-lg border border-white/10">
-                                    <Heart className="mx-auto text-gray-500" size={40}/>
-                                    <p className="mt-4 text-gray-400">{t('favoritesPage.noDealers')}</p>
-                                </div>
-                            )}
-                        </section>
+                <section>
+                    <h2 className="text-3xl font-bold text-white mb-8">{t('favoritesPage.dealers')}</h2>
+                    {dataLoading || favoritesLoading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {Array.from({ length: 3 }).map((_, index) => (
+                                <DealerCard key={`dealer-skeleton-${index}`} isLoading />
+                            ))}
+                        </div>
+                    ) : favoriteDealers.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {favoriteDealers.map(dealer => <DealerCard key={dealer.id} dealer={dealer} />)}
+                        </div>
+                    ) : (
+                        <div className="text-center py-10 bg-white/5 rounded-lg border border-white/10">
+                            <Heart className="mx-auto text-gray-500" size={40}/>
+                            <p className="mt-4 text-gray-400">{t('favoritesPage.noDealers')}</p>
+                        </div>
+                    )}
+                </section>
 
-                        <section className="mt-16">
-                             <h2 className="text-3xl font-bold text-white mb-8">{t('favoritesPage.models')}</h2>
-                             {favoriteModels.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                    {favoriteModels.map(model => <ModelCard key={model.id} model={model} />)}
+                <section className="mt-16">
+                     <h2 className="text-3xl font-bold text-white mb-8">{t('favoritesPage.models')}</h2>
+                     {dataLoading || favoritesLoading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {Array.from({ length: 3 }).map((_, index) => (
+                                <div key={`model-skeleton-${index}`} className="flex h-full animate-pulse flex-col overflow-hidden rounded-xl border border-white/5 bg-white/5 p-6 backdrop-blur-md">
+                                    <div className="mb-4 h-40 w-full rounded-lg bg-white/10" />
+                                    <div className="h-6 w-2/3 rounded bg-white/10" />
+                                    <div className="mt-3 h-4 w-1/2 rounded bg-white/10" />
                                 </div>
-                            ) : (
-                                <div className="text-center py-10 bg-white/5 rounded-lg border border-white/10">
-                                    <Heart className="mx-auto text-gray-500" size={40}/>
-                                    <p className="mt-4 text-gray-400">{t('favoritesPage.noModels')}</p>
-                                </div>
-                            )}
-                        </section>
-                    </>
-                )}
+                            ))}
+                        </div>
+                    ) : favoriteModels.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {favoriteModels.map(model => <ModelCard key={model.id} model={model} />)}
+                        </div>
+                    ) : (
+                        <div className="text-center py-10 bg-white/5 rounded-lg border border-white/10">
+                            <Heart className="mx-auto text-gray-500" size={40}/>
+                            <p className="mt-4 text-gray-400">{t('favoritesPage.noModels')}</p>
+                        </div>
+                    )}
+                </section>
             </div>
         </div>
     );

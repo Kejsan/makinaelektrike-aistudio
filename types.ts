@@ -1,6 +1,26 @@
 
-export interface Dealer {
-  id: string;
+import type { Timestamp } from 'firebase/firestore';
+
+export type UserRole = 'admin' | 'dealer' | 'user' | 'pending';
+
+export interface AuthenticatedUser {
+  uid: string;
+  email: string | null;
+  role: UserRole;
+}
+
+export interface UserProfile extends AuthenticatedUser {
+  displayName?: string | null;
+  status?: 'pending' | 'approved';
+  [key: string]: unknown;
+}
+
+interface FirestoreTimestamps {
+  createdAt?: Timestamp | null;
+  updatedAt?: Timestamp | null;
+}
+
+interface DealerCore {
   name: string;
   companyName?: string;
   contactName?: string;
@@ -20,18 +40,24 @@ export interface Dealer {
   modelsAvailable: string[];
   image_url?: string;
   isFeatured?: boolean;
-  approved?: boolean;
-  ownerUid?: string;
   imageGallery?: string[];
 }
 
-export interface Model {
+export interface DealerDocument extends DealerCore, FirestoreTimestamps {
+  ownerUid?: string | null;
+  approved?: boolean;
+  approvedAt?: Timestamp | null;
+  rejectedAt?: Timestamp | null;
+  rejectionReason?: string | null;
+}
+
+export interface Dealer extends DealerDocument {
   id: string;
+}
+
+interface ModelCore {
   brand: string;
   model_name: string;
-  ownerDealerId?: string;
-  createdBy?: string;
-  updatedBy?: string;
   body_type?: string;
   battery_capacity?: number; // in kWh
   range_wltp?: number; // in km
@@ -48,9 +74,28 @@ export interface Model {
   isFeatured?: boolean;
 }
 
+export interface ModelOwnershipMetadata extends FirestoreTimestamps {
+  ownerDealerId?: string | null;
+  ownerUid?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+}
+
+export interface Model extends ModelCore, ModelOwnershipMetadata {
+  id: string;
+}
+
 export interface DealerModel {
   dealer_id: string;
   model_id: string;
+}
+
+export interface FavouriteEntry extends FirestoreTimestamps {
+  id: string;
+  itemId: string;
+  userId: string;
+  role?: UserRole | null;
+  collection?: string;
 }
 
 export interface BlogPost {

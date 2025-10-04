@@ -18,6 +18,9 @@
         "terms": "Kushtet e Shërbimit",
         "rightsReserved": "Të gjitha të drejtat e rezervuara."
     },
+    "common": {
+        "unknownCity": "Lokacion i panjohur"
+    },
     "home": {
         "heroTitle": "Ngisni të Ardhmen.",
         "heroSubtitle": "Zbuloni Lëvizshmërinë Elektrike në Shqipëri.",
@@ -37,7 +40,8 @@
         "brand": "Marka",
         "language": "Gjuha e Folur",
         "noResults": "Nuk u gjet asnjë konçesionar që përputhet me kriteret tuaja.",
-        "viewDetails": "Shiko Detajet"
+        "viewDetails": "Shiko Detajet",
+        "pendingApproval": "Në pritje të aprovimit"
     },
     "dealerDetails": {
         "brandsSold": "Markat e Shitura",
@@ -47,9 +51,12 @@
         "email": "Email",
         "website": "Faqja e Internetit",
         "languagesSpoken": "Gjuhët e Folura",
+        "noLanguages": "Nuk janë specifikuar gjuhë",
         "notes": "Shënime",
         "modelsAvailable": "Modelet e Disponueshme në këtë Konçesionar",
-        "backLink": "Kthehu te të gjithë shitësit"
+        "backLink": "Kthehu te të gjithë shitësit",
+        "approved": "Shitës i aprovuar",
+        "pendingApproval": "Në pritje të aprovimit"
     },
     "modelsPage": {
         "title": "Modelet Elektrike & Hibride",
@@ -58,7 +65,8 @@
         "bodyType": "Tipi i Karrocerisë",
         "range": "Autonomia (WLTP)",
         "noResults": "Nuk u gjet asnjë model që përputhet me kriteret tuaja.",
-        "viewDetails": "Shiko Detajet"
+        "viewDetails": "Shiko Detajet",
+        "rangeUnknown": "Autonomia e panjohur"
     },
     "modelDetails": {
         "specifications": "Specifikimet",
