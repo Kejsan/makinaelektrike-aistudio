@@ -7,6 +7,7 @@ import DealerCard from '../components/DealerCard';
 import ModelCard from '../components/ModelCard';
 import BlogCard from '../components/BlogCard';
 import { DataContext } from '../contexts/DataContext';
+import heroDashboard from '../assets/BYD SEAL.jpg';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -63,9 +64,9 @@ const HomePage: React.FC = () => {
     <div>
       {/* Hero Section */}
       <section className="relative h-[70vh] flex items-center justify-center text-center text-white overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center scale-110" 
-          style={{ backgroundImage: "url('https://raw.githubusercontent.com/Kejsan/makinaelektrike-aistudio/refs/heads/main/assets/BYD%20SEAL.jpg?token=GHSAT0AAAAAADHR43C6X5RZOPGLVPWTJYPM2G7A65Q')" }}
+        <div
+          className="absolute inset-0 bg-cover bg-center scale-110"
+          style={{ backgroundImage: `url(${heroDashboard})` }}
         ></div>
         <div className="absolute inset-0 bg-[#00001a]/60"></div>
         <div className="relative z-10 px-4 flex flex-col items-center">
