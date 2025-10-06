@@ -101,13 +101,38 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialValues, onSubmit, on
       return;
     }
 
+    const baseTitle = formState.title.trim();
+    const baseExcerpt = formState.excerpt.trim();
+
     const payload: BlogPostFormValues = {
       id: initialValues?.id,
-      title: formState.title.trim(),
-      excerpt: formState.excerpt.trim(),
+      title: baseTitle,
+      excerpt: baseExcerpt,
       author: formState.author.trim(),
       date: formState.date,
-      imageUrl: formState.imageUrl.trim() || undefined,
+      imageUrl: formState.imageUrl.trim() || initialValues?.imageUrl,
+      slug:
+        initialValues?.slug ??
+        baseTitle
+          .toLowerCase()
+          .replace(/[^a-zà-ž0-9\s-]/gi, '')
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-'),
+      readTime: initialValues?.readTime ?? '5 minuta lexim',
+      metaTitle: initialValues?.metaTitle ?? baseTitle,
+      metaDescription: initialValues?.metaDescription ?? baseExcerpt,
+      tags: initialValues?.tags ?? [],
+      sections:
+        initialValues?.sections ?? [
+          {
+            id: 'hyrje',
+            heading: baseTitle,
+            paragraphs: [baseExcerpt],
+          },
+        ],
+      faqs: initialValues?.faqs,
+      cta: initialValues?.cta,
     };
 
     await onSubmit(payload);

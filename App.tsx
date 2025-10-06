@@ -8,6 +8,7 @@ import DealerDetailPage from './pages/DealerDetailPage';
 import ModelsListPage from './pages/ModelsListPage';
 import ModelDetailPage from './pages/ModelDetailPage';
 import BlogPage from './pages/BlogPage';
+import BlogPostPage from './pages/BlogPostPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import FavoritesPage from './pages/FavoritesPage';
@@ -100,6 +101,7 @@ const App: React.FC = () => {
                   <Route path="/models" element={<ModelsListPage />} />
                   <Route path="/models/:id" element={<ModelDetailPage />} />
                   <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogPostPage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />

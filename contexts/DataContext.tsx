@@ -28,6 +28,7 @@ import { useAuth } from './AuthContext';
 import type { UserRole } from '../types';
 import { useToast } from './ToastContext';
 import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
+import blogPostsData from '../data/blogPosts';
 
 type DealerInput = DealerDocument;
 type DealerUpdate = Partial<DealerDocument>;
@@ -237,17 +238,23 @@ interface DataProviderProps {
   children: ReactNode;
 }
 
+const isFirebaseConfigured = Boolean(import.meta.env.VITE_FIREBASE_PROJECT_ID);
+
+const staticBlogPosts = [...blogPostsData].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+);
+
 const initialDataState: DataState = {
   dealers: [],
   models: [],
-  blogPosts: [],
+  blogPosts: isFirebaseConfigured ? [] : staticBlogPosts,
   dealerModels: [],
   loadError: null,
   loading: true,
   loaded: {
     dealers: false,
     models: false,
-    blogPosts: false,
+    blogPosts: !isFirebaseConfigured,
     dealerModels: false,
   },
 };
@@ -289,15 +296,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         onData: models => dataDispatch({ type: 'SET_MODELS', payload: models }),
         onError: handleSubscriptionError('vehicle models'),
       }),
-      subscribeToBlogPosts({
-        onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
-        onError: handleSubscriptionError('blog posts'),
-      }),
       subscribeToDealerModels({
         onData: mappings => dataDispatch({ type: 'SET_DEALER_MODELS', payload: mappings }),
         onError: handleSubscriptionError('dealer relationships'),
       }),
     ];
+
+    if (isFirebaseConfigured) {
+      unsubscribers.push(
+        subscribeToBlogPosts({
+          onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
+          onError: handleSubscriptionError('blog posts'),
+        }),
+      );
+    } else {
+      dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts });
+    }
 
     return () => {
       unsubscribers.forEach(unsubscribe => unsubscribe());
