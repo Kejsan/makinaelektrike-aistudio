@@ -4,13 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Globe, Zap } from 'lucide-react';
 
 const LanguageSwitcher: React.FC = () => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const languages = {
-    en: 'English',
-    sq: 'Shqip',
-    it: 'Italiano',
-  };
+  const languages = [
+    { code: 'en', label: t('languages.en') },
+    { code: 'sq', label: t('languages.sq') },
+    { code: 'it', label: t('languages.it') },
+  ];
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -24,13 +24,14 @@ const LanguageSwitcher: React.FC = () => {
         className="flex items-center space-x-2 text-white hover:text-gray-cyan transition-colors"
         aria-haspopup="true"
         aria-expanded={isOpen}
+        aria-label={t('header.languageSwitcherLabel')}
       >
         <Globe size={20} />
-        <span className="hidden md:inline">Language</span>
+        <span className="hidden md:inline">{t('header.languageSwitcherLabel')}</span>
       </button>
       {isOpen && (
         <div className="absolute right-0 mt-2 w-32 bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-md shadow-lg py-1 z-20">
-          {Object.entries(languages).map(([code, name]) => (
+          {languages.map(({ code, label }) => (
             <button
               key={code}
               onClick={() => changeLanguage(code)}
@@ -38,7 +39,7 @@ const LanguageSwitcher: React.FC = () => {
                 i18n.language === code ? 'text-gray-cyan font-semibold' : 'text-gray-200'
               }`}
             >
-              {name}
+              {label}
             </button>
           ))}
         </div>

@@ -13,7 +13,8 @@ const enTranslations = {
         "register": "Register",
         "becomeDealer": "Become a Dealer",
         "login": "Log in",
-        "admin": "Admin"
+        "admin": "Admin",
+        "languageSwitcherLabel": "Language"
     },
     "footer": {
         "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
@@ -146,6 +147,11 @@ const enTranslations = {
         "noDealers": "You haven't favorited any dealerships yet.",
         "noModels": "You haven't favorited any models yet."
     },
+    "languages": {
+        "en": "English",
+        "sq": "Shqip",
+        "it": "Italiano"
+    },
     "admin": {
         "loginTitle": "Admin Access",
         "emailLabel": "Email",
@@ -211,7 +217,8 @@ const sqTranslations = {
         "register": "Regjistrohu",
         "becomeDealer": "Bëhu Shitës",
         "login": "Hyr",
-        "admin": "Admin"
+        "admin": "Admin",
+        "languageSwitcherLabel": "Gjuha"
     },
     "footer": {
         "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
@@ -344,6 +351,11 @@ const sqTranslations = {
         "noDealers": "Ju nuk keni shtuar ende asnjë shitës te të preferuarat.",
         "noModels": "Ju nuk keni shtuar ende asnjë model te të preferuarat."
     },
+    "languages": {
+        "en": "Anglisht",
+        "sq": "Shqip",
+        "it": "Italisht"
+    },
     "admin": {
         "loginTitle": "Akses Admin",
         "emailLabel": "Email",
@@ -409,7 +421,8 @@ const itTranslations = {
         "register": "Registrati",
         "becomeDealer": "Diventa Rivenditore",
         "login": "Accedi",
-        "admin": "Admin"
+        "admin": "Admin",
+        "languageSwitcherLabel": "Lingua"
     },
     "footer": {
         "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
@@ -541,6 +554,11 @@ const itTranslations = {
         "models": "Modelli Preferiti",
         "noDealers": "Non hai ancora aggiunto nessun concessionario ai preferiti.",
         "noModels": "Non hai ancora aggiunto nessun modello ai preferiti."
+    },
+    "languages": {
+        "en": "Inglese",
+        "sq": "Albanese",
+        "it": "Italiano"
     },
     "admin": {
         "loginTitle": "Accesso Admin",
