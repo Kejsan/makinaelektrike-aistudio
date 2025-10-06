@@ -1,5 +1,5 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import BlogCard from '../components/BlogCard';
 import { DataContext } from '../contexts/DataContext';
@@ -7,6 +7,27 @@ import { DataContext } from '../contexts/DataContext';
 const BlogPage: React.FC = () => {
   const { t } = useTranslation();
   const { blogPosts, loading } = useContext(DataContext);
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    const metaTag = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const previousDescription = metaTag?.getAttribute('content') ?? '';
+
+    document.title = 'Blog | Makina Elektrike';
+    if (metaTag) {
+      metaTag.setAttribute(
+        'content',
+        'Lexoni analizat më të fundit për makinat elektrike, krahasimet e modeleve dhe këshilla praktike për drejtuesit shqiptarë.',
+      );
+    }
+
+    return () => {
+      document.title = previousTitle;
+      if (metaTag) {
+        metaTag.setAttribute('content', previousDescription);
+      }
+    };
+  }, []);
 
   if (loading) {
     return <div className="text-center py-10 text-white">Loading posts...</div>;

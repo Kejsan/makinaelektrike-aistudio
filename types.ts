@@ -98,11 +98,43 @@ export interface FavouriteEntry extends FirestoreTimestamps {
   collection?: string;
 }
 
+export interface BlogPostList {
+  title?: string;
+  ordered?: boolean;
+  items: string[];
+}
+
+export interface BlogPostSection {
+  id: string;
+  heading: string;
+  paragraphs: string[];
+  list?: BlogPostList;
+  highlight?: string;
+}
+
+export interface BlogPostFaq {
+  question: string;
+  answer: string;
+}
+
+export interface BlogPostCta {
+  text: string;
+  url: string;
+}
+
 export interface BlogPost {
   id: string;
+  slug: string;
   title: string;
   excerpt: string;
   author: string;
   date: string;
+  readTime: string;
   imageUrl: string;
+  metaTitle: string;
+  metaDescription: string;
+  tags: string[];
+  sections: BlogPostSection[];
+  faqs?: BlogPostFaq[];
+  cta?: BlogPostCta;
 }
