@@ -45,11 +45,22 @@ export interface DealerModel {
   model_id: string;
 }
 
+export interface BlogSection {
+  heading?: string;
+  paragraphs: string[];
+  bullets?: string[];
+}
+
 export interface BlogPost {
   id: string;
+  slug: string;
   title: string;
   excerpt: string;
   author: string;
   date: string;
   imageUrl: string;
+  readTime: string;
+  metaDescription: string;
+  keywords: string[];
+  sections: BlogSection[];
 }

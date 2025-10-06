@@ -8,9 +8,13 @@ import DealerDetailPage from './pages/DealerDetailPage';
 import ModelsListPage from './pages/ModelsListPage';
 import ModelDetailPage from './pages/ModelDetailPage';
 import BlogPage from './pages/BlogPage';
+import BlogDetailPage from './pages/BlogDetailPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import FavoritesPage from './pages/FavoritesPage';
+import LoginPage from './pages/LoginPage';
+import RegisterUserPage from './pages/RegisterUserPage';
+import RegisterDealerPage from './pages/RegisterDealerPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
 import AdminPage from './pages/AdminPage';
 import { AuthProvider } from './contexts/AuthContext';
@@ -37,9 +41,13 @@ const App: React.FC = () => {
                   <Route path="/models" element={<ModelsListPage />} />
                   <Route path="/models/:id" element={<ModelDetailPage />} />
                   <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogDetailPage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/favorites" element={<FavoritesPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterUserPage />} />
+                  <Route path="/register-dealer" element={<RegisterDealerPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                 </Routes>
               </main>

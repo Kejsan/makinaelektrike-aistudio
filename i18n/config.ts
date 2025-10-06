@@ -10,6 +10,9 @@ const enTranslations = {
         "blog": "Blog",
         "about": "About",
         "favorites": "Favorites",
+        "register": "Register",
+        "becomeDealer": "Become a Dealer",
+        "login": "Log in",
         "admin": "Admin"
     },
     "footer": {
@@ -114,7 +117,12 @@ const enTranslations = {
     },
     "blogPage": {
         "title": "Our Blog",
-        "subtitle": "News, guides, and insights into the world of electric vehicles."
+        "subtitle": "News, guides, and insights into the world of electric vehicles.",
+        "loading": "Loading content...",
+        "notFound": "We couldn't find the article you're looking for.",
+        "backToList": "Back to all posts",
+        "categoryInsight": "Insights",
+        "readMore": "Read more"
     },
     "aboutPage": {
       "title": "About Makina Elektrike",
@@ -167,6 +175,20 @@ const enTranslations = {
         "edit": "Edit",
         "logout": "Logout"
     },
+    "authPages": {
+        "loginTitle": "Sign in to your account",
+        "loginSubtitle": "Use your administrator or dealer credentials to access the dashboard.",
+        "emailLabel": "Email address",
+        "passwordLabel": "Password",
+        "loginButton": "Log in",
+        "loginSuccess": "You are now signed in as a demo user.",
+        "registerUserTitle": "Create a Makina Elektrike account",
+        "registerUserSubtitle": "Soon you'll be able to register online to save your favourite models and dealerships.",
+        "registerDealerTitle": "Become a verified dealer",
+        "registerDealerSubtitle": "Share your dealership details and our team will guide you through the approval process.",
+        "comingSoon": "Self-service registration is coming soon. Contact our team to get started today.",
+        "contactSupport": "Contact support"
+    },
     "compare": {
         "title": "Compare Models",
         "selectPrompt": "Select up to 3 models to compare from the list.",
@@ -186,6 +208,9 @@ const sqTranslations = {
         "blog": "Blogu",
         "about": "Rreth Nesh",
         "favorites": "Të Preferuarat",
+        "register": "Regjistrohu",
+        "becomeDealer": "Bëhu Shitës",
+        "login": "Hyr",
         "admin": "Admin"
     },
     "footer": {
@@ -290,7 +315,12 @@ const sqTranslations = {
     },
     "blogPage": {
         "title": "Blogu Ynë",
-        "subtitle": "Lajme, udhëzues dhe njohuri nga bota e automjeteve elektrike."
+        "subtitle": "Lajme, udhëzues dhe njohuri nga bota e automjeteve elektrike.",
+        "loading": "Po ngarkojmë përmbajtjen...",
+        "notFound": "Artikulli që kërkoni nuk u gjet.",
+        "backToList": "Kthehu te të gjitha postimet",
+        "categoryInsight": "Analiza",
+        "readMore": "Lexo më shumë"
     },
     "aboutPage": {
       "title": "Rreth Makina Elektrike",
@@ -343,6 +373,20 @@ const sqTranslations = {
         "edit": "Modifiko",
         "logout": "Dil"
     },
+    "authPages": {
+        "loginTitle": "Hyni në llogarinë tuaj",
+        "loginSubtitle": "Përdorni kredencialet e administratorit ose të shitësit për të hyrë në panelin e menaxhimit.",
+        "emailLabel": "Adresa e emailit",
+        "passwordLabel": "Fjalëkalimi",
+        "loginButton": "Hyr",
+        "loginSuccess": "Tani jeni i kyçur si përdorues demonstrues.",
+        "registerUserTitle": "Krijo një llogari në Makina Elektrike",
+        "registerUserSubtitle": "Së shpejti do të mund të regjistroheni online për të ruajtur modelet dhe konçesionarët tuaj të preferuar.",
+        "registerDealerTitle": "Bëhu shitës i verifikuar",
+        "registerDealerSubtitle": "Na dërgo të dhënat bazë të biznesit dhe ekipi ynë do t\'ju kontaktojë për procesin e aprovimit.",
+        "comingSoon": "Regjistrimi i vetëshërbimit po vjen së shpejti. Kontaktoni ekipin tonë për të nisur bashkëpunimin.",
+        "contactSupport": "Kontakto ekipin"
+    },
     "compare": {
         "title": "Krahaso Modelet",
         "selectPrompt": "Zgjidhni deri në 3 modele për të krahasuar nga lista.",
@@ -362,6 +406,9 @@ const itTranslations = {
         "blog": "Blog",
         "about": "Chi Siamo",
         "favorites": "Preferiti",
+        "register": "Registrati",
+        "becomeDealer": "Diventa Rivenditore",
+        "login": "Accedi",
         "admin": "Admin"
     },
     "footer": {
@@ -466,7 +513,12 @@ const itTranslations = {
     },
     "blogPage": {
         "title": "Il Nostro Blog",
-        "subtitle": "Notizie, guide e approfondimenti sul mondo dei veicoli elettrici."
+        "subtitle": "Notizie, guide e approfondimenti sul mondo dei veicoli elettrici.",
+        "loading": "Caricamento contenuti...",
+        "notFound": "Non riusciamo a trovare l'articolo richiesto.",
+        "backToList": "Torna a tutti gli articoli",
+        "categoryInsight": "Approfondimenti",
+        "readMore": "Leggi di più"
     },
     "aboutPage": {
       "title": "Chi Siamo - Makina Elektrike",
@@ -518,6 +570,20 @@ const itTranslations = {
         "delete": "Elimina",
         "edit": "Modifica",
         "logout": "Esci"
+    },
+    "authPages": {
+        "loginTitle": "Accedi al tuo account",
+        "loginSubtitle": "Utilizza le credenziali da amministratore o rivenditore per entrare nel pannello.",
+        "emailLabel": "Indirizzo email",
+        "passwordLabel": "Password",
+        "loginButton": "Accedi",
+        "loginSuccess": "Accesso dimostrativo effettuato con successo.",
+        "registerUserTitle": "Crea un account Makina Elektrike",
+        "registerUserSubtitle": "Presto potrai registrarti online per salvare i tuoi modelli e concessionari preferiti.",
+        "registerDealerTitle": "Diventa un rivenditore verificato",
+        "registerDealerSubtitle": "Inviaci i dati principali della tua azienda e il nostro team ti guiderà all'approvazione.",
+        "comingSoon": "La registrazione self-service sarà presto disponibile. Contatta il nostro team per iniziare subito.",
+        "contactSupport": "Contatta il supporto"
     },
     "compare": {
         "title": "Confronta Modelli",

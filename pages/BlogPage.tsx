@@ -20,7 +20,7 @@ const BlogPage: React.FC = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-10 text-white">Loading posts...</div>;
+    return <div className="text-center py-10 text-white">{t('blogPage.loading')}</div>;
   }
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Zap, Settings } from 'lucide-react';
+import { Globe, Zap } from 'lucide-react';
 
 const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation();
@@ -50,35 +50,60 @@ const LanguageSwitcher: React.FC = () => {
 const Header: React.FC = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  
-  const navLinkClasses = (path: string) => 
+
+  const navigation = [
+    { path: '/', label: t('header.home') },
+    { path: '/dealers', label: t('header.dealers') },
+    { path: '/models', label: t('header.models') },
+    { path: '/favorites', label: t('header.favorites') },
+    { path: '/blog', label: t('header.blog') },
+    { path: '/about', label: t('header.about') }
+  ];
+
+  const navLinkClasses = (path: string) =>
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-      location.pathname === path 
-        ? 'text-gray-cyan' 
+      location.pathname === path
+        ? 'text-gray-cyan'
         : 'text-white hover:text-gray-cyan'
     }`;
 
   return (
-    <header className="sticky top-0 z-50 bg-navy-blue/50 backdrop-blur-md border-b border-gray-cyan/20">
+    <header className="sticky top-0 z-50 bg-navy-blue/60 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center text-white space-x-2">
-              <Zap className="text-gray-cyan" size={28}/>
-              <span className="font-bold text-xl">Makina Elektrike</span>
+        <div className="flex items-center justify-between h-16 gap-4">
+          <div className="flex items-center flex-shrink-0">
+            <Link to="/" className="flex items-center text-white space-x-2">
+              <Zap className="text-gray-cyan" size={28} />
+              <span className="font-bold text-xl tracking-tight">Makina Elektrike</span>
             </Link>
           </div>
-          <nav className="hidden md:flex items-center space-x-4">
-            <Link to="/" className={navLinkClasses('/')}>{t('header.home')}</Link>
-            <Link to="/dealers" className={navLinkClasses('/dealers')}>{t('header.dealers')}</Link>
-            <Link to="/models" className={navLinkClasses('/models')}>{t('header.models')}</Link>
-            <Link to="/favorites" className={navLinkClasses('/favorites')}>{t('header.favorites')}</Link>
-            <Link to="/blog" className={navLinkClasses('/blog')}>{t('header.blog')}</Link>
-            <Link to="/about" className={navLinkClasses('/about')}>{t('header.about')}</Link>
+
+          <nav className="hidden md:flex items-center space-x-2 lg:space-x-4">
+            {navigation.map(item => (
+              <Link key={item.path} to={item.path} className={navLinkClasses(item.path)}>
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          <div className="flex items-center space-x-4">
-            <Link to="/admin" className="text-white hover:text-gray-cyan transition-colors" aria-label={t('header.admin') as string}>
-                <Settings size={20} />
+
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <Link
+              to="/register"
+              className="hidden sm:inline-flex items-center px-3 py-2 rounded-lg border border-white/20 text-sm font-medium text-white hover:border-gray-cyan hover:text-gray-cyan transition-colors"
+            >
+              {t('header.register')}
+            </Link>
+            <Link
+              to="/register-dealer"
+              className="hidden lg:inline-flex items-center px-3 py-2 rounded-lg border border-gray-cyan/40 text-sm font-medium text-gray-cyan hover:bg-gray-cyan hover:text-navy-blue transition-colors"
+            >
+              {t('header.becomeDealer')}
+            </Link>
+            <Link
+              to="/login"
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-gray-cyan text-navy-blue font-semibold hover:bg-white transition-colors"
+            >
+              {t('header.login')}
             </Link>
             <LanguageSwitcher />
           </div>
