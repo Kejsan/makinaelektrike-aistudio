@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { Shield, LogOut, Plus, Pencil, Trash2, X, Check, XCircle, Loader2 } from 'lucide-react';
+import { Shield, LogOut, Plus, Pencil, Trash2, X, Check, XCircle, Loader2, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,6 +8,7 @@ import { Dealer, Model, BlogPost } from '../types';
 import DealerForm, { DealerFormValues } from '../components/admin/DealerForm';
 import ModelForm, { ModelFormValues } from '../components/admin/ModelForm';
 import BlogPostForm, { BlogPostFormValues } from '../components/admin/BlogPostForm';
+import BulkImportModal, { BulkImportEntity } from '../components/admin/BulkImportModal';
 
 interface ModalProps {
   title: string;
@@ -87,6 +88,7 @@ const AdminPage: React.FC = () => {
   const [dealerFormState, setDealerFormState] = useState<FormState<Dealer>>(null);
   const [modelFormState, setModelFormState] = useState<FormState<Model>>(null);
   const [blogFormState, setBlogFormState] = useState<FormState<BlogPost>>(null);
+  const [bulkEntity, setBulkEntity] = useState<BulkImportEntity | null>(null);
   const [dealerSubmitting, setDealerSubmitting] = useState(false);
   const [modelSubmitting, setModelSubmitting] = useState(false);
   const [blogSubmitting, setBlogSubmitting] = useState(false);
@@ -114,6 +116,18 @@ const AdminPage: React.FC = () => {
     setDealerFormState(null);
     setModelFormState(null);
     setBlogFormState(null);
+  };
+
+  const getBulkModalTitle = (entity: BulkImportEntity) => {
+    switch (entity) {
+      case 'dealers':
+        return t('admin.bulkUploadDealers', { defaultValue: 'Bulk upload dealers' });
+      case 'models':
+        return t('admin.bulkUploadModels', { defaultValue: 'Bulk upload models' });
+      case 'blog':
+      default:
+        return t('admin.bulkUploadPosts', { defaultValue: 'Bulk upload blog posts' });
+    }
   };
 
   const pendingDealers = useMemo(
@@ -257,13 +271,22 @@ const AdminPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold text-white">{t('admin.manageDealers')}</h2>
-          <button
-            onClick={() => setDealerFormState({ mode: 'create' })}
-            className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
-          >
-            <Plus size={16} />
-            <span>{t('admin.addNewDealer')}</span>
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setBulkEntity('dealers')}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              <Upload size={16} />
+              <span>{t('admin.bulkUploadDealers', { defaultValue: 'Bulk upload dealers' })}</span>
+            </button>
+            <button
+              onClick={() => setDealerFormState({ mode: 'create' })}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
+            >
+              <Plus size={16} />
+              <span>{t('admin.addNewDealer')}</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -439,13 +462,22 @@ const AdminPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold text-white">{t('admin.manageModels')}</h2>
-          <button
-            onClick={() => setModelFormState({ mode: 'create' })}
-            className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
-          >
-            <Plus size={16} />
-            <span>{t('admin.addNewModel')}</span>
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setBulkEntity('models')}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              <Upload size={16} />
+              <span>{t('admin.bulkUploadModels', { defaultValue: 'Bulk upload models' })}</span>
+            </button>
+            <button
+              onClick={() => setModelFormState({ mode: 'create' })}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
+            >
+              <Plus size={16} />
+              <span>{t('admin.addNewModel')}</span>
+            </button>
+          </div>
         </div>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
@@ -510,13 +542,22 @@ const AdminPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold text-white">{t('admin.manageBlog')}</h2>
-          <button
-            onClick={() => setBlogFormState({ mode: 'create' })}
-            className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
-          >
-            <Plus size={16} />
-            <span>{t('admin.addBlogPost')}</span>
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setBulkEntity('blog')}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              <Upload size={16} />
+              <span>{t('admin.bulkUploadPosts', { defaultValue: 'Bulk upload blog posts' })}</span>
+            </button>
+            <button
+              onClick={() => setBlogFormState({ mode: 'create' })}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
+            >
+              <Plus size={16} />
+              <span>{t('admin.addBlogPost')}</span>
+            </button>
+          </div>
         </div>
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
@@ -671,6 +712,12 @@ const AdminPage: React.FC = () => {
             onCancel={closeAllModals}
             isSubmitting={blogSubmitting}
           />
+        </AdminModal>
+      )}
+
+      {bulkEntity && (
+        <AdminModal title={getBulkModalTitle(bulkEntity)} onClose={() => setBulkEntity(null)}>
+          <BulkImportModal entity={bulkEntity} onClose={() => setBulkEntity(null)} />
         </AdminModal>
       )}
     </div>
