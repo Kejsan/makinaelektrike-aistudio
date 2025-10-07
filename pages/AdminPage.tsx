@@ -467,7 +467,6 @@ const AdminPage: React.FC = () => {
   const renderModelsPanel = () => {
     const modelUpdateLoading = modelMutations.update.loading;
     const modelDeleteLoading = modelMutations.delete.loading;
-
     let content: React.ReactNode;
     if (loadError) {
       content = renderErrorState();
@@ -557,7 +556,6 @@ const AdminPage: React.FC = () => {
   const renderBlogPanel = () => {
     const blogUpdateLoading = blogPostMutations.update.loading;
     const blogDeleteLoading = blogPostMutations.delete.loading;
-
     let content: React.ReactNode;
     if (loadError) {
       content = renderErrorState();
