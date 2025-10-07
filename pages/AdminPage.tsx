@@ -267,28 +267,13 @@ const AdminPage: React.FC = () => {
     const dealerUpdateLoading = dealerMutations.update.loading;
     const dealerDeleteLoading = dealerMutations.delete.loading;
 
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold text-white">{t('admin.manageDealers')}</h2>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setBulkEntity('dealers')}
-              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-            >
-              <Upload size={16} />
-              <span>{t('admin.bulkUploadDealers', { defaultValue: 'Bulk upload dealers' })}</span>
-            </button>
-            <button
-              onClick={() => setDealerFormState({ mode: 'create' })}
-              className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
-            >
-              <Plus size={16} />
-              <span>{t('admin.addNewDealer')}</span>
-            </button>
-          </div>
-        </div>
-
+    let content: React.ReactNode;
+    if (loadError) {
+      content = renderErrorState();
+    } else if (loading) {
+      content = renderLoadingState();
+    } else {
+      content = (
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
             <header className="mb-4 flex items-center justify-between gap-3">
@@ -450,36 +435,45 @@ const AdminPage: React.FC = () => {
             )}
           </section>
         </div>
-      </div>
-    );
-  };
-
-  const renderModelsPanel = () => {
-    const modelUpdateLoading = modelMutations.update.loading;
-    const modelDeleteLoading = modelMutations.delete.loading;
+      );
+    }
 
     return (
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold text-white">{t('admin.manageModels')}</h2>
+          <h2 className="text-xl font-semibold text-white">{t('admin.manageDealers')}</h2>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setBulkEntity('models')}
+              onClick={() => setBulkEntity('dealers')}
               className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
             >
               <Upload size={16} />
-              <span>{t('admin.bulkUploadModels', { defaultValue: 'Bulk upload models' })}</span>
+              <span>{t('admin.bulkUploadDealers', { defaultValue: 'Bulk upload dealers' })}</span>
             </button>
             <button
-              onClick={() => setModelFormState({ mode: 'create' })}
+              onClick={() => setDealerFormState({ mode: 'create' })}
               className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
             >
               <Plus size={16} />
-              <span>{t('admin.addNewModel')}</span>
+              <span>{t('admin.addNewDealer')}</span>
             </button>
           </div>
         </div>
 
+        {content}
+      </div>
+    );
+  };
+  const renderModelsPanel = () => {
+    const modelUpdateLoading = modelMutations.update.loading;
+    const modelDeleteLoading = modelMutations.delete.loading;
+    let content: React.ReactNode;
+    if (loadError) {
+      content = renderErrorState();
+    } else if (loading) {
+      content = renderLoadingState();
+    } else {
+      content = (
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
           <header className="mb-4 flex items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-white">{t('admin.modelsList', { defaultValue: 'Models' })}</h3>
@@ -530,36 +524,45 @@ const AdminPage: React.FC = () => {
             </ul>
           )}
         </section>
-      </div>
-    );
-  };
-
-  const renderBlogPanel = () => {
-    const blogUpdateLoading = blogPostMutations.update.loading;
-    const blogDeleteLoading = blogPostMutations.delete.loading;
+      );
+    }
 
     return (
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-xl font-semibold text-white">{t('admin.manageBlog')}</h2>
+          <h2 className="text-xl font-semibold text-white">{t('admin.manageModels')}</h2>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setBulkEntity('blog')}
+              onClick={() => setBulkEntity('models')}
               className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
             >
               <Upload size={16} />
-              <span>{t('admin.bulkUploadPosts', { defaultValue: 'Bulk upload blog posts' })}</span>
+              <span>{t('admin.bulkUploadModels', { defaultValue: 'Bulk upload models' })}</span>
             </button>
             <button
-              onClick={() => setBlogFormState({ mode: 'create' })}
+              onClick={() => setModelFormState({ mode: 'create' })}
               className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
             >
               <Plus size={16} />
-              <span>{t('admin.addBlogPost')}</span>
+              <span>{t('admin.addNewModel')}</span>
             </button>
           </div>
         </div>
 
+        {content}
+      </div>
+    );
+  };
+  const renderBlogPanel = () => {
+    const blogUpdateLoading = blogPostMutations.update.loading;
+    const blogDeleteLoading = blogPostMutations.delete.loading;
+    let content: React.ReactNode;
+    if (loadError) {
+      content = renderErrorState();
+    } else if (loading) {
+      content = renderLoadingState();
+    } else {
+      content = (
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
           <header className="mb-4 flex items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-white">{t('admin.blogPosts')}</h3>
@@ -606,10 +609,35 @@ const AdminPage: React.FC = () => {
             </ul>
           )}
         </section>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold text-white">{t('admin.manageBlog')}</h2>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setBulkEntity('blog')}
+              className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              <Upload size={16} />
+              <span>{t('admin.bulkUploadPosts', { defaultValue: 'Bulk upload blog posts' })}</span>
+            </button>
+            <button
+              onClick={() => setBlogFormState({ mode: 'create' })}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90"
+            >
+              <Plus size={16} />
+              <span>{t('admin.addBlogPost')}</span>
+            </button>
+          </div>
+        </div>
+
+        {content}
       </div>
     );
   };
-
   if (!user) {
     return null;
   }
@@ -655,17 +683,9 @@ const AdminPage: React.FC = () => {
             </div>
 
             <div className="mt-8">
-              {loading ? (
-                renderLoadingState()
-              ) : loadError ? (
-                renderErrorState()
-              ) : (
-                <>
-                  {activeTab === 'dealers' && renderDealersPanel()}
-                  {activeTab === 'models' && renderModelsPanel()}
-                  {activeTab === 'blog' && renderBlogPanel()}
-                </>
-              )}
+              {activeTab === 'dealers' && renderDealersPanel()}
+              {activeTab === 'models' && renderModelsPanel()}
+              {activeTab === 'blog' && renderBlogPanel()}
             </div>
           </div>
         </div>
