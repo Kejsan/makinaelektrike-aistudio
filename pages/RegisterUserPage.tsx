@@ -5,6 +5,8 @@ import { useToast } from '../contexts/ToastContext';
 import { auth, firestore } from '../services/firebase';
 import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { UserPlus } from 'lucide-react';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 const RegisterUserPage: React.FC = () => {
   const { registerUser, loading, user, role, initializing } = useAuth();
@@ -88,8 +90,38 @@ const RegisterUserPage: React.FC = () => {
     }
   };
 
+  const metaTitle = 'Krijo llogarinë | Makina Elektrike';
+  const metaDescription = 'Regjistrohu për të ruajtur dilerët dhe modelet e preferuara të makinave elektrike në Shqipëri.';
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: metaTitle,
+    description: metaDescription,
+    url: `${BASE_URL}/#/register`,
+  };
+
   return (
     <div className="py-16">
+      <SEO
+        title={metaTitle}
+        description={metaDescription}
+        keywords={['regjistrim', 'makina elektrike', 'favoritët e makinave', 'Makina Elektrike account']}
+        canonical={`${BASE_URL}/#/register`}
+        openGraph={{
+          title: metaTitle,
+          description: metaDescription,
+          url: `${BASE_URL}/#/register`,
+          type: 'website',
+          images: [DEFAULT_OG_IMAGE],
+        }}
+        twitter={{
+          title: metaTitle,
+          description: metaDescription,
+          image: DEFAULT_OG_IMAGE,
+          site: '@makinaelektrike',
+        }}
+        structuredData={structuredData}
+      />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden p-8 text-white">
           <div className="text-center mb-8">
@@ -98,6 +130,15 @@ const RegisterUserPage: React.FC = () => {
             <p className="mt-2 text-gray-300">
               Join Makina Elektrike to save your favourite dealers and electric vehicle models.
             </p>
+          </div>
+
+          <div className="mb-8 grid gap-4 rounded-xl border border-white/10 bg-white/5 p-6 text-gray-200">
+            <p className="font-semibold text-white">Why register?</p>
+            <ul className="list-disc list-inside space-y-2 text-sm text-gray-300">
+              <li>Receive curated updates about new electric models arriving in Albania.</li>
+              <li>Bookmark trusted dealerships and manage a shortlist before you buy.</li>
+              <li>Export saved data and compare specs whenever you need them.</li>
+            </ul>
           </div>
 
           {formError && (

@@ -9,6 +9,8 @@ import DealerForm, { DealerFormValues } from '../components/admin/DealerForm';
 import ModelForm, { ModelFormValues } from '../components/admin/ModelForm';
 import BlogPostForm, { BlogPostFormValues } from '../components/admin/BlogPostForm';
 import BulkImportModal, { BulkImportEntity } from '../components/admin/BulkImportModal';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 interface ModalProps {
   title: string;
@@ -141,6 +143,16 @@ const AdminPage: React.FC = () => {
   );
 
   const isAdmin = role === 'admin';
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: t('admin.dashboardMetaTitle'),
+    description: t('admin.dashboardMetaDescription'),
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'All',
+    url: `${BASE_URL}/#/admin`,
+  };
 
   const handleApproveDealer = async (dealerId: string) => {
     if (!isAdmin) {
@@ -644,6 +656,27 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="py-16">
+      <SEO
+        title={t('admin.dashboardMetaTitle')}
+        description={t('admin.dashboardMetaDescription')}
+        keywords={t('admin.dashboardMetaKeywords', { returnObjects: true }) as string[]}
+        canonical={`${BASE_URL}/#/admin`}
+        robots="noindex, nofollow"
+        openGraph={{
+          title: t('admin.dashboardMetaTitle'),
+          description: t('admin.dashboardMetaDescription'),
+          url: `${BASE_URL}/#/admin`,
+          type: 'website',
+          images: [DEFAULT_OG_IMAGE],
+        }}
+        twitter={{
+          title: t('admin.dashboardMetaTitle'),
+          description: t('admin.dashboardMetaDescription'),
+          image: DEFAULT_OG_IMAGE,
+          site: '@makinaelektrike',
+        }}
+        structuredData={structuredData}
+      />
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-white shadow-2xl backdrop-blur-xl md:p-12">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
