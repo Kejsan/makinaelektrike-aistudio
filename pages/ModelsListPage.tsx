@@ -6,6 +6,8 @@ import CustomSelect from '../components/CustomSelect';
 import { Car, Tag, Gauge, ListFilter, Scale } from 'lucide-react';
 import ComparisonModal from '../components/ComparisonModal';
 import { DataContext } from '../contexts/DataContext';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 const ModelsListPage: React.FC = () => {
     const { t } = useTranslation();
@@ -13,6 +15,21 @@ const ModelsListPage: React.FC = () => {
     const [allModels, setAllModels] = useState<Model[]>(models);
     const [filteredModels, setFilteredModels] = useState<Model[]>([]);
     const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+    const insights = t('modelsPage.insights', { returnObjects: true }) as Array<{ title: string; description: string }>;
+    const faqItems = t('modelsPage.faqItems', { returnObjects: true }) as Array<{ question: string; answer: string }>;
+
+    const structuredData = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: t('modelsPage.metaTitle'),
+        description: t('modelsPage.metaDescription'),
+        itemListElement: allModels.map((model, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: `${model.brand} ${model.model_name}`,
+            url: `${BASE_URL}/#/models/${model.id}`,
+        })),
+    };
 
     // Filter states
     const [selectedBrand, setSelectedBrand] = useState('');
@@ -94,10 +111,36 @@ const ModelsListPage: React.FC = () => {
 
     return (
         <>
+            <SEO
+                title={t('modelsPage.metaTitle')}
+                description={t('modelsPage.metaDescription')}
+                keywords={t('modelsPage.metaKeywords', { returnObjects: true }) as string[]}
+                canonical={`${BASE_URL}/#/models`}
+                openGraph={{
+                    title: t('modelsPage.metaTitle'),
+                    description: t('modelsPage.metaDescription'),
+                    url: `${BASE_URL}/#/models`,
+                    type: 'website',
+                    images: [DEFAULT_OG_IMAGE],
+                }}
+                twitter={{
+                    title: t('modelsPage.metaTitle'),
+                    description: t('modelsPage.metaDescription'),
+                    image: DEFAULT_OG_IMAGE,
+                    site: '@makinaelektrike',
+                }}
+                structuredData={structuredData}
+            />
             <div className="py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-10">
                         <h1 className="text-4xl font-extrabold text-white">{t('modelsPage.title')}</h1>
+                        <p className="mt-4 text-lg text-gray-300 max-w-3xl mx-auto">{t('modelsPage.subtitle')}</p>
+                    </div>
+
+                    <div className="bg-white/5 border border-white/10 rounded-2xl p-8 mb-12 shadow-2xl">
+                        <h2 className="text-2xl font-bold text-white text-center">{t('modelsPage.introTitle')}</h2>
+                        <p className="mt-4 text-gray-300 leading-relaxed text-center max-w-4xl mx-auto">{t('modelsPage.introSubtitle')}</p>
                     </div>
 
                     <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-6 mb-12">
@@ -148,9 +191,39 @@ const ModelsListPage: React.FC = () => {
                     ) : (
                         <p className="text-center text-gray-400 py-10">{t('modelsPage.noResults')}</p>
                     )}
+
+                    <section className="mt-16">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-10 shadow-2xl">
+                            <h2 className="text-3xl font-bold text-white text-center">{t('modelsPage.insightsTitle')}</h2>
+                            <p className="mt-4 text-gray-300 text-center max-w-4xl mx-auto">{t('modelsPage.insightsSubtitle')}</p>
+                            <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {insights.map(item => (
+                                    <div key={item.title} className="bg-black/30 border border-gray-800 rounded-xl p-6">
+                                        <h3 className="text-xl font-semibold text-white">{item.title}</h3>
+                                        <p className="mt-3 text-gray-300 leading-relaxed">{item.description}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="mt-16">
+                        <div className="max-w-4xl mx-auto">
+                            <h2 className="text-3xl font-bold text-white text-center">{t('modelsPage.faqTitle')}</h2>
+                            <p className="mt-3 text-gray-300 text-center">{t('modelsPage.faqSubtitle')}</p>
+                            <div className="mt-8 space-y-6">
+                                {faqItems.map(faq => (
+                                    <div key={faq.question} className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg">
+                                        <h3 className="text-lg font-semibold text-white">{faq.question}</h3>
+                                        <p className="mt-2 text-gray-300 leading-relaxed">{faq.answer}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
-            <ComparisonModal 
+            <ComparisonModal
                 isOpen={isCompareModalOpen}
                 onClose={() => setIsCompareModalOpen(false)}
                 allModels={allModels}

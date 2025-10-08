@@ -8,6 +8,8 @@ import ModelCard from '../components/ModelCard';
 import BlogCard from '../components/BlogCard';
 import { DataContext } from '../contexts/DataContext';
 import heroDashboard from '../assets/BYD SEAL.jpg';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -19,6 +21,52 @@ const HomePage: React.FC = () => {
   const [searchCity, setSearchCity] = useState('');
   const [searchBrand, setSearchBrand] = useState('');
   const [filteredDealersForSearch, setFilteredDealersForSearch] = useState(dealers.filter(d => d.isFeatured));
+  const valueHighlights = t('home.valueHighlights', { returnObjects: true }) as Array<{ title: string; description: string }>;
+  const insightItems = t('home.insights', { returnObjects: true }) as Array<{ title: string; description: string }>;
+  const faqItems = t('home.faqItems', { returnObjects: true }) as Array<{ question: string; answer: string }>;
+
+  const heroImageUrl = typeof window !== 'undefined'
+    ? new URL(heroDashboard, window.location.origin).toString()
+    : heroDashboard;
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Makina Elektrike',
+      url: BASE_URL,
+      description: t('home.metaDescription'),
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${BASE_URL}/#/models?query={search_term_string}`,
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: 'Makina Elektrike',
+      url: BASE_URL,
+      sameAs: [
+        'https://www.facebook.com',
+        'https://www.instagram.com',
+        'https://www.linkedin.com',
+      ],
+      description: t('home.metaDescription'),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqItems.map(item => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: item.answer,
+        },
+      })),
+    },
+  ];
 
   useEffect(() => {
     // Update featured lists when context data changes
@@ -62,6 +110,26 @@ const HomePage: React.FC = () => {
 
   return (
     <div>
+      <SEO
+        title={t('home.metaTitle')}
+        description={t('home.metaDescription')}
+        keywords={t('home.metaKeywords', { returnObjects: true }) as string[]}
+        canonical={`${BASE_URL}/#/`}
+        openGraph={{
+          title: t('home.metaTitle'),
+          description: t('home.metaDescription'),
+          url: `${BASE_URL}/#/`,
+          type: 'website',
+          images: [DEFAULT_OG_IMAGE, heroImageUrl],
+        }}
+        twitter={{
+          title: t('home.metaTitle'),
+          description: t('home.metaDescription'),
+          image: DEFAULT_OG_IMAGE,
+          site: '@makinaelektrike',
+        }}
+        structuredData={structuredData}
+      />
       {/* Hero Section */}
       <section className="relative h-[70vh] flex items-center justify-center text-center text-white overflow-hidden">
         <div
@@ -104,6 +172,24 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Value Proposition */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white">{t('home.valueTitle')}</h2>
+            <p className="mt-4 text-lg text-gray-300 max-w-3xl mx-auto">{t('home.valueSubtitle')}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {valueHighlights.map(highlight => (
+              <div key={highlight.title} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 shadow-xl">
+                <h3 className="text-xl font-semibold text-white">{highlight.title}</h3>
+                <p className="mt-3 text-gray-300 leading-relaxed">{highlight.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Featured Dealers */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -127,6 +213,28 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Market Insights */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-10 shadow-2xl">
+            <div className="md:flex md:items-start md:justify-between gap-10">
+              <div className="md:w-1/3 mb-8 md:mb-0">
+                <h2 className="text-3xl font-bold text-white">{t('home.insightsTitle')}</h2>
+                <p className="mt-4 text-gray-300 leading-relaxed">{t('home.insightsSubtitle')}</p>
+              </div>
+              <div className="md:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {insightItems.map(item => (
+                  <div key={item.title} className="bg-black/30 border border-gray-700 rounded-xl p-6">
+                    <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+                    <p className="mt-3 text-gray-300 text-sm leading-relaxed">{item.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Models */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -141,7 +249,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
-      
+
       {/* From Our Blog */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -153,6 +261,24 @@ const HomePage: React.FC = () => {
             <Link to="/blog" className="inline-block bg-gray-cyan text-white font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-gray-cyan/50">
               {t('home.seeAllPosts')}
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white">{t('home.faqTitle')}</h2>
+            <p className="mt-3 text-gray-300 max-w-3xl mx-auto">{t('home.faqSubtitle')}</p>
+          </div>
+          <div className="space-y-6">
+            {faqItems.map(faq => (
+              <div key={faq.question} className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg">
+                <h3 className="text-xl font-semibold text-white">{faq.question}</h3>
+                <p className="mt-3 text-gray-300 leading-relaxed">{faq.answer}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
