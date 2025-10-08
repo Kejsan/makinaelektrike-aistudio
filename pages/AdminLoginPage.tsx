@@ -3,6 +3,8 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 const AdminLoginPage: React.FC = () => {
   const { t } = useTranslation();
@@ -49,14 +51,49 @@ const AdminLoginPage: React.FC = () => {
     }
   };
 
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: t('admin.metaTitle'),
+    description: t('admin.metaDescription'),
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'All',
+    url: `${BASE_URL}/#/admin/login`,
+  };
+
   return (
     <div className="py-16">
+      <SEO
+        title={t('admin.metaTitle')}
+        description={t('admin.metaDescription')}
+        keywords={t('admin.metaKeywords', { returnObjects: true }) as string[]}
+        canonical={`${BASE_URL}/#/admin/login`}
+        robots="noindex, nofollow"
+        openGraph={{
+          title: t('admin.metaTitle'),
+          description: t('admin.metaDescription'),
+          url: `${BASE_URL}/#/admin/login`,
+          type: 'website',
+          images: [DEFAULT_OG_IMAGE],
+        }}
+        twitter={{
+          title: t('admin.metaTitle'),
+          description: t('admin.metaDescription'),
+          image: DEFAULT_OG_IMAGE,
+          site: '@makinaelektrike',
+        }}
+        structuredData={structuredData}
+      />
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden p-8">
           <div className="text-center">
             <Shield className="mx-auto text-gray-cyan h-12 w-12" />
             <h1 className="text-3xl font-extrabold text-white mt-6">{t('admin.loginTitle')}</h1>
             <p className="mt-2 text-gray-300">{t('admin.loginSubtitle')}</p>
+          </div>
+
+          <div className="mt-6 rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-gray-300">
+            {t('admin.loginInfo')}
           </div>
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
