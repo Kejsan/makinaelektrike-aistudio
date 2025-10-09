@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -92,7 +92,7 @@ const App: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
-    <HashRouter>
+    <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
           <DataProvider>
@@ -146,7 +146,7 @@ const App: React.FC = () => {
           </DataProvider>
         </AuthProvider>
       </ToastProvider>
-    </HashRouter>
+    </BrowserRouter>
   );
 };
 
