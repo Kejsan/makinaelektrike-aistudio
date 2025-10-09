@@ -4,7 +4,7 @@
 # =========================
 
 # --- Sitemaps ---
-Sitemap: https://makinaelektrike.al/sitemap.xml
+Sitemap: https://makina-elektrike.netlify.app/sitemap.xml
 
 # --- Allow core resources (important for rendering) ---
 User-agent: *
