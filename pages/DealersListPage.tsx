@@ -127,9 +127,9 @@ const DealersListPage: React.FC = () => {
                     <p className="mt-4 text-gray-300 leading-relaxed text-center max-w-4xl mx-auto">{t('dealersPage.introSubtitle')}</p>
                 </div>
 
-                <div className="relative z-20 bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-6 mb-12">
-                    <h2 className="text-xl font-bold text-white mb-4">{t('dealersPage.filters')}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <div className="relative z-20 mb-12 rounded-xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
+                    <h2 className="mb-4 text-xl font-bold text-white">{t('dealersPage.filters')}</h2>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:items-end">
                         <CustomSelect
                             icon={<Building size={16} />}
                             placeholder={t('dealersPage.allCities')}
@@ -158,25 +158,30 @@ const DealersListPage: React.FC = () => {
                             value={sortBy}
                             onChange={setSortBy}
                         />
-                        <button onClick={clearFilters} className="bg-vivid-red text-white font-bold py-2.5 px-6 rounded-md hover:bg-opacity-90 transition-colors h-[46px]">
+                        <button
+                            onClick={clearFilters}
+                            className="flex h-[46px] w-full items-center justify-center rounded-md bg-vivid-red px-6 py-2.5 font-bold text-white transition-colors hover:bg-opacity-90 sm:col-span-2 xl:col-span-1"
+                        >
                             {t('dealersPage.clearFilters')}
                         </button>
                     </div>
                 </div>
 
                 <div className="mb-12">
-                    <h2 className="text-2xl font-bold text-white mb-4 text-center">{t('dealersPage.mapTitle')}</h2>
-                    <GoogleMap
-                        center={{ lat: 41.3275, lng: 19.8187 }} // Centered on Tirana
-                        zoom={8}
-                        markers={mapMarkers}
-                        className="h-[500px] w-full"
-                        enableClustering={true}
-                    />
+                    <h2 className="text-center text-2xl font-bold text-white">{t('dealersPage.mapTitle')}</h2>
+                    <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+                        <GoogleMap
+                            center={{ lat: 41.3275, lng: 19.8187 }} // Centered on Tirana
+                            zoom={8}
+                            markers={mapMarkers}
+                            className="h-[420px] w-full sm:h-[500px]"
+                            enableClustering={true}
+                        />
+                    </div>
                 </div>
 
                 {filteredDealers.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {filteredDealers.map(dealer => <DealerCard key={dealer.id} dealer={dealer} />)}
                     </div>
                 ) : (
@@ -184,12 +189,12 @@ const DealersListPage: React.FC = () => {
                 )}
 
                 <section className="mt-16">
-                    <div className="bg-white/5 border border-white/10 rounded-2xl p-10 shadow-2xl">
-                        <h2 className="text-3xl font-bold text-white text-center">{t('dealersPage.insightsTitle')}</h2>
-                        <p className="mt-4 text-gray-300 text-center max-w-4xl mx-auto">{t('dealersPage.insightsSubtitle')}</p>
-                        <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl sm:p-10">
+                        <h2 className="text-center text-3xl font-bold text-white">{t('dealersPage.insightsTitle')}</h2>
+                        <p className="mt-4 mx-auto max-w-4xl text-center text-gray-300">{t('dealersPage.insightsSubtitle')}</p>
+                        <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                             {insights.map(item => (
-                                <div key={item.title} className="bg-black/30 border border-gray-800 rounded-xl p-6">
+                                <div key={item.title} className="rounded-xl border border-gray-800 bg-black/30 p-6">
                                     <h3 className="text-xl font-semibold text-white">{item.title}</h3>
                                     <p className="mt-3 text-gray-300 leading-relaxed">{item.description}</p>
                                 </div>

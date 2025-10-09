@@ -4,8 +4,15 @@
     "dealers": "Dealers",
     "models": "Models",
     "blog": "Blog",
+    "favorites": "Favourites",
     "about": "About",
-    "admin": "Admin"
+    "admin": "Admin",
+    "register": "Sign up",
+    "becomeDealer": "Become a dealer",
+    "login": "Log in",
+    "language": "Language",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu"
   },
   "footer": {
     "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
@@ -19,11 +26,13 @@
     "userSignup": "User sign up",
     "dealerSignup": "Dealer sign up",
     "sitemap": "Sitemap",
+    "cookies": "Cookie Policy",
     "credits": "Made by",
     "rightsReserved": "All rights reserved."
   },
   "common": {
-    "unknownCity": "Unknown location"
+    "unknownCity": "Unknown location",
+    "loading": "Loading..."
   },
   "home": {
     "heroTitle": "Drive the Future.",
@@ -164,6 +173,195 @@
         "answer": "Dealers marked as approved have completed our onboarding checklist and provide confirmed EV expertise in Albania."
       }
     ]
+  },
+  "sitemap": {
+    "title": "Sitemap",
+    "subtitle": "Jump to the area you need. Quickly reach core navigation, service tools, and our latest dynamic content.",
+    "xmlTitle": "Need the XML sitemap?",
+    "xmlDescription": "Open the machine-readable sitemap used by search engines or copy the link for Google Search Console.",
+    "xmlCta": "Open sitemap.xml",
+    "sections": {
+      "explore": { "title": "Explore" },
+      "services": { "title": "Services" },
+      "company": { "title": "Company" },
+      "legal": { "title": "Legal" }
+    },
+    "dynamic": {
+      "dealers": "Highlighted dealers",
+      "dealersDescription": "Browse a selection of verified dealerships recently featured on the platform.",
+      "viewAllDealers": "View all dealers",
+      "models": "Popular models",
+      "modelsDescription": "Discover electric and hybrid models drivers in Albania are researching right now.",
+      "viewAllModels": "View all models",
+      "blog": "Latest from the blog",
+      "blogDescription": "Read fresh market updates, guides, and charging insights from Makina Elektrike.",
+      "viewAllPosts": "View all posts"
+    },
+    "metaTitle": "Makina Elektrike sitemap",
+    "metaDescription": "Find every public page on Makina Elektrike, including dealers, EV models, services, and legal resources.",
+    "metaKeywords": [
+      "Makina Elektrike sitemap",
+      "EV sitemap",
+      "Albania electric car sitemap"
+    ]
+  },
+  "loginPage": {
+    "title": "Sign in to Makina Elektrike",
+    "subtitle": "Choose how you want to use the platform and continue where you left off.",
+    "chooseAccount": "Who is signing in?",
+    "userOption": {
+      "title": "Drivers & Enthusiasts",
+      "description": "Access your saved dealers, shortlisted models, and personalised recommendations."
+    },
+    "dealerOption": {
+      "title": "Dealers & Partners",
+      "description": "Manage your dealership profile, update inventory, and respond to new leads."
+    },
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submitLabel": "Continue",
+    "loading": "Signing in...",
+    "supportTitle": "Need an account?",
+    "supportDescription": "Create a free profile tailored to your needs or request dealer access from our team.",
+    "registerUserCta": "Create a user account",
+    "registerDealerCta": "Apply as a dealer",
+    "guidance": {
+      "title": "What happens after you sign in",
+      "description": "We personalise the experience depending on your role so you immediately see the tools that matter.",
+      "userTitle": "For drivers",
+      "userDescription": "Track favourites, compare models, and message dealers when you're ready to book a test drive.",
+      "dealerTitle": "For dealers",
+      "dealerDescription": "Update opening hours, add new models, and review pending enquiries from interested buyers.",
+      "security": "All sessions are secured with encrypted authentication provided by Firebase."
+    },
+    "adminPrompt": "Looking for the administration console?",
+    "adminLinkLabel": "Open the admin login",
+    "errors": {
+      "missingFields": "Enter both email and password to continue."
+    },
+    "metaTitle": "Makina Elektrike login",
+    "metaDescription": "Sign in to manage your saved electric vehicle research or update your dealership presence.",
+    "metaKeywords": [
+      "Makina Elektrike login",
+      "EV account",
+      "dealer login"
+    ]
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy Policy",
+      "updated": "Last updated: March 2024",
+      "intro": "We explain how Makina Elektrike collects, uses and protects your personal data when you browse the platform or create an account.",
+      "sections": [
+        {
+          "title": "Information we collect",
+          "items": [
+            "Account details provided during registration such as name, email address and organisation.",
+            "Usage analytics that help us understand how visitors interact with pages, search filters and listings.",
+            "Content you submit directly, including enquiries to dealers or feedback sent via forms."
+          ]
+        },
+        {
+          "title": "How we use your data",
+          "items": [
+            "To deliver personalised features like saved favourites and recently viewed pages.",
+            "To connect dealers with interested shoppers and facilitate follow-up conversations.",
+            "To maintain platform security, prevent abuse and comply with legal obligations."
+          ]
+        },
+        {
+          "title": "Your rights",
+          "items": [
+            "Request access to the data we hold about you and receive a portable copy.",
+            "Ask for corrections, updates or deletion of personal information when appropriate.",
+            "Withdraw consent for marketing communications at any time using the links provided."
+          ]
+        }
+      ],
+      "metaTitle": "Makina Elektrike privacy policy",
+      "metaDescription": "Understand how Makina Elektrike handles account information, analytics data and communications.",
+      "metaKeywords": [
+        "Makina Elektrike privacy",
+        "data protection",
+        "EV platform privacy policy"
+      ]
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "updated": "Last updated: March 2024",
+      "intro": "These terms outline the acceptable use of the Makina Elektrike website and the responsibilities of our community.",
+      "sections": [
+        {
+          "title": "Using the platform",
+          "items": [
+            "You may browse listings and content for personal or business research related to electric mobility.",
+            "Do not copy or republish data without permission or automated scraping of dealer and model information.",
+            "Respect intellectual property rights and the privacy of other members when posting or sharing links."
+          ]
+        },
+        {
+          "title": "Accounts and access",
+          "items": [
+            "Provide accurate information during registration and keep login credentials secure.",
+            "Dealer accounts remain subject to verification. We may suspend access if profile data is incomplete or misleading.",
+            "Notify us immediately if you suspect unauthorised use of your account or credentials."
+          ]
+        },
+        {
+          "title": "Liability",
+          "items": [
+            "Makina Elektrike curates information but cannot guarantee that every listing or price is error-free.",
+            "We are not responsible for agreements negotiated directly between dealers and drivers.",
+            "The platform is provided “as is”; service interruptions may occur during maintenance or upgrades."
+          ]
+        }
+      ],
+      "metaTitle": "Makina Elektrike terms of service",
+      "metaDescription": "Review the conditions for using Makina Elektrike, including account rules and limitations of liability.",
+      "metaKeywords": [
+        "Makina Elektrike terms",
+        "EV platform rules",
+        "usage policy"
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "updated": "Last updated: March 2024",
+      "intro": "Cookies help us deliver a tailored experience, measure performance and remember your preferences.",
+      "sections": [
+        {
+          "title": "Types of cookies",
+          "items": [
+            "Essential cookies keep you signed in, secure forms and enable basic functionality.",
+            "Analytics cookies show us which pages attract the most interest so we can improve navigation.",
+            "Preference cookies remember language choices and recently viewed dealers or models."
+          ]
+        },
+        {
+          "title": "Managing cookies",
+          "items": [
+            "Most browsers let you delete or block cookies through their settings.",
+            "You can opt out of analytics tracking by enabling “Do Not Track” or adjusting cookie preferences.",
+            "Disabling certain cookies may reduce personalised features such as saved favourites."
+          ]
+        },
+        {
+          "title": "Third-party services",
+          "items": [
+            "We may embed trusted services like map providers or video platforms that set their own cookies.",
+            "Those providers follow separate privacy policies; review them if you have specific concerns.",
+            "You can contact us for more detail about third-party integrations and data processors."
+          ]
+        }
+      ],
+      "metaTitle": "Makina Elektrike cookie policy",
+      "metaDescription": "Learn which cookies Makina Elektrike uses and how to control analytics or preference settings.",
+      "metaKeywords": [
+        "Makina Elektrike cookies",
+        "cookie preferences",
+        "analytics cookies"
+      ]
+    }
   },
   "dealerDetails": {
     "brandsSold": "Brands Sold",

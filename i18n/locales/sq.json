@@ -4,8 +4,15 @@
     "dealers": "Shitësit",
     "models": "Modelet",
     "blog": "Blogu",
+    "favorites": "Të preferuarat",
     "about": "Rreth Nesh",
-    "admin": "Admin"
+    "admin": "Admin",
+    "register": "Regjistrohu",
+    "becomeDealer": "Bëhu shitës",
+    "login": "Hyr",
+    "language": "Gjuha",
+    "openMenu": "Hap menunë e navigimit",
+    "closeMenu": "Mbyll menunë e navigimit"
   },
   "footer": {
     "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
@@ -19,11 +26,13 @@
     "userSignup": "Regjistrohu si përdorues",
     "dealerSignup": "Regjistrohu si shitës",
     "sitemap": "Harta e faqes",
+    "cookies": "Politika e cookie-ve",
     "credits": "Bërë nga",
     "rightsReserved": "Të gjitha të drejtat e rezervuara."
   },
   "common": {
-    "unknownCity": "Lokacion i panjohur"
+    "unknownCity": "Lokacion i panjohur",
+    "loading": "Duke u ngarkuar..."
   },
   "home": {
     "heroTitle": "Ngisni të ardhmen.",
@@ -164,6 +173,195 @@
         "answer": "Shitësit me këtë shenjë kanë plotësuar listën e kontrollit tonë dhe ofrojnë ekspertizë të konfirmuar EV në Shqipëri."
       }
     ]
+  },
+  "sitemap": {
+    "title": "Harta e faqes",
+    "subtitle": "Shkoni menjëherë te seksioni që ju duhet – nga faqet kryesore te shërbimet dhe përmbajtja e përditësuar.",
+    "xmlTitle": "Ju duhet sitemap-i XML?",
+    "xmlDescription": "Hapni sitemap-in teknik që përdorin motorët e kërkimit ose kopjoni lidhjen për Google Search Console.",
+    "xmlCta": "Hap sitemap.xml",
+    "sections": {
+      "explore": { "title": "Eksploro" },
+      "services": { "title": "Shërbimet" },
+      "company": { "title": "Rreth nesh" },
+      "legal": { "title": "Ligjore" }
+    },
+    "dynamic": {
+      "dealers": "Shitës të veçuar",
+      "dealersDescription": "Një përzgjedhje konçesionarësh të verifikuar që janë përditësuar së fundmi në platformë.",
+      "viewAllDealers": "Shiko të gjithë shitësit",
+      "models": "Modele të njohura",
+      "modelsDescription": "Zbuloni modelet elektrike dhe hibride që po kërkohen më shumë nga drejtuesit në Shqipëri.",
+      "viewAllModels": "Shiko të gjitha modelet",
+      "blog": "Nga blogu",
+      "blogDescription": "Lexoni artikuj, udhëzues dhe lajme të reja për mobilitetin elektrik.",
+      "viewAllPosts": "Shiko të gjitha postimet"
+    },
+    "metaTitle": "Harta e faqes Makina Elektrike",
+    "metaDescription": "Gjeni çdo faqe publike të Makina Elektrike, përfshirë shitësit, modelet, shërbimet dhe dokumentet ligjore.",
+    "metaKeywords": [
+      "harta e faqes Makina Elektrike",
+      "sitemap EV",
+      "sitemap makina elektrike"
+    ]
+  },
+  "loginPage": {
+    "title": "Hyr në Makina Elektrike",
+    "subtitle": "Zgjidh mënyrën si do të përdorësh platformën dhe vazhdo aty ku e le.",
+    "chooseAccount": "Kush po hyn?",
+    "userOption": {
+      "title": "Drejtues & entuziastë",
+      "description": "Akseso shitësit e ruajtur, listat me modele dhe rekomandimet personale."
+    },
+    "dealerOption": {
+      "title": "Shitës & partnerë",
+      "description": "Menaxho profilin e konçesionarit, përditëso stokun dhe përgjigju kërkesave të reja."
+    },
+    "emailLabel": "Email",
+    "passwordLabel": "Fjalëkalimi",
+    "submitLabel": "Vazhdo",
+    "loading": "Po kryhet hyrja...",
+    "supportTitle": "Nuk ke llogari?",
+    "supportDescription": "Krijo një profil falas sipas nevojës ose kërko akses si shitës nga ekipi ynë.",
+    "registerUserCta": "Krijo llogari përdoruesi",
+    "registerDealerCta": "Apliko si shitës",
+    "guidance": {
+      "title": "Çfarë ndodh pas hyrjes",
+      "description": "Përvoja përshtatet sipas rolit që të shfaqen menjëherë mjetet më të rëndësishme.",
+      "userTitle": "Për drejtuesit",
+      "userDescription": "Ndjek të preferuarat, krahaso modelet dhe kontakto shitësit kur je gati për test drive.",
+      "dealerTitle": "Për shitësit",
+      "dealerDescription": "Përditëso oraret, shto modele të reja dhe menaxho kërkesat nga blerësit e interesuar.",
+      "security": "Sesione të sigurta me autentikim të enkriptuar nga Firebase."
+    },
+    "adminPrompt": "Kërkon panelin e administrimit?",
+    "adminLinkLabel": "Hap hyrjen për admin",
+    "errors": {
+      "missingFields": "Plotëso email-in dhe fjalëkalimin për të vazhduar."
+    },
+    "metaTitle": "Hyrja në Makina Elektrike",
+    "metaDescription": "Identifikohu për të menaxhuar kërkimet e tua për automjete elektrike ose profilin e konçesionarit.",
+    "metaKeywords": [
+      "hyrje Makina Elektrike",
+      "llogari EV",
+      "hyrje shitësish"
+    ]
+  },
+  "legal": {
+    "privacy": {
+      "title": "Politika e privatësisë",
+      "updated": "Përditësuar së fundmi: Mars 2024",
+      "intro": "Këtu shpjegojmë si Makina Elektrike grumbullon, përdor dhe mbron të dhënat tuaja personale kur shfletoni ose krijoni një llogari.",
+      "sections": [
+        {
+          "title": "Çfarë të dhënash mbledhim",
+          "items": [
+            "Të dhënat e llogarisë gjatë regjistrimit si emri, email-i dhe organizata.",
+            "Analiza përdorimi që na ndihmon të kuptojmë si navigojnë vizitorët në faqe, filtra dhe lista.",
+            "Përmbajtja që dërgoni vetë, përfshirë kërkesat drejt shitësve ose feedback-un përmes formularëve."
+          ]
+        },
+        {
+          "title": "Si i përdorim të dhënat",
+          "items": [
+            "Për të ofruar funksione të personalizuara si të preferuarat e ruajtura dhe faqet e shikuara së fundmi.",
+            "Për të lidhur shitësit me blerësit e interesuar dhe për të lehtësuar komunikimin.",
+            "Për të mbajtur platformën të sigurt, për të parandaluar abuzimet dhe për të respektuar detyrimet ligjore."
+          ]
+        },
+        {
+          "title": "Të drejtat tuaja",
+          "items": [
+            "Kërkoni akses në të dhënat që mbajmë për ju dhe merrni një kopje të tyre.",
+            "Kërkoni korrigjimin, përditësimin ose fshirjen e informacionit personal kur është e nevojshme.",
+            "Hiqni dorë nga komunikimet marketing në çdo kohë duke përdorur lidhjet përkatëse."
+          ]
+        }
+      ],
+      "metaTitle": "Politika e privatësisë Makina Elektrike",
+      "metaDescription": "Mësoni si trajtohen të dhënat e llogarisë, analitikës dhe komunikimet nga Makina Elektrike.",
+      "metaKeywords": [
+        "privatësia Makina Elektrike",
+        "mbrojtja e të dhënave",
+        "politika e privatësisë EV"
+      ]
+    },
+    "terms": {
+      "title": "Kushtet e përdorimit",
+      "updated": "Përditësuar së fundmi: Mars 2024",
+      "intro": "Këto kushte përcaktojnë mënyrën e pranueshme të përdorimit të faqes Makina Elektrike dhe përgjegjësitë e komunitetit tonë.",
+      "sections": [
+        {
+          "title": "Përdorimi i platformës",
+          "items": [
+            "Mund të shfletoni listimet dhe përmbajtjen për kërkime personale ose biznesi rreth mobilitetit elektrik.",
+            "Mos kopjoni ose publikoni të dhëna pa leje dhe mos përdorni scraping automatik të informacionit.",
+            "Respektoni të drejtat e autorit dhe privatësinë e anëtarëve të tjerë kur ndani komente ose lidhje."
+          ]
+        },
+        {
+          "title": "Llogaritë dhe akseset",
+          "items": [
+            "Jepni informacion të saktë gjatë regjistrimit dhe mbani të sigurta kredencialet e hyrjes.",
+            "Llogaritë e shitësve kalojnë në verifikim; mund të pezullohen nëse të dhënat janë të paplota ose të pasakta.",
+            "Na njoftoni menjëherë nëse dyshoni për përdorim të paautorizuar të llogarisë."
+          ]
+        },
+        {
+          "title": "Përgjegjësia",
+          "items": [
+            "Makina Elektrike kujdeset për saktësinë, por nuk garanton që çdo listim apo çmim është i gabueshëm.",
+            "Nuk mbajmë përgjegjësi për marrëveshjet që bëhen drejtpërdrejt mes shitësve dhe drejtuesve.",
+            "Platforma ofrohet “siç është”; mund të ketë ndërprerje gjatë mirëmbajtjes ose përditësimeve."
+          ]
+        }
+      ],
+      "metaTitle": "Kushtet e shërbimit Makina Elektrike",
+      "metaDescription": "Lexoni rregullat e përdorimit të Makina Elektrike, përfshirë politikat e llogarisë dhe kufizimet e përgjegjësisë.",
+      "metaKeywords": [
+        "kushtet Makina Elektrike",
+        "rregullat e platformës EV",
+        "politika e përdorimit"
+      ]
+    },
+    "cookies": {
+      "title": "Politika e cookie-ve",
+      "updated": "Përditësuar së fundmi: Mars 2024",
+      "intro": "Cookie-t na ndihmojnë të ofrojmë përvojë të personalizuar, të masim performancën dhe të ruajmë preferencat.",
+      "sections": [
+        {
+          "title": "Llojet e cookie-ve",
+          "items": [
+            "Cookie-t esenciale mbajnë hyrjen aktive, sigurojnë formularët dhe funksionet bazë.",
+            "Cookie-t analitike tregojnë cilat faqe kanë më shumë interes që të përmirësojmë navigimin.",
+            "Cookie-t e preferencave mbajnë mend gjuhën e zgjedhur dhe shitësit ose modelet e shikuara së fundmi."
+          ]
+        },
+        {
+          "title": "Menaxhimi i cookie-ve",
+          "items": [
+            "Shumica e shfletuesve lejojnë fshirjen ose bllokimin e cookie-ve nga cilësimet.",
+            "Mund të çaktivizoni analizat duke aktivizuar “Mos më gjurmo” ose duke rregulluar preferencat e cookie-ve.",
+            "Çaktivizimi i disa cookie-ve mund të kufizojë funksione të personalizuara si të preferuarat."
+          ]
+        },
+        {
+          "title": "Shërbimet e palëve të treta",
+          "items": [
+            "Mund të përdorim shërbime të besuara si harta ose video që vendosin cookie-t e tyre.",
+            "Këto shërbime ndjekin politika të veçanta privatësie; lexojini nëse keni shqetësime specifike.",
+            "Na kontaktoni për më shumë detaje mbi integrimet dhe përpunuesit e të dhënave."
+          ]
+        }
+      ],
+      "metaTitle": "Politika e cookie-ve Makina Elektrike",
+      "metaDescription": "Mësoni cilat cookie përdor Makina Elektrike dhe si të kontrolloni preferencat e analitikës.",
+      "metaKeywords": [
+        "cookie Makina Elektrike",
+        "preferencat e cookie-ve",
+        "cookie analitike"
+      ]
+    }
   },
   "dealerDetails": {
     "brandsSold": "Markat e shitura",

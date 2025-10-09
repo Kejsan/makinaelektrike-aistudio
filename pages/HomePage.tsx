@@ -131,57 +131,82 @@ const HomePage: React.FC = () => {
         structuredData={structuredData}
       />
       {/* Hero Section */}
-      <section className="relative h-[70vh] flex items-center justify-center text-center text-white overflow-hidden">
+      <section className="relative flex min-h-[60vh] items-center justify-center overflow-hidden bg-[#00001a] text-center text-white">
         <div
           className="absolute inset-0 bg-cover bg-center scale-110"
           style={{ backgroundImage: `url(${heroDashboard})` }}
-        ></div>
-        <div className="absolute inset-0 bg-[#00001a]/60"></div>
-        <div className="relative z-10 px-4 flex flex-col items-center">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight" style={{textShadow: '0 0 20px rgba(84, 160, 155, 0.5)'}}>{t('home.heroTitle')}</h1>
-          <p className="mt-4 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">{t('home.heroSubtitle')}</p>
-          <a href="#search-section" className="mt-8 inline-block bg-vivid-red text-white font-bold py-3 px-8 rounded-full hover:bg-opacity-90 transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-vivid-red/50">
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-[#00001a]/70" aria-hidden="true" />
+        <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center px-4 py-20 sm:px-6 lg:px-8">
+          <h1
+            className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl md:text-6xl"
+            style={{ textShadow: '0 0 20px rgba(84, 160, 155, 0.5)' }}
+          >
+            {t('home.heroTitle')}
+          </h1>
+          <p className="mt-4 text-base text-gray-300 sm:text-lg md:text-xl">{t('home.heroSubtitle')}</p>
+          <a
+            href="#search-section"
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-vivid-red px-8 py-3 text-base font-semibold text-white transition-transform duration-200 hover:scale-105 hover:bg-opacity-90 hover:shadow-lg hover:shadow-vivid-red/50"
+          >
             {t('home.heroCta')}
           </a>
         </div>
       </section>
 
       {/* Search Section */}
-      <section id="search-section" className="py-16 -mt-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-8 text-white">{t('home.searchTitle')}</h2>
-          <div className="bg-white/5 backdrop-blur-lg p-8 rounded-xl shadow-2xl border border-white/10 grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-            <div>
-              <label htmlFor="city" className="block text-sm font-medium text-gray-300 mb-2">{t('home.cityPlaceholder')}</label>
+      <section id="search-section" className="-mt-16 py-16">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-8 text-center text-3xl font-bold text-white">{t('home.searchTitle')}</h2>
+          <div className="grid grid-cols-1 gap-6 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg sm:p-8 md:grid-cols-2 xl:grid-cols-3 xl:items-end">
+            <div className="w-full">
+              <label htmlFor="city" className="mb-2 block text-sm font-medium text-gray-300">{t('home.cityPlaceholder')}</label>
               <div className="relative">
-                <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-                <input type="text" id="city" placeholder={t('home.cityPlaceholder')} className="pl-10 block w-full bg-white/10 border-gray-600 rounded-md shadow-sm focus:ring-gray-cyan focus:border-gray-cyan text-white py-2.5" value={searchCity} onChange={(e) => setSearchCity(e.target.value)} />
+                <Building className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  id="city"
+                  placeholder={t('home.cityPlaceholder')}
+                  className="block w-full rounded-md border border-gray-600 bg-white/10 py-2.5 pl-10 text-white shadow-sm focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                  value={searchCity}
+                  onChange={(e) => setSearchCity(e.target.value)}
+                />
               </div>
             </div>
-            <div>
-              <label htmlFor="brand" className="block text-sm font-medium text-gray-300 mb-2">{t('home.brandPlaceholder')}</label>
+            <div className="w-full">
+              <label htmlFor="brand" className="mb-2 block text-sm font-medium text-gray-300">{t('home.brandPlaceholder')}</label>
               <div className="relative">
-                <Car className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-                <input type="text" id="brand" placeholder={t('home.brandPlaceholder')} className="pl-10 block w-full bg-white/10 border-gray-600 rounded-md shadow-sm focus:ring-gray-cyan focus:border-gray-cyan text-white py-2.5" value={searchBrand} onChange={(e) => setSearchBrand(e.target.value)} />
+                <Car className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  id="brand"
+                  placeholder={t('home.brandPlaceholder')}
+                  className="block w-full rounded-md border border-gray-600 bg-white/10 py-2.5 pl-10 text-white shadow-sm focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                  value={searchBrand}
+                  onChange={(e) => setSearchBrand(e.target.value)}
+                />
               </div>
             </div>
-            <button className="w-full bg-gray-cyan text-white font-bold py-2.5 px-6 rounded-md hover:bg-opacity-90 transition-colors h-[46px]">
-              {t('home.searchButton')}
-            </button>
+            <div className="md:col-span-2 xl:col-span-1">
+              <button className="flex w-full items-center justify-center rounded-md bg-gray-cyan px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-opacity-90">
+                {t('home.searchButton')}
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Value Proposition */}
       <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold text-white">{t('home.valueTitle')}</h2>
-            <p className="mt-4 text-lg text-gray-300 max-w-3xl mx-auto">{t('home.valueSubtitle')}</p>
+            <p className="mt-4 mx-auto max-w-3xl text-lg text-gray-300">{t('home.valueSubtitle')}</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
             {valueHighlights.map(highlight => (
-              <div key={highlight.title} className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 shadow-xl">
+              <div key={highlight.title} className="rounded-xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur-lg">
                 <h3 className="text-xl font-semibold text-white">{highlight.title}</h3>
                 <p className="mt-3 text-gray-300 leading-relaxed">{highlight.description}</p>
               </div>
@@ -192,9 +217,9 @@ const HomePage: React.FC = () => {
 
       {/* Featured Dealers */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12 text-white">{t('home.featuredDealers')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-12 text-center text-3xl font-bold text-white">{t('home.featuredDealers')}</h2>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {dataLoading ? (
               Array.from({ length: 4 }).map((_, index) => (
                 <DealerCard key={`featured-dealer-skeleton-${index}`} isLoading />
@@ -237,13 +262,13 @@ const HomePage: React.FC = () => {
 
       {/* Featured Models */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12 text-white">{t('home.featuredModels')}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-             {featuredModels.map(model => <ModelCard key={model.id} model={model} />)}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-12 text-center text-3xl font-bold text-white">{t('home.featuredModels')}</h2>
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {featuredModels.map(model => <ModelCard key={model.id} model={model} />)}
           </div>
-           <div className="mt-12 text-center">
-            <Link to="/models" className="inline-block bg-gray-cyan text-white font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-gray-cyan/50">
+          <div className="mt-12 text-center">
+            <Link to="/models" className="inline-block rounded-md bg-gray-cyan px-8 py-3 text-base font-bold text-white transition-transform duration-200 hover:scale-105 hover:bg-opacity-90 hover:shadow-lg hover:shadow-gray-cyan/50">
               {t('home.seeAllModels')}
             </Link>
           </div>
@@ -252,13 +277,13 @@ const HomePage: React.FC = () => {
 
       {/* From Our Blog */}
       <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12 text-white">{t('home.fromOurBlog')}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {latestPosts.map(post => <BlogCard key={post.id} post={post} />)}
           </div>
           <div className="mt-12 text-center">
-            <Link to="/blog" className="inline-block bg-gray-cyan text-white font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-gray-cyan/50">
+            <Link to="/blog" className="inline-block rounded-md bg-gray-cyan px-8 py-3 text-base font-bold text-white transition-transform duration-200 hover:scale-105 hover:bg-opacity-90 hover:shadow-lg hover:shadow-gray-cyan/50">
               {t('home.seeAllPosts')}
             </Link>
           </div>
@@ -267,18 +292,18 @@ const HomePage: React.FC = () => {
 
       {/* FAQ Section */}
       <section className="py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-white">{t('home.faqTitle')}</h2>
-            <p className="mt-3 text-gray-300 max-w-3xl mx-auto">{t('home.faqSubtitle')}</p>
-          </div>
-          <div className="space-y-6">
-            {faqItems.map(faq => (
-              <div key={faq.question} className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg">
-                <h3 className="text-xl font-semibold text-white">{faq.question}</h3>
-                <p className="mt-3 text-gray-300 leading-relaxed">{faq.answer}</p>
-              </div>
-            ))}
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl sm:p-10">
+            <h2 className="text-center text-3xl font-bold text-white">{t('home.faqTitle')}</h2>
+            <p className="mt-4 mx-auto max-w-4xl text-center text-gray-300">{t('home.faqSubtitle')}</p>
+            <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {faqItems.map(faq => (
+                <div key={faq.question} className="rounded-xl border border-gray-800 bg-black/30 p-6">
+                  <h3 className="text-xl font-semibold text-white">{faq.question}</h3>
+                  <p className="mt-3 text-gray-300 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
