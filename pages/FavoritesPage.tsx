@@ -40,7 +40,7 @@ const FavoritesPage: React.FC = () => {
             '@type': 'CollectionPage',
             name: t('favoritesPage.metaTitle'),
             description: t('favoritesPage.metaDescription'),
-            url: `${BASE_URL}/#/favorites`,
+            url: `${BASE_URL}/favorites`,
         },
         {
             '@context': 'https://schema.org',
@@ -50,7 +50,7 @@ const FavoritesPage: React.FC = () => {
                 '@type': 'ListItem',
                 position: index + 1,
                 name: dealer.name,
-                url: `${BASE_URL}/#/dealers/${dealer.id}`,
+                url: `${BASE_URL}/dealers/${dealer.id}`,
             })),
         },
         {
@@ -61,7 +61,7 @@ const FavoritesPage: React.FC = () => {
                 '@type': 'ListItem',
                 position: index + 1,
                 name: `${model.brand} ${model.model_name}`,
-                url: `${BASE_URL}/#/models/${model.id}`,
+                url: `${BASE_URL}/models/${model.id}`,
             })),
         },
         {
@@ -84,11 +84,11 @@ const FavoritesPage: React.FC = () => {
                 title={t('favoritesPage.metaTitle')}
                 description={t('favoritesPage.metaDescription')}
                 keywords={t('favoritesPage.metaKeywords', { returnObjects: true }) as string[]}
-                canonical={`${BASE_URL}/#/favorites`}
+                canonical={`${BASE_URL}/favorites`}
                 openGraph={{
                     title: t('favoritesPage.metaTitle'),
                     description: t('favoritesPage.metaDescription'),
-                    url: `${BASE_URL}/#/favorites`,
+                    url: `${BASE_URL}/favorites`,
                     type: 'website',
                     images: [DEFAULT_OG_IMAGE],
                 }}

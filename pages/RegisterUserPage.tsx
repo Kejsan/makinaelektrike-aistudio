@@ -97,7 +97,7 @@ const RegisterUserPage: React.FC = () => {
     '@type': 'WebPage',
     name: metaTitle,
     description: metaDescription,
-    url: `${BASE_URL}/#/register`,
+    url: `${BASE_URL}/register`,
   };
 
   return (
@@ -106,11 +106,11 @@ const RegisterUserPage: React.FC = () => {
         title={metaTitle}
         description={metaDescription}
         keywords={['regjistrim', 'makina elektrike', 'favoritët e makinave', 'Makina Elektrike account']}
-        canonical={`${BASE_URL}/#/register`}
+        canonical={`${BASE_URL}/register`}
         openGraph={{
           title: metaTitle,
           description: metaDescription,
-          url: `${BASE_URL}/#/register`,
+          url: `${BASE_URL}/register`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}

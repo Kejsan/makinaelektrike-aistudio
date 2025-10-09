@@ -58,7 +58,7 @@ const AdminLoginPage: React.FC = () => {
     description: t('admin.metaDescription'),
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'All',
-    url: `${BASE_URL}/#/admin/login`,
+    url: `${BASE_URL}/admin/login`,
   };
 
   return (
@@ -67,12 +67,12 @@ const AdminLoginPage: React.FC = () => {
         title={t('admin.metaTitle')}
         description={t('admin.metaDescription')}
         keywords={t('admin.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/#/admin/login`}
+        canonical={`${BASE_URL}/admin/login`}
         robots="noindex, nofollow"
         openGraph={{
           title: t('admin.metaTitle'),
           description: t('admin.metaDescription'),
-          url: `${BASE_URL}/#/admin/login`,
+          url: `${BASE_URL}/admin/login`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}
