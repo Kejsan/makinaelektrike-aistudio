@@ -1,115 +1,560 @@
-
 {
-    "header": {
-        "home": "Home",
-        "dealers": "Dealers",
-        "models": "Models",
-        "blog": "Blog",
-        "about": "About",
-        "admin": "Admin"
+  "header": {
+    "home": "Home",
+    "dealers": "Dealers",
+    "models": "Models",
+    "blog": "Blog",
+    "about": "About",
+    "admin": "Admin"
+  },
+  "footer": {
+    "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
+    "explore": "Explore",
+    "services": "Services",
+    "aboutUs": "About Us",
+    "contact": "Contact",
+    "sitemap": "Sitemap",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "rightsReserved": "All rights reserved.",
+    "userSignup": "User Sign Up",
+    "dealerSignup": "Dealer Sign Up",
+    "madeBy": "Made by"
+  },
+  "common": {
+    "unknownCity": "Unknown location"
+  },
+  "home": {
+    "heroTitle": "Drive the Future.",
+    "heroSubtitle": "Discover Electric Mobility in Albania.",
+    "heroCta": "Find Your EV",
+    "searchTitle": "Find Your Perfect Electric Car",
+    "cityPlaceholder": "City",
+    "brandPlaceholder": "Brand",
+    "typePlaceholder": "Car Type",
+    "searchButton": "Search",
+    "featuredDealers": "Featured Dealerships",
+    "featuredModels": "Popular Models",
+    "fromOurBlog": "From our Blog",
+    "seeAllDealers": "Browse all dealers",
+    "seeAllModels": "Browse all models",
+    "seeAllPosts": "Read all articles",
+    "metaTitle": "Makina Elektrike | Albania's Electric & Hybrid Vehicle Hub",
+    "metaDescription": "Search verified electric vehicle dealers, compare EV models and learn about charging in Albania with Makina Elektrike.",
+    "metaKeywords": [
+      "electric cars Albania",
+      "EV dealers",
+      "Makina Elektrike directory",
+      "hybrid vehicles"
+    ],
+    "valueTitle": "Everything you need to go electric",
+    "valueSubtitle": "Makina Elektrike combines data, editorial guidance and verified partners so you can make a confident switch to electric mobility.",
+    "valueHighlights": [
+      {
+        "title": "Verified dealers",
+        "description": "Profiles are vetted and updated so you always know who is authorised to sell and service electric vehicles in Albania."
+      },
+      {
+        "title": "Complete model data",
+        "description": "Compare WLTP range, charging speeds, battery sizes and equipment across dozens of EV and hybrid models."
+      },
+      {
+        "title": "Decision support",
+        "description": "Get practical guides, incentives information and FAQs tailored to Albanian drivers and businesses."
+      }
+    ],
+    "insightsTitle": "Electric mobility at a glance",
+    "insightsSubtitle": "Understand how the market is evolving and what that means for your next purchase or fleet upgrade.",
+    "insights": [
+      {
+        "title": "Charging network",
+        "description": "Over 120 public charging points are active nationwide, with rapid DC stations connecting the Tirana–Durrës corridor."
+      },
+      {
+        "title": "Total cost of ownership",
+        "description": "Average energy cost per 100 km with an EV is €2–€3, less than half the fuel spend of comparable petrol vehicles."
+      },
+      {
+        "title": "Maintenance savings",
+        "description": "Electric drivetrains remove oil changes, exhaust repairs and timing belts—reducing annual workshop visits by up to 40%."
+      },
+      {
+        "title": "Government incentives",
+        "description": "Customs duties and VAT are waived for new EV imports, while several municipalities offer preferential parking schemes."
+      }
+    ],
+    "faqTitle": "Frequently asked questions",
+    "faqSubtitle": "Quick answers to the most common questions we receive from Albanian EV shoppers.",
+    "faqItems": [
+      {
+        "question": "Do I need a home charger to own an EV?",
+        "answer": "A dedicated wallbox is recommended for daily convenience, but many drivers rely on public AC points or workplace charging."
+      },
+      {
+        "question": "How long does the registration process take?",
+        "answer": "Dealers featured on Makina Elektrike handle homologation and registration, usually within two to four working days."
+      },
+      {
+        "question": "Can I test drive before committing?",
+        "answer": "Yes. Each verified dealer page includes contact details to book EV test drives across Tirana, Durrës, Shkodër and beyond."
+      }
+    ]
+  },
+  "dealersPage": {
+    "title": "Dealerships in Albania",
+    "subtitle": "Filter and compare authorised electric and hybrid vehicle dealers across the country.",
+    "filters": "Filters",
+    "city": "City",
+    "brand": "Brand",
+    "language": "Language Spoken",
+    "noResults": "No dealerships found matching your criteria.",
+    "viewDetails": "View Details",
+    "pendingApproval": "Pending approval",
+    "allCities": "All cities",
+    "allBrands": "All brands",
+    "allLanguages": "All languages",
+    "sortBy": "Sort by",
+    "clearFilters": "Clear filters",
+    "mapTitle": "View locations on the map",
+    "sortOptions": {
+      "name_asc": "Name A–Z",
+      "name_desc": "Name Z–A",
+      "city_asc": "City A–Z",
+      "city_desc": "City Z–A"
     },
-    "footer": {
-        "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
-        "explore": "Explore",
-        "aboutUs": "About Us",
-        "contact": "Contact",
-        "legal": "Legal",
-        "privacy": "Privacy Policy",
-        "terms": "Terms of Service",
-        "rightsReserved": "All rights reserved."
+    "metaTitle": "Electric car dealerships in Albania | Makina Elektrike",
+    "metaDescription": "Explore verified EV and hybrid dealerships in Tirana, Durrës, Shkodër and more. Filter by brand, language and location.",
+    "metaKeywords": [
+      "EV dealers Albania",
+      "electric car showroom",
+      "Makina Elektrike dealers"
+    ],
+    "introTitle": "Trusted partners, transparent information",
+    "introSubtitle": "Every listing is manually reviewed to ensure it represents an active dealership with experience in electric mobility.",
+    "insightsTitle": "What to evaluate before visiting",
+    "insightsSubtitle": "Use these quick tips to understand which dealership best matches your expectations.",
+    "insights": [
+      {
+        "title": "Certification & service",
+        "description": "Ask about factory training, EV-specific tooling and battery diagnostics to guarantee long-term support."
+      },
+      {
+        "title": "Charging assistance",
+        "description": "Dealers often partner with installers—confirm whether they can help set up a home or business wallbox."
+      },
+      {
+        "title": "Financing & trade-ins",
+        "description": "Dedicated EV financing and trade-in programmes can lower upfront cost and speed up your switch to electric."
+      }
+    ],
+    "faqTitle": "Dealer directory FAQ",
+    "faqSubtitle": "Helpful guidance for getting the most from the Makina Elektrike dealer list.",
+    "faqItems": [
+      {
+        "question": "How often are dealer listings updated?",
+        "answer": "Our team validates contact details and inventory highlights monthly, and whenever a partner submits changes."
+      },
+      {
+        "question": "Can I request a new brand to be added?",
+        "answer": "Absolutely. Use the contact form to suggest new electric brands or importers and we will follow up with verification."
+      },
+      {
+        "question": "What does the approval badge mean?",
+        "answer": "Dealers marked as approved have completed our onboarding checklist and provide confirmed EV expertise in Albania."
+      }
+    ]
+  },
+  "dealerDetails": {
+    "brandsSold": "Brands Sold",
+    "contactInfo": "Contact Information",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "website": "Website",
+    "languagesSpoken": "Languages Spoken",
+    "noLanguages": "No languages specified",
+    "notes": "Notes",
+    "modelsAvailable": "Models Available at this Dealership",
+    "backLink": "Back to all dealers",
+    "approved": "Approved dealer",
+    "pendingApproval": "Pending approval",
+    "locationOnMap": "Showroom location",
+    "metaTitleSuffix": "Electric vehicle dealer | Makina Elektrike",
+    "metaDescription": "Discover {{name}} in {{city}} — authorised retailer for {{brands}} and specialist support for electric drivers in Albania.",
+    "aboutTitle": "About {{name}}",
+    "aboutDescription": "{{name}} helps drivers in {{city}} experience electric mobility with dedicated advisers and certified service for {{brands}}.",
+    "faqTitle": "Dealer support FAQ",
+    "faqSubtitle": "Practical details before you visit the showroom.",
+    "faqItems": [
+      {
+        "question": "Do you offer test drives?",
+        "answer": "Most partners can organise test drives within 24–48 hours. Contact the dealer directly to confirm vehicle availability."
+      },
+      {
+        "question": "What documents should I bring?",
+        "answer": "Prepare identification, driving licence and (if financing) income documentation so the dealer can process your request quickly."
+      },
+      {
+        "question": "Can the dealer help with charging installation?",
+        "answer": "Yes, many dealers collaborate with certified electricians and can coordinate a home or workplace charger installation for you."
+      }
+    ]
+  },
+  "modelsPage": {
+    "title": "Electric & Hybrid Models",
+    "subtitle": "Compare specifications, range and charging speeds for vehicles available in Albania.",
+    "filters": "Filters",
+    "brand": "Brand",
+    "bodyType": "Body Type",
+    "range": "Range (WLTP)",
+    "noResults": "No models found matching your criteria.",
+    "viewDetails": "View Details",
+    "rangeUnknown": "Unknown",
+    "allBrands": "All brands",
+    "allBodyTypes": "All body types",
+    "sortBy": "Sort by",
+    "compare": "Compare models",
+    "clearFilters": "Clear filters",
+    "sortOptions": {
+      "model_asc": "Model A–Z",
+      "model_desc": "Model Z–A",
+      "brand_asc": "Brand A–Z",
+      "brand_desc": "Brand Z–A",
+      "range_desc": "Longest range",
+      "range_asc": "Shortest range"
     },
-    "common": {
-        "unknownCity": "Unknown location"
-    },
-    "home": {
-        "heroTitle": "Drive the Future.",
-        "heroSubtitle": "Discover Electric Mobility in Albania.",
-        "heroCta": "Find Your EV",
-        "searchTitle": "Find Your Perfect Electric Car",
-        "cityPlaceholder": "City",
-        "brandPlaceholder": "Brand",
-        "typePlaceholder": "Car Type",
-        "searchButton": "Search",
-        "featuredDealers": "Featured Dealerships",
-        "featuredModels": "Popular Models"
-    },
-    "dealersPage": {
-        "title": "Dealerships in Albania",
-        "filters": "Filters",
-        "city": "City",
-        "brand": "Brand",
-        "language": "Language Spoken",
-        "noResults": "No dealerships found matching your criteria.",
-        "viewDetails": "View Details",
-        "pendingApproval": "Pending approval"
-    },
-    "dealerDetails": {
-        "brandsSold": "Brands Sold",
-        "contactInfo": "Contact Information",
-        "address": "Address",
-        "phone": "Phone",
-        "email": "Email",
-        "website": "Website",
-        "languagesSpoken": "Languages Spoken",
-        "noLanguages": "No languages specified",
-        "notes": "Notes",
-        "modelsAvailable": "Models Available at this Dealership",
-        "backLink": "Back to all dealers",
-        "approved": "Approved dealer",
-        "pendingApproval": "Pending approval"
-    },
-    "modelsPage": {
-        "title": "Electric & Hybrid Models",
-        "filters": "Filters",
-        "brand": "Brand",
-        "bodyType": "Body Type",
-        "range": "Range (WLTP)",
-        "noResults": "No models found matching your criteria.",
-        "viewDetails": "View Details",
-        "rangeUnknown": "Unknown"
-    },
-    "modelDetails": {
-        "specifications": "Specifications",
-        "battery": "Battery",
-        "range": "Range (WLTP)",
-        "power": "Power",
-        "torque": "Torque",
-        "acceleration": "0-100 km/h",
-        "topSpeed": "Top Speed",
-        "drive": "Drive",
-        "seats": "Seats",
-        "chargingAC": "AC Charging",
-        "chargingDC": "DC Charging",
-        "notes": "Notes",
-        "availableAt": "Available at these Dealerships",
-        "contactDealer": "Contact Dealer",
-        "backLink": "Back to all models"
-    },
-    "blogPage": {
-        "title": "Our Blog",
-        "subtitle": "News, guides, and insights into the world of electric vehicles."
-    },
-    "aboutPage": {
-      "title": "About Makina Elektrike",
-      "p1": "Makina Elektrike is the premier online directory for electric and hybrid vehicles in Albania. Our mission is to accelerate the adoption of sustainable transportation by providing a comprehensive, user-friendly platform for prospective buyers.",
-      "p2": "We connect you with a wide network of official dealerships and importers, offering detailed information on the latest EV models available in the country. From technical specifications to dealership locations, we aim to be your one-stop resource for everything electric.",
-      "p3": "Whether you're a seasoned EV enthusiast or just starting to explore your options, Makina Elektrike is here to guide you on your journey towards a cleaner, greener future on the road."
-    },
-    "contactPage": {
-      "title": "Contact Us",
-      "p1": "Have a question, feedback, or a business inquiry? We'd love to hear from you. Reach out to us via the channels below, and our team will get back to you as soon as possible.",
-      "email": "Email",
-      "phone": "Phone",
-      "address": "Address",
-      "addressDetails": "Tirana, Albania"
-    },
-    "admin": {
-        "loginTitle": "Admin Login",
-        "loginSubtitle": "Access the administration dashboard",
-        "loginEmail": "Email",
-        "loginPassword": "Password",
-        "loginButton": "Sign in",
-        "loginError": "The provided credentials are invalid.",
-        "logout": "Log out"
-    }
+    "metaTitle": "Electric car catalogue for Albania | Makina Elektrike",
+    "metaDescription": "Browse technical data for EV and hybrid models: WLTP range, battery size, charging speeds and dealer availability.",
+    "metaKeywords": [
+      "electric car models",
+      "EV range",
+      "hybrid vehicles Albania"
+    ],
+    "introTitle": "Explore every electric option",
+    "introSubtitle": "Filter by body style, range or brand to build a shortlist that matches your driving habits and budget.",
+    "insightsTitle": "Buying insights",
+    "insightsSubtitle": "Key considerations when comparing electric vehicles side by side.",
+    "insights": [
+      {
+        "title": "Battery capacity vs. usage",
+        "description": "City drivers often do well with 50–60 kWh packs, while frequent highway travellers should target 70 kWh or more."
+      },
+      {
+        "title": "Charging curve",
+        "description": "Look beyond peak kW—steady charging curves reduce downtime on road trips even if the headline figure is moderate."
+      },
+      {
+        "title": "Software & updates",
+        "description": "Ask whether the vehicle supports over-the-air updates and connected services that improve efficiency over time."
+      }
+    ],
+    "faqTitle": "Model comparison FAQ",
+    "faqSubtitle": "Answers to the most common questions from first-time EV buyers.",
+    "faqItems": [
+      {
+        "question": "What is WLTP and why does it matter?",
+        "answer": "WLTP is the European efficiency cycle. It provides a realistic estimate of range so you can compare models on equal terms."
+      },
+      {
+        "question": "Can I filter only by rapid-charging capability?",
+        "answer": "Yes. Use the filters to focus on 100 kW+ DC charging or manually review the charging specifications on each model page."
+      },
+      {
+        "question": "Are plug-in hybrids included?",
+        "answer": "Where available, we include PHEVs with meaningful electric range so you can evaluate them alongside full battery-electric models."
+      }
+    ]
+  },
+  "modelDetails": {
+    "specifications": "Specifications",
+    "battery": "Battery",
+    "range": "Range (WLTP)",
+    "power": "Power",
+    "torque": "Torque",
+    "acceleration": "0-100 km/h",
+    "topSpeed": "Top Speed",
+    "drive": "Drive",
+    "seats": "Seats",
+    "chargingAC": "AC Charging",
+    "chargingDC": "DC Charging",
+    "notes": "Notes",
+    "availableAt": "Available at these Dealerships",
+    "contactDealer": "Contact Dealer",
+    "backLink": "Back to all models",
+    "metaTitleSuffix": "Electric vehicle specifications | Makina Elektrike",
+    "metaDescription": "View detailed data for {{brand}} {{model}} — WLTP range {{range}} km, battery {{battery}} kWh and charging performance.",
+    "faqTitle": "Model FAQ",
+    "faqSubtitle": "Good to know before requesting a quote or test drive.",
+    "faqItems": [
+      {
+        "question": "How does cold weather affect the range?",
+        "answer": "Expect a temporary reduction of 10–15% during Albanian winters. Preconditioning and eco driving help maintain range."
+      },
+      {
+        "question": "Is the battery covered by warranty?",
+        "answer": "Most manufacturers offer 8-year / 160,000 km coverage, guaranteeing the battery remains above 70% capacity."
+      },
+      {
+        "question": "What home charging do I need?",
+        "answer": "A 7.4 kW wallbox on a dedicated circuit is ideal; models supporting 11 kW three-phase charging reduce top-up times further."
+      }
+    ]
+  },
+  "blogPage": {
+    "title": "Our Blog",
+    "subtitle": "News, guides, and insights into the world of electric vehicles.",
+    "metaTitle": "Electric mobility insights | Makina Elektrike Blog",
+    "metaDescription": "Read guides about EV ownership, charging infrastructure, incentives and model comparisons tailored to Albania.",
+    "metaKeywords": [
+      "EV blog",
+      "electric car tips",
+      "Makina Elektrike articles"
+    ],
+    "introTitle": "Expert knowledge for Albanian drivers",
+    "introSubtitle": "Stay informed with fact-checked articles that translate global EV trends into local opportunities.",
+    "insightsTitle": "What you'll learn",
+    "insightsSubtitle": "The blog covers everything from policy updates to maintenance best practices.",
+    "insights": [
+      {
+        "title": "Charging best practices",
+        "description": "Discover how to balance home, workplace and public charging for maximum convenience and battery health."
+      },
+      {
+        "title": "Incentives explained",
+        "description": "Understand customs, VAT exemptions and municipal programmes that reduce the cost of going electric."
+      },
+      {
+        "title": "Real-world case studies",
+        "description": "See how Albanian households and fleets are reducing running costs and emissions with EV adoption."
+      }
+    ],
+    "faqTitle": "Blog FAQ",
+    "faqSubtitle": "Helpful notes about our editorial process.",
+    "faqItems": [
+      {
+        "question": "Who writes the articles?",
+        "answer": "Our editorial team collaborates with local experts, dealerships and infrastructure providers to ensure accuracy."
+      },
+      {
+        "question": "How often is new content published?",
+        "answer": "We publish fresh stories every week, plus timely updates when new incentives or major models launch."
+      },
+      {
+        "question": "Can I suggest a topic?",
+        "answer": "Yes, send us your ideas via the contact form and we will consider them for upcoming guides and interviews."
+      }
+    ]
+  },
+  "aboutPage": {
+    "title": "About Makina Elektrike",
+    "metaTitle": "About Makina Elektrike | EV directory for Albania",
+    "metaDescription": "Learn how Makina Elektrike connects Albanian drivers with electric vehicles, dealerships and trusted advice.",
+    "metaKeywords": [
+      "about Makina Elektrike",
+      "EV directory Albania",
+      "electric mobility mission"
+    ],
+    "p1": "Makina Elektrike is the premier online directory for electric and hybrid vehicles in Albania. Our mission is to accelerate the adoption of sustainable transportation by providing a comprehensive, user-friendly platform for prospective buyers.",
+    "p2": "We connect you with a wide network of official dealerships and importers, offering detailed information on the latest EV models available in the country. From technical specifications to dealership locations, we aim to be your one-stop resource for everything electric.",
+    "p3": "Whether you're a seasoned EV enthusiast or just starting to explore your options, Makina Elektrike is here to guide you on your journey towards a cleaner, greener future on the road.",
+    "p4": "Our team monitors market developments, charging infrastructure and policy updates so Albanian consumers and businesses can make informed decisions at every step.",
+    "pillars": [
+      {
+        "title": "Transparency",
+        "description": "We prioritise verified data, clear pricing context and unbiased comparisons for all vehicles and dealers."
+      },
+      {
+        "title": "Local expertise",
+        "description": "Guides and resources are written with Albanian roads, energy costs and regulations in mind."
+      },
+      {
+        "title": "Continuous innovation",
+        "description": "We iterate quickly, adding new tools—from comparison charts to lead tracking—to support the EV ecosystem."
+      }
+    ],
+    "faqTitle": "About Makina Elektrike FAQ",
+    "faqSubtitle": "More context about our platform and how we work with partners.",
+    "faqItems": [
+      {
+        "question": "Is Makina Elektrike independent?",
+        "answer": "Yes. We collaborate with dealerships but maintain editorial independence to ensure trustworthy recommendations."
+      },
+      {
+        "question": "How can dealers partner with you?",
+        "answer": "Dealers can apply through the registration page; our team verifies credentials and onboards approved partners."
+      },
+      {
+        "question": "Do you cover commercial fleets?",
+        "answer": "We are expanding resources for business fleets and welcome enquiries from logistics, taxi and corporate operators."
+      }
+    ]
+  },
+  "contactPage": {
+    "title": "Contact Us",
+    "metaTitle": "Contact Makina Elektrike",
+    "metaDescription": "Get in touch with Makina Elektrike for partnerships, media enquiries or EV support in Albania.",
+    "metaKeywords": [
+      "contact Makina Elektrike",
+      "EV support Albania",
+      "dealer partnerships"
+    ],
+    "p1": "Have a question, feedback, or a business inquiry? We'd love to hear from you. Reach out to us via the channels below, and our team will get back to you as soon as possible.",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "addressDetails": "Tirana, Albania",
+    "highlights": [
+      {
+        "title": "Partnership enquiries",
+        "description": "Dealerships, charging providers and service partners can collaborate with us to reach more EV customers."
+      },
+      {
+        "title": "Media & press",
+        "description": "We provide commentary on the Albanian EV market and can connect you with local experts for interviews."
+      },
+      {
+        "title": "Community support",
+        "description": "Need help choosing an EV or charger? Send us your questions and we will point you to the right resources."
+      }
+    ],
+    "faqTitle": "Contact FAQ",
+    "faqSubtitle": "Key information about response times and support.",
+    "faqItems": [
+      {
+        "question": "How fast will you reply?",
+        "answer": "We respond to most enquiries within one working day, prioritising urgent support for existing partners."
+      },
+      {
+        "question": "Do you offer phone consultations?",
+        "answer": "Yes, book a call via email and our team will schedule a session to discuss your EV plans in detail."
+      },
+      {
+        "question": "Where are you based?",
+        "answer": "Our core team operates from Tirana, with partner support across other major Albanian cities."
+      }
+    ]
+  },
+  "favoritesPage": {
+    "title": "Your favourites",
+    "subtitle": "Keep track of the dealers and models that best fit your electric mobility plans.",
+    "dealers": "Favourite dealers",
+    "models": "Favourite models",
+    "noDealers": "You have not saved any dealers yet.",
+    "noModels": "You have not saved any models yet.",
+    "metaTitle": "Saved electric dealers & models | Makina Elektrike",
+    "metaDescription": "Review your bookmarked EV dealerships and vehicles in one place and continue your research with ease.",
+    "metaKeywords": [
+      "EV favourites",
+      "saved dealers",
+      "saved models"
+    ],
+    "introTitle": "Build your shortlist",
+    "introSubtitle": "Use favourites to compare offers, plan test drives and keep important links handy across devices.",
+    "insightsTitle": "Tips for next steps",
+    "insightsSubtitle": "Make the most of your saved list before visiting showrooms.",
+    "insights": [
+      {
+        "title": "Group by priority",
+        "description": "Tag or note why each dealer or model stood out so you can discuss the right topics during follow-up calls."
+      },
+      {
+        "title": "Share with your family",
+        "description": "Send your list to family members or colleagues to gather feedback before making a purchase decision."
+      },
+      {
+        "title": "Update after test drives",
+        "description": "Remove models that no longer fit and add notes about driving impressions to track your progress."
+      }
+    ],
+    "faqTitle": "Favourites FAQ",
+    "faqSubtitle": "How to manage your personalised EV watchlist.",
+    "faqItems": [
+      {
+        "question": "Can I export my favourites?",
+        "answer": "Yes, copy the list or capture a screenshot before sharing it with dealerships or advisors."
+      },
+      {
+        "question": "Do favourites sync across devices?",
+        "answer": "Once logged in, your saved dealers and models are available on desktop and mobile."
+      },
+      {
+        "question": "How many items can I save?",
+        "answer": "There is no hard limit—save as many dealers and models as you need while researching."
+      }
+    ]
+  },
+  "auth": {
+    "awaitingApprovalTitle": "Awaiting Approval",
+    "awaitingApprovalDescription": "Thanks for registering! Your account is pending approval. We will notify you once an administrator reviews your request.",
+    "awaitingApprovalEmail": "Current account",
+    "awaitingMetaTitle": "Account pending approval | Makina Elektrike",
+    "awaitingMetaDescription": "Your application is under review. We will activate access to Makina Elektrike as soon as the verification is complete.",
+    "awaitingMetaKeywords": [
+      "dealer approval",
+      "pending account",
+      "Makina Elektrike onboarding"
+    ],
+    "awaitingNextSteps": "You can continue gathering documents or reach out to our team if you need to update your submission while we complete the review."
+  },
+  "admin": {
+    "loginTitle": "Admin Login",
+    "loginSubtitle": "Access the administration dashboard",
+    "loginEmail": "Email",
+    "loginPassword": "Password",
+    "loginButton": "Sign in",
+    "loginError": "The provided credentials are invalid.",
+    "loginInfo": "Secure area for administrators and approved dealers. Accounts are monitored and protected with activity logging.",
+    "metaTitle": "Makina Elektrike admin login",
+    "metaDescription": "Sign in to manage dealers, models and content for Makina Elektrike.",
+    "metaKeywords": [
+      "Makina Elektrike admin",
+      "dealer login",
+      "EV platform management"
+    ],
+    "logout": "Log out",
+    "dashboard": "Administration dashboard",
+    "dashboardMetaTitle": "Makina Elektrike administration dashboard",
+    "dashboardMetaDescription": "Manage dealer profiles, EV models, blog content and approvals for the Makina Elektrike platform.",
+    "dashboardMetaKeywords": [
+      "EV admin dashboard",
+      "dealer management",
+      "content management"
+    ],
+    "manageDealers": "Manage dealers",
+    "manageModels": "Manage models",
+    "manageBlog": "Manage blog",
+    "bulkUploadDealers": "Bulk upload dealers",
+    "bulkUploadModels": "Bulk upload models",
+    "bulkUploadPosts": "Bulk upload blog posts",
+    "deleteConfirm": "Are you sure you want to delete this item?",
+    "loading": "Loading data…",
+    "errorTitle": "Something went wrong",
+    "tryAgain": "Try again",
+    "pendingDealers": "Pending approvals",
+    "noPendingDealers": "No dealers are awaiting approval.",
+    "noBrands": "No brands listed",
+    "ownerUid": "Owner UID: {{uid}}",
+    "createdOn": "Created on {{date}}",
+    "updatedOn": "Updated on {{date}}",
+    "editDealer": "Edit dealer",
+    "edit": "Edit",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approvedDealers": "Active dealers",
+    "noApprovedDealers": "No active dealers found.",
+    "delete": "Delete",
+    "modelsList": "Models",
+    "noModels": "No models linked yet.",
+    "rangeUnknown": "Range unknown",
+    "featured": "Featured",
+    "editModel": "Edit model",
+    "addNewDealer": "Add new dealer",
+    "addNewModel": "Add new model",
+    "blogPosts": "Blog posts",
+    "noBlogPosts": "No blog posts published yet.",
+    "dateUnknown": "Date unknown",
+    "editBlogPost": "Edit blog post",
+    "addBlogPost": "Add blog post"
+  }
 }

@@ -1,8 +1,10 @@
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Clock, ArrowLeft, Tag, HelpCircle } from 'lucide-react';
 import { DataContext } from '../contexts/DataContext';
 import type { BlogPostList } from '../types';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 const formatDate = (value: string) => {
   try {
@@ -49,30 +51,28 @@ const BlogPostPage: React.FC = () => {
     [blogPosts, slug],
   );
 
-  useEffect(() => {
-    const previousTitle = document.title;
-    const metaTag = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    const previousDescription = metaTag?.getAttribute('content') ?? '';
-
-    if (post) {
-      document.title = post.metaTitle;
-      if (metaTag) {
-        metaTag.setAttribute('content', post.metaDescription);
-      }
-    }
-
-    return () => {
-      document.title = previousTitle;
-      if (metaTag) {
-        metaTag.setAttribute('content', previousDescription);
-      }
-    };
-  }, [post]);
-
   if (!post) {
     return (
       <div className="py-24">
         <div className="max-w-3xl mx-auto px-4 text-center text-white">
+          <SEO
+            title="Artikulli nuk u gjet | Makina Elektrike"
+            description="Artikulli i kërkuar nuk ekziston më ose është zhvendosur."
+            canonical={`${BASE_URL}/#/blog/${slug ?? ''}`}
+            openGraph={{
+              title: 'Artikulli nuk u gjet | Makina Elektrike',
+              description: 'Artikulli i kërkuar nuk ekziston më ose është zhvendosur.',
+              url: `${BASE_URL}/#/blog/${slug ?? ''}`,
+              type: 'article',
+              images: [DEFAULT_OG_IMAGE],
+            }}
+            twitter={{
+              title: 'Artikulli nuk u gjet | Makina Elektrike',
+              description: 'Artikulli i kërkuar nuk ekziston më ose është zhvendosur.',
+              image: DEFAULT_OG_IMAGE,
+              site: '@makinaelektrike',
+            }}
+          />
           <h1 className="text-3xl font-bold">Artikulli nuk u gjet</h1>
           <p className="mt-4 text-gray-300">
             Përmbajtja që po kërkoni mund të jetë zhvendosur ose nuk ekziston më.
@@ -89,8 +89,69 @@ const BlogPostPage: React.FC = () => {
     );
   }
 
+  const canonical = `${BASE_URL}/#/blog/${post.slug}`;
+  const faqEntities = post.faqs?.map(faq => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  }));
+
+  const structuredData = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.metaDescription,
+      image: [post.imageUrl],
+      datePublished: post.date,
+      author: {
+        '@type': 'Person',
+        name: post.author,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Makina Elektrike',
+        url: BASE_URL,
+      },
+      mainEntityOfPage: canonical,
+      keywords: post.tags.join(', '),
+      articleSection: post.tags,
+    },
+  ];
+
+  if (faqEntities && faqEntities.length > 0) {
+    structuredData.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqEntities,
+    });
+  }
+
   return (
     <article className="py-12">
+      <SEO
+        title={post.metaTitle}
+        description={post.metaDescription}
+        keywords={post.tags}
+        canonical={canonical}
+        openGraph={{
+          title: post.metaTitle,
+          description: post.metaDescription,
+          url: canonical,
+          type: 'article',
+          images: [post.imageUrl],
+        }}
+        twitter={{
+          title: post.metaTitle,
+          description: post.metaDescription,
+          image: post.imageUrl,
+          site: '@makinaelektrike',
+        }}
+        structuredData={structuredData}
+      />
       <div className="relative h-72 sm:h-96">
         <img
           src={post.imageUrl}

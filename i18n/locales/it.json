@@ -1,115 +1,560 @@
-
 {
-    "header": {
-        "home": "Home",
-        "dealers": "Concessionari",
-        "models": "Modelli",
-        "blog": "Blog",
-        "about": "Chi Siamo",
-        "admin": "Admin"
+  "header": {
+    "home": "Home",
+    "dealers": "Concessionari",
+    "models": "Modelli",
+    "blog": "Blog",
+    "about": "Chi siamo",
+    "admin": "Admin"
+  },
+  "footer": {
+    "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
+    "explore": "Esplora",
+    "services": "Servizi",
+    "aboutUs": "Chi siamo",
+    "contact": "Contatti",
+    "sitemap": "Mappa del sito",
+    "legal": "Note legali",
+    "privacy": "Privacy",
+    "terms": "Termini di servizio",
+    "rightsReserved": "Tutti i diritti riservati.",
+    "userSignup": "Registrazione utente",
+    "dealerSignup": "Registrazione rivenditore",
+    "madeBy": "Realizzato da"
+  },
+  "common": {
+    "unknownCity": "Località sconosciuta"
+  },
+  "home": {
+    "heroTitle": "Guida il futuro.",
+    "heroSubtitle": "Scopri la mobilità elettrica in Albania.",
+    "heroCta": "Trova il tuo EV",
+    "searchTitle": "Trova l'auto elettrica perfetta",
+    "cityPlaceholder": "Città",
+    "brandPlaceholder": "Marca",
+    "typePlaceholder": "Tipologia",
+    "searchButton": "Cerca",
+    "featuredDealers": "Concessionari in evidenza",
+    "featuredModels": "Modelli popolari",
+    "fromOurBlog": "Dal nostro blog",
+    "seeAllDealers": "Tutti i concessionari",
+    "seeAllModels": "Tutti i modelli",
+    "seeAllPosts": "Leggi tutti gli articoli",
+    "metaTitle": "Makina Elektrike | Hub dei veicoli elettrici in Albania",
+    "metaDescription": "Trova concessionari verificati, confronta modelli elettrici e scopri la ricarica in Albania con Makina Elektrike.",
+    "metaKeywords": [
+      "auto elettriche Albania",
+      "concessionari EV",
+      "Makina Elektrike",
+      "veicoli ibridi"
+    ],
+    "valueTitle": "Tutto ciò che serve per passare all'elettrico",
+    "valueSubtitle": "Makina Elektrike riunisce dati, guide e partner certificati per accompagnarti nel passaggio alla mobilità elettrica.",
+    "valueHighlights": [
+      {
+        "title": "Concessionari verificati",
+        "description": "I profili vengono controllati e aggiornati per garantire che siano autorizzati alla vendita e assistenza dei veicoli elettrici."
+      },
+      {
+        "title": "Dati completi sui modelli",
+        "description": "Confronta autonomia WLTP, potenza di ricarica, capacità batteria e dotazioni di ogni EV o ibrida plug-in."
+      },
+      {
+        "title": "Supporto alle decisioni",
+        "description": "Guide pratiche, informazioni sugli incentivi e FAQ pensate per automobilisti e flotte albanesi."
+      }
+    ],
+    "insightsTitle": "Uno sguardo rapido alla mobilità elettrica",
+    "insightsSubtitle": "Comprendi l'evoluzione del mercato e cosa significa per il tuo prossimo acquisto.",
+    "insights": [
+      {
+        "title": "Rete di ricarica",
+        "description": "Sono attivi oltre 120 punti di ricarica pubblici, con stazioni rapide DC lungo l'asse Tirana–Durazzo."
+      },
+      {
+        "title": "Costo totale",
+        "description": "Con un EV spendi in media 2–3 € ogni 100 km: meno della metà rispetto a un veicolo a benzina equivalente."
+      },
+      {
+        "title": "Manutenzione ridotta",
+        "description": "I motori elettrici eliminano cambi olio, scarichi e cinghie: fino al 40% di visite in officina in meno ogni anno."
+      },
+      {
+        "title": "Incentivi pubblici",
+        "description": "Per gli EV nuovi non si pagano dazi e IVA all'importazione; diverse municipalità offrono anche parcheggi agevolati."
+      }
+    ],
+    "faqTitle": "Domande frequenti",
+    "faqSubtitle": "Le risposte ai dubbi più comuni di chi valuta un'auto elettrica in Albania.",
+    "faqItems": [
+      {
+        "question": "Serve un caricatore domestico?",
+        "answer": "Un wallbox dedicato è consigliato, ma molti conducenti utilizzano punti AC pubblici o ricaricano sul posto di lavoro."
+      },
+      {
+        "question": "Quanto dura l'immatricolazione?",
+        "answer": "I concessionari presenti su Makina Elektrike gestiscono omologazione e immatricolazione in 2–4 giorni lavorativi."
+      },
+      {
+        "question": "Posso prenotare un test drive?",
+        "answer": "Certo. Ogni profilo di concessionario include i contatti per prenotare prove su strada a Tirana, Durazzo, Scutari e altre città."
+      }
+    ]
+  },
+  "dealersPage": {
+    "title": "Concessionari in Albania",
+    "subtitle": "Filtra e confronta i rivenditori autorizzati di veicoli elettrici e ibridi nel Paese.",
+    "filters": "Filtri",
+    "city": "Città",
+    "brand": "Marca",
+    "language": "Lingua parlata",
+    "noResults": "Nessun concessionario corrisponde ai tuoi criteri.",
+    "viewDetails": "Dettagli",
+    "pendingApproval": "In attesa di approvazione",
+    "allCities": "Tutte le città",
+    "allBrands": "Tutte le marche",
+    "allLanguages": "Tutte le lingue",
+    "sortBy": "Ordina per",
+    "clearFilters": "Azzera filtri",
+    "mapTitle": "Visualizza sulla mappa",
+    "sortOptions": {
+      "name_asc": "Nome A–Z",
+      "name_desc": "Nome Z–A",
+      "city_asc": "Città A–Z",
+      "city_desc": "Città Z–A"
     },
-    "footer": {
-        "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
-        "explore": "Esplora",
-        "aboutUs": "Chi Siamo",
-        "contact": "Contatti",
-        "legal": "Legale",
-        "privacy": "Politica sulla Privacy",
-        "terms": "Termini di Servizio",
-        "rightsReserved": "Tutti i diritti riservati."
+    "metaTitle": "Concessionari di auto elettriche in Albania | Makina Elektrike",
+    "metaDescription": "Esplora concessionari EV verificati a Tirana, Durazzo, Scutari e oltre. Filtra per marca, lingua e posizione.",
+    "metaKeywords": [
+      "concessionari EV",
+      "auto elettriche Albania",
+      "Makina Elektrike concessionari"
+    ],
+    "introTitle": "Partner affidabili, informazioni trasparenti",
+    "introSubtitle": "Ogni scheda viene approvata manualmente per garantire esperienza reale nella mobilità elettrica.",
+    "insightsTitle": "Cosa valutare prima della visita",
+    "insightsSubtitle": "Suggerimenti rapidi per individuare il concessionario più adatto a te.",
+    "insights": [
+      {
+        "title": "Certificazioni e assistenza",
+        "description": "Verifica formazione ufficiale, strumenti EV e diagnosi batteria per un supporto affidabile nel tempo."
+      },
+      {
+        "title": "Supporto alla ricarica",
+        "description": "Molti rivenditori collaborano con installatori certificati: chiedi se possono aiutarti a installare un wallbox."
+      },
+      {
+        "title": "Finanziamenti e permute",
+        "description": "Soluzioni di leasing dedicate e programmi di permuta possono ridurre i costi iniziali e velocizzare la transizione."
+      }
+    ],
+    "faqTitle": "FAQ directory concessionari",
+    "faqSubtitle": "Consigli per utilizzare al meglio l'elenco di Makina Elektrike.",
+    "faqItems": [
+      {
+        "question": "Ogni quanto aggiornate i dati?",
+        "answer": "Il nostro team verifica contatti e informazioni principali ogni mese e quando riceviamo aggiornamenti dai partner."
+      },
+      {
+        "question": "Posso suggerire una nuova marca?",
+        "answer": "Sì. Compila il modulo contatti per segnalarci nuovi importatori o brand elettrici e avvieremo le verifiche."
+      },
+      {
+        "question": "Cosa indica il badge di approvazione?",
+        "answer": "I concessionari con badge hanno completato il nostro onboarding e offrono comprovata esperienza EV in Albania."
+      }
+    ]
+  },
+  "dealerDetails": {
+    "brandsSold": "Marche trattate",
+    "contactInfo": "Informazioni di contatto",
+    "address": "Indirizzo",
+    "phone": "Telefono",
+    "email": "Email",
+    "website": "Sito web",
+    "languagesSpoken": "Lingue parlate",
+    "noLanguages": "Nessuna lingua indicata",
+    "notes": "Note",
+    "modelsAvailable": "Modelli disponibili",
+    "backLink": "Torna a tutti i concessionari",
+    "approved": "Concessionario approvato",
+    "pendingApproval": "In attesa di approvazione",
+    "locationOnMap": "Posizione sulla mappa",
+    "metaTitleSuffix": "Concessionario veicoli elettrici | Makina Elektrike",
+    "metaDescription": "Scopri {{name}} a {{city}} — rivenditore autorizzato per {{brands}} con supporto dedicato alla mobilità elettrica in Albania.",
+    "aboutTitle": "Chi è {{name}}",
+    "aboutDescription": "{{name}} assiste gli automobilisti di {{city}} con consulenti dedicati e officina certificata per le marche {{brands}}.",
+    "faqTitle": "FAQ concessionario",
+    "faqSubtitle": "Informazioni pratiche prima della visita.",
+    "faqItems": [
+      {
+        "question": "Offrite test drive?",
+        "answer": "La maggior parte dei partner organizza test drive entro 24–48 ore. Contatta direttamente il concessionario per disponibilità."
+      },
+      {
+        "question": "Quali documenti portare?",
+        "answer": "Documento, patente e – in caso di finanziamento – documenti reddituali per velocizzare le pratiche."
+      },
+      {
+        "question": "Potete aiutare con l'installazione del caricatore?",
+        "answer": "Sì, molti concessionari collaborano con elettricisti certificati e possono coordinare l'installazione domestica o aziendale."
+      }
+    ]
+  },
+  "modelsPage": {
+    "title": "Modelli elettrici e ibridi",
+    "subtitle": "Confronta specifiche, autonomia e tempi di ricarica dei veicoli disponibili in Albania.",
+    "filters": "Filtri",
+    "brand": "Marca",
+    "bodyType": "Carrozzeria",
+    "range": "Autonomia (WLTP)",
+    "noResults": "Nessun modello corrisponde ai tuoi criteri.",
+    "viewDetails": "Dettagli",
+    "rangeUnknown": "Autonomia non indicata",
+    "allBrands": "Tutte le marche",
+    "allBodyTypes": "Tutte le carrozzerie",
+    "sortBy": "Ordina per",
+    "compare": "Confronta modelli",
+    "clearFilters": "Azzera filtri",
+    "sortOptions": {
+      "model_asc": "Modello A–Z",
+      "model_desc": "Modello Z–A",
+      "brand_asc": "Marca A–Z",
+      "brand_desc": "Marca Z–A",
+      "range_desc": "Autonomia maggiore",
+      "range_asc": "Autonomia minore"
     },
-    "common": {
-        "unknownCity": "Località sconosciuta"
-    },
-    "home": {
-        "heroTitle": "Guida il Futuro.",
-        "heroSubtitle": "Scopri la Mobilità Elettrica in Albania.",
-        "heroCta": "Trova il Tuo EV",
-        "searchTitle": "Trova la Tua Auto Elettrica Perfetta",
-        "cityPlaceholder": "Città",
-        "brandPlaceholder": "Marca",
-        "typePlaceholder": "Tipo di Auto",
-        "searchButton": "Cerca",
-        "featuredDealers": "Concessionari in Evidenza",
-        "featuredModels": "Modelli Popolari"
-    },
-    "dealersPage": {
-        "title": "Concessionari in Albania",
-        "filters": "Filtri",
-        "city": "Città",
-        "brand": "Marca",
-        "language": "Lingua Parlata",
-        "noResults": "Nessun concessionario trovato che corrisponda ai tuoi criteri.",
-        "viewDetails": "Vedi Dettagli",
-        "pendingApproval": "In attesa di approvazione"
-    },
-    "dealerDetails": {
-        "brandsSold": "Marche Vendute",
-        "contactInfo": "Informazioni di Contatto",
-        "address": "Indirizzo",
-        "phone": "Telefono",
-        "email": "Email",
-        "website": "Sito Web",
-        "languagesSpoken": "Lingue Parlate",
-        "noLanguages": "Nessuna lingua specificata",
-        "notes": "Note",
-        "modelsAvailable": "Modelli Disponibili presso questo Concessionario",
-        "backLink": "Torna a tutti i concessionari",
-        "approved": "Concessionario approvato",
-        "pendingApproval": "In attesa di approvazione"
-    },
-    "modelsPage": {
-        "title": "Modelli Elettrici e Ibridi",
-        "filters": "Filtri",
-        "brand": "Marca",
-        "bodyType": "Tipo di Carrozzeria",
-        "range": "Autonomia (WLTP)",
-        "noResults": "Nessun modello trovato che corrisponda ai tuoi criteri.",
-        "viewDetails": "Vedi Dettagli",
-        "rangeUnknown": "Autonomia sconosciuta"
-    },
-    "modelDetails": {
-        "specifications": "Specifiche",
-        "battery": "Batteria",
-        "range": "Autonomia (WLTP)",
-        "power": "Potenza",
-        "torque": "Coppia",
-        "acceleration": "0-100 km/h",
-        "topSpeed": "Velocità Massima",
-        "drive": "Trazione",
-        "seats": "Posti",
-        "chargingAC": "Ricarica AC",
-        "chargingDC": "Ricarica DC",
-        "notes": "Note",
-        "availableAt": "Disponibile presso questi Concessionari",
-        "contactDealer": "Contatta il Concessionario",
-        "backLink": "Torna a tutti i modelli"
-    },
-    "blogPage": {
-        "title": "Il Nostro Blog",
-        "subtitle": "Notizie, guide e approfondimenti sul mondo dei veicoli elettrici."
-    },
-    "aboutPage": {
-      "title": "Chi Siamo - Makina Elektrike",
-      "p1": "Makina Elektrike è la principale directory online per veicoli elettrici e ibridi in Albania. La nostra missione è accelerare l'adozione di trasporti sostenibili fornendo una piattaforma completa e facile da usare per i potenziali acquirenti.",
-      "p2": "Ti mettiamo in contatto con una vasta rete di concessionari e importatori ufficiali, offrendo informazioni dettagliate sugli ultimi modelli di veicoli elettrici disponibili nel paese. Dalle specifiche tecniche alle sedi dei concessionari, il nostro obiettivo è essere la tua risorsa unica per tutto ciò che è elettrico.",
-      "p3": "Che tu sia un appassionato di veicoli elettrici di lunga data o che tu stia appena iniziando a esplorare le tue opzioni, Makina Elektrike è qui per guidarti nel tuo viaggio verso un futuro più pulito e più verde sulla strada."
-    },
-    "contactPage": {
-      "title": "Contattaci",
-      "p1": "Hai una domanda, un feedback o una richiesta commerciale? Ci piacerebbe sentirti. Contattaci tramite i canali sottostanti e il nostro team ti risponderà il prima possibile.",
-      "email": "Email",
-      "phone": "Telefono",
-      "address": "Indirizzo",
-      "addressDetails": "Tirana, Albania"
-    },
-    "admin": {
-        "loginTitle": "Accesso Admin",
-        "loginSubtitle": "Accedi al pannello di amministrazione",
-        "loginEmail": "Email",
-        "loginPassword": "Password",
-        "loginButton": "Accedi",
-        "loginError": "Le credenziali fornite non sono valide.",
-        "logout": "Esci"
-    }
+    "metaTitle": "Catalogo veicoli elettrici per l'Albania | Makina Elektrike",
+    "metaDescription": "Consulta i dati tecnici di EV e ibridi: autonomia WLTP, batteria, ricarica e disponibilità presso i concessionari.",
+    "metaKeywords": [
+      "modelli auto elettriche",
+      "autonomia EV",
+      "veicoli ibridi Albania"
+    ],
+    "introTitle": "Esplora ogni opzione elettrica",
+    "introSubtitle": "Filtra per carrozzeria, autonomia o marca e crea una short-list in linea con il tuo stile di guida e budget.",
+    "insightsTitle": "Suggerimenti per l'acquisto",
+    "insightsSubtitle": "Aspetti chiave da valutare quando si confrontano i veicoli elettrici.",
+    "insights": [
+      {
+        "title": "Capacità batteria",
+        "description": "Per uso cittadino bastano 50–60 kWh, chi viaggia spesso in autostrada dovrebbe orientarsi su 70 kWh o più."
+      },
+      {
+        "title": "Curva di ricarica",
+        "description": "Non guardare solo il picco in kW: una curva stabile riduce i tempi di sosta nei viaggi lunghi."
+      },
+      {
+        "title": "Aggiornamenti software",
+        "description": "Verifica se il veicolo supporta aggiornamenti OTA e servizi connessi che migliorano efficienza e funzioni nel tempo."
+      }
+    ],
+    "faqTitle": "FAQ confronto modelli",
+    "faqSubtitle": "Risposte rapide per chi valuta il primo EV.",
+    "faqItems": [
+      {
+        "question": "Cos'è il ciclo WLTP?",
+        "answer": "È lo standard europeo che permette di confrontare l'autonomia dei vari modelli con condizioni realistiche."
+      },
+      {
+        "question": "Posso filtrare i modelli con ricarica rapida?",
+        "answer": "Sì, usa i filtri per selezionare modelli oltre 100 kW in DC oppure consulta le specifiche di ogni scheda."
+      },
+      {
+        "question": "Includete anche le ibride plug-in?",
+        "answer": "Inseriamo i PHEV con autonomia elettrica significativa così da confrontarli con i modelli full electric."
+      }
+    ]
+  },
+  "modelDetails": {
+    "specifications": "Specifiche",
+    "battery": "Batteria",
+    "range": "Autonomia (WLTP)",
+    "power": "Potenza",
+    "torque": "Coppia",
+    "acceleration": "0-100 km/h",
+    "topSpeed": "Velocità massima",
+    "drive": "Trazione",
+    "seats": "Posti",
+    "chargingAC": "Ricarica AC",
+    "chargingDC": "Ricarica DC",
+    "notes": "Note",
+    "availableAt": "Disponibile presso questi concessionari",
+    "contactDealer": "Contatta il concessionario",
+    "backLink": "Torna ai modelli",
+    "metaTitleSuffix": "Scheda tecnica veicolo elettrico | Makina Elektrike",
+    "metaDescription": "Dettagli di {{brand}} {{model}} — autonomia {{range}} km WLTP, batteria {{battery}} kWh e prestazioni di ricarica.",
+    "faqTitle": "FAQ modello",
+    "faqSubtitle": "Informazioni utili prima di richiedere un preventivo o un test drive.",
+    "faqItems": [
+      {
+        "question": "Come influisce il freddo sull'autonomia?",
+        "answer": "In inverno l'autonomia può ridursi del 10–15%. Pre-riscaldamento e guida efficiente aiutano a limitarne l'impatto."
+      },
+      {
+        "question": "La batteria è coperta da garanzia?",
+        "answer": "La maggior parte dei costruttori offre 8 anni / 160.000 km garantendo almeno il 70% della capacità."
+      },
+      {
+        "question": "Che ricarica domestica serve?",
+        "answer": "Un wallbox da 7,4 kW è ideale; se il modello accetta 11 kW trifase i tempi si riducono ulteriormente."
+      }
+    ]
+  },
+  "blogPage": {
+    "title": "Il nostro blog",
+    "subtitle": "Notizie, guide e approfondimenti sul mondo dei veicoli elettrici.",
+    "metaTitle": "Approfondimenti sulla mobilità elettrica | Blog Makina Elektrike",
+    "metaDescription": "Leggi guide su proprietà EV, infrastruttura di ricarica, incentivi e confronti modelli pensati per l'Albania.",
+    "metaKeywords": [
+      "blog EV",
+      "consigli auto elettriche",
+      "articoli Makina Elektrike"
+    ],
+    "introTitle": "Conoscenza per i conducenti albanesi",
+    "introSubtitle": "Contenuti verificati che traducono i trend globali in opportunità locali.",
+    "insightsTitle": "Cosa troverai",
+    "insightsSubtitle": "Il blog copre normativa, manutenzione, casi reali e molto altro.",
+    "insights": [
+      {
+        "title": "Best practice di ricarica",
+        "description": "Scopri come bilanciare ricarica domestica, aziendale e pubblica per comfort e durata della batteria."
+      },
+      {
+        "title": "Incentivi spiegati",
+        "description": "Capisci dogane, IVA e programmi comunali che riducono i costi del passaggio all'elettrico."
+      },
+      {
+        "title": "Case study locali",
+        "description": "Famiglie e aziende albanesi raccontano come riducono costi operativi ed emissioni con veicoli elettrici."
+      }
+    ],
+    "faqTitle": "FAQ blog",
+    "faqSubtitle": "Informazioni sulla redazione e su come contribuire.",
+    "faqItems": [
+      {
+        "question": "Chi scrive gli articoli?",
+        "answer": "Il nostro team lavora con esperti locali, concessionari e operatori della ricarica per garantire informazioni accurate."
+      },
+      {
+        "question": "Con quale frequenza pubblicate?",
+        "answer": "Pubblicazioni settimanali e aggiornamenti extra quando arrivano nuovi incentivi o modelli importanti."
+      },
+      {
+        "question": "Posso proporre un argomento?",
+        "answer": "Sì, inviaci le tue idee tramite il modulo di contatto e le valuteremo per i prossimi articoli."
+      }
+    ]
+  },
+  "aboutPage": {
+    "title": "Chi è Makina Elektrike",
+    "metaTitle": "Chi siamo | Makina Elektrike",
+    "metaDescription": "Scopri come Makina Elektrike collega gli automobilisti albanesi con EV, concessionari e consigli affidabili.",
+    "metaKeywords": [
+      "chi è Makina Elektrike",
+      "directory EV",
+      "mobilità elettrica Albania"
+    ],
+    "p1": "Makina Elektrike è la principale directory online per veicoli elettrici e ibridi in Albania. La nostra missione è accelerare l'adozione del trasporto sostenibile con una piattaforma completa e intuitiva.",
+    "p2": "Mettiamo in contatto con una rete di concessionari e importatori ufficiali offrendo informazioni dettagliate sui modelli più recenti disponibili nel Paese.",
+    "p3": "Che tu sia un appassionato o stia muovendo i primi passi, Makina Elektrike ti guida verso una mobilità più pulita e verde.",
+    "p4": "Monitoriamo mercato, infrastruttura di ricarica e politiche per aiutare consumatori e aziende a prendere decisioni informate.",
+    "pillars": [
+      {
+        "title": "Trasparenza",
+        "description": "Priorità a dati verificati, prezzi contestualizzati e confronti imparziali per ogni veicolo e concessionario."
+      },
+      {
+        "title": "Competenza locale",
+        "description": "Contenuti pensati per le strade, i costi energetici e le normative albanesi."
+      },
+      {
+        "title": "Innovazione continua",
+        "description": "Aggiorniamo rapidamente la piattaforma con nuovi strumenti, dal confronto ai sistemi di gestione lead."
+      }
+    ],
+    "faqTitle": "FAQ su Makina Elektrike",
+    "faqSubtitle": "Altre informazioni su come lavoriamo e collaboriamo.",
+    "faqItems": [
+      {
+        "question": "Siete indipendenti?",
+        "answer": "Sì. Collaboriamo con concessionari ma manteniamo indipendenza editoriale per offrire consigli affidabili."
+      },
+      {
+        "question": "Come può collaborare un concessionario?",
+        "answer": "Basta candidarsi tramite la pagina di registrazione; verifichiamo le credenziali e abilitiamo i partner approvati."
+      },
+      {
+        "question": "Coprite anche flotte aziendali?",
+        "answer": "Stiamo ampliando le risorse dedicate alle flotte e accogliamo richieste da aziende, taxi e logistica."
+      }
+    ]
+  },
+  "contactPage": {
+    "title": "Contattaci",
+    "metaTitle": "Contatta Makina Elektrike",
+    "metaDescription": "Mettiti in contatto con Makina Elektrike per partnership, media o supporto EV in Albania.",
+    "metaKeywords": [
+      "contatta Makina Elektrike",
+      "supporto EV",
+      "partnership concessionari"
+    ],
+    "p1": "Hai domande, feedback o richieste di collaborazione? Scrivici e il nostro team ti risponderà al più presto.",
+    "email": "Email",
+    "phone": "Telefono",
+    "address": "Indirizzo",
+    "addressDetails": "Tirana, Albania",
+    "highlights": [
+      {
+        "title": "Collaborazioni",
+        "description": "Concessionari, operatori di ricarica e fornitori di servizi possono lavorare con noi per raggiungere più clienti EV."
+      },
+      {
+        "title": "Media",
+        "description": "Forniamo analisi sul mercato albanese e possiamo mettervi in contatto con esperti locali per interviste."
+      },
+      {
+        "title": "Supporto comunità",
+        "description": "Hai bisogno di aiuto per scegliere un EV o un caricatore? Inviaci la tua domanda e ti indirizzeremo verso le risorse giuste."
+      }
+    ],
+    "faqTitle": "FAQ contatti",
+    "faqSubtitle": "Informazioni su tempi di risposta e supporto.",
+    "faqItems": [
+      {
+        "question": "In quanto tempo rispondete?",
+        "answer": "Rispondiamo entro un giorno lavorativo, dando priorità al supporto dei partner già attivi."
+      },
+      {
+        "question": "Offrite consulenze telefoniche?",
+        "answer": "Sì, prenota una chiamata via email e organizzeremo una sessione per discutere i tuoi piani."
+      },
+      {
+        "question": "Dove vi trovate?",
+        "answer": "Il team principale opera a Tirana con il supporto di partner nelle principali città albanesi."
+      }
+    ]
+  },
+  "favoritesPage": {
+    "title": "I tuoi preferiti",
+    "subtitle": "Tieni traccia dei concessionari e dei modelli più adatti ai tuoi progetti di mobilità elettrica.",
+    "dealers": "Concessionari preferiti",
+    "models": "Modelli preferiti",
+    "noDealers": "Non hai ancora salvato concessionari.",
+    "noModels": "Non hai ancora salvato modelli.",
+    "metaTitle": "Concessionari e modelli salvati | Makina Elektrike",
+    "metaDescription": "Rivedi in un unico posto i concessionari e le auto elettriche che hai salvato e continua la tua ricerca con facilità.",
+    "metaKeywords": [
+      "preferiti EV",
+      "concessionari salvati",
+      "modelli salvati"
+    ],
+    "introTitle": "Crea la tua short-list",
+    "introSubtitle": "Usa i preferiti per confrontare offerte, pianificare test drive e conservare link importanti su ogni dispositivo.",
+    "insightsTitle": "Consigli per i prossimi passi",
+    "insightsSubtitle": "Suggerimenti per sfruttare al meglio la lista salvata.",
+    "insights": [
+      {
+        "title": "Dai priorità",
+        "description": "Annota perché ti interessa un concessionario o modello così da affrontare i temi giusti nelle chiamate successive."
+      },
+      {
+        "title": "Condividi con chi decide",
+        "description": "Invia la lista a familiari o colleghi per raccogliere pareri prima della scelta finale."
+      },
+      {
+        "title": "Aggiorna dopo i test drive",
+        "description": "Rimuovi ciò che non ti convince più e aggiungi impressioni di guida per seguire l'evoluzione della ricerca."
+      }
+    ],
+    "faqTitle": "FAQ preferiti",
+    "faqSubtitle": "Come gestire la tua lista personalizzata di EV.",
+    "faqItems": [
+      {
+        "question": "Posso esportare la lista?",
+        "answer": "Sì, copia l'elenco o salva uno screenshot prima di condividerlo con concessionari o consulenti."
+      },
+      {
+        "question": "I preferiti si sincronizzano?",
+        "answer": "Una volta autenticato, ritrovi i preferiti sia su desktop che su mobile."
+      },
+      {
+        "question": "Quanti elementi posso salvare?",
+        "answer": "Non c'è un limite: salva tutti i concessionari e modelli necessari durante la tua valutazione."
+      }
+    ]
+  },
+  "auth": {
+    "awaitingApprovalTitle": "In attesa di approvazione",
+    "awaitingApprovalDescription": "Grazie per la registrazione! Il tuo account è in verifica. Ti avviseremo appena completato il controllo.",
+    "awaitingApprovalEmail": "Account attuale",
+    "awaitingMetaTitle": "Account in verifica | Makina Elektrike",
+    "awaitingMetaDescription": "La tua richiesta è in revisione. Attiveremo l'accesso a Makina Elektrike non appena sarà completata la verifica.",
+    "awaitingMetaKeywords": [
+      "approvazione concessionario",
+      "account in attesa",
+      "onboarding Makina Elektrike"
+    ],
+    "awaitingNextSteps": "Puoi prepararci eventuali documenti aggiuntivi o contattarci se desideri aggiornare i dati durante la verifica."
+  },
+  "admin": {
+    "loginTitle": "Accesso admin",
+    "loginSubtitle": "Accedi al pannello di amministrazione",
+    "loginEmail": "Email",
+    "loginPassword": "Password",
+    "loginButton": "Accedi",
+    "loginError": "Le credenziali inserite non sono valide.",
+    "loginInfo": "Area protetta per amministratori e concessionari approvati. Le attività vengono monitorate e registrate.",
+    "metaTitle": "Login admin Makina Elektrike",
+    "metaDescription": "Accedi per gestire concessionari, modelli e contenuti di Makina Elektrike.",
+    "metaKeywords": [
+      "Makina Elektrike admin",
+      "login concessionario",
+      "gestione piattaforma EV"
+    ],
+    "logout": "Esci",
+    "dashboard": "Dashboard amministrativa",
+    "dashboardMetaTitle": "Dashboard amministrativa Makina Elektrike",
+    "dashboardMetaDescription": "Gestisci profili concessionari, modelli EV, articoli del blog e approvazioni sulla piattaforma Makina Elektrike.",
+    "dashboardMetaKeywords": [
+      "dashboard EV",
+      "gestione concessionari",
+      "gestione contenuti"
+    ],
+    "manageDealers": "Gestisci concessionari",
+    "manageModels": "Gestisci modelli",
+    "manageBlog": "Gestisci blog",
+    "bulkUploadDealers": "Carica concessionari",
+    "bulkUploadModels": "Carica modelli",
+    "bulkUploadPosts": "Carica articoli",
+    "deleteConfirm": "Sei sicuro di voler eliminare questo elemento?",
+    "loading": "Caricamento dati…",
+    "errorTitle": "Si è verificato un errore",
+    "tryAgain": "Riprova",
+    "pendingDealers": "In attesa di approvazione",
+    "noPendingDealers": "Nessun concessionario in attesa.",
+    "noBrands": "Nessuna marca",
+    "ownerUid": "UID proprietario: {{uid}}",
+    "createdOn": "Creato il {{date}}",
+    "updatedOn": "Aggiornato il {{date}}",
+    "editDealer": "Modifica concessionario",
+    "edit": "Modifica",
+    "approve": "Approva",
+    "reject": "Rifiuta",
+    "approvedDealers": "Concessionari attivi",
+    "noApprovedDealers": "Nessun concessionario attivo.",
+    "delete": "Elimina",
+    "modelsList": "Modelli",
+    "noModels": "Nessun modello collegato.",
+    "rangeUnknown": "Autonomia non indicata",
+    "featured": "In evidenza",
+    "editModel": "Modifica modello",
+    "addNewDealer": "Aggiungi concessionario",
+    "addNewModel": "Aggiungi modello",
+    "blogPosts": "Articoli del blog",
+    "noBlogPosts": "Nessun articolo pubblicato.",
+    "dateUnknown": "Data sconosciuta",
+    "editBlogPost": "Modifica articolo",
+    "addBlogPost": "Aggiungi articolo"
+  }
 }

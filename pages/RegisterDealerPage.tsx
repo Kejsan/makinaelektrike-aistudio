@@ -5,6 +5,8 @@ import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { auth, firestore } from '../services/firebase';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 const RegisterDealerPage: React.FC = () => {
   const { registerDealer, loading, user, role, initializing } = useAuth();
@@ -129,8 +131,38 @@ const RegisterDealerPage: React.FC = () => {
     }
   };
 
+  const metaTitle = 'Regjistro dilerin | Makina Elektrike';
+  const metaDescription = 'Apliko për t’u listuar si dealer i autorizuar i makinave elektrike dhe hibride në Shqipëri.';
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: metaTitle,
+    description: metaDescription,
+    url: `${BASE_URL}/#/register-dealer`,
+  };
+
   return (
     <div className="py-16">
+      <SEO
+        title={metaTitle}
+        description={metaDescription}
+        keywords={['regjistrim dealer', 'makina elektrike', 'listo dilerin', 'Makina Elektrike']}
+        canonical={`${BASE_URL}/#/register-dealer`}
+        openGraph={{
+          title: metaTitle,
+          description: metaDescription,
+          url: `${BASE_URL}/#/register-dealer`,
+          type: 'website',
+          images: [DEFAULT_OG_IMAGE],
+        }}
+        twitter={{
+          title: metaTitle,
+          description: metaDescription,
+          image: DEFAULT_OG_IMAGE,
+          site: '@makinaelektrike',
+        }}
+        structuredData={structuredData}
+      />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden p-8 text-white">
           <div className="text-center mb-8">
@@ -139,6 +171,15 @@ const RegisterDealerPage: React.FC = () => {
             <p className="mt-2 text-gray-300">
               Submit your details to join Makina Elektrike as a trusted electric vehicle dealer.
             </p>
+          </div>
+
+          <div className="mb-8 grid gap-3 rounded-xl border border-white/10 bg-white/5 p-6 text-gray-200">
+            <p className="font-semibold text-white">Benefits of joining Makina Elektrike:</p>
+            <ul className="list-disc list-inside space-y-2 text-sm text-gray-300">
+              <li>Reach EV buyers across Albania with localized, SEO-friendly listings.</li>
+              <li>Publish detailed model information and update inventory in real time.</li>
+              <li>Access marketing support, analytics and lead notifications from our team.</li>
+            </ul>
           </div>
 
           {formError && (

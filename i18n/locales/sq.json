@@ -1,115 +1,560 @@
-
 {
-    "header": {
-        "home": "Kryefaqja",
-        "dealers": "Shitësit",
-        "models": "Modelet",
-        "blog": "Blogu",
-        "about": "Rreth Nesh",
-        "admin": "Admin"
+  "header": {
+    "home": "Kryefaqja",
+    "dealers": "Shitësit",
+    "models": "Modelet",
+    "blog": "Blogu",
+    "about": "Rreth Nesh",
+    "admin": "Admin"
+  },
+  "footer": {
+    "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
+    "explore": "Eksploro",
+    "services": "Shërbime",
+    "aboutUs": "Rreth Nesh",
+    "contact": "Kontaktoni",
+    "sitemap": "Harta e faqes",
+    "legal": "Ligjore",
+    "privacy": "Politika e Privatësisë",
+    "terms": "Kushtet e Shërbimit",
+    "rightsReserved": "Të gjitha të drejtat e rezervuara.",
+    "userSignup": "Regjistrim përdoruesi",
+    "dealerSignup": "Regjistrim shitësi",
+    "madeBy": "Krijuar nga"
+  },
+  "common": {
+    "unknownCity": "Lokacion i panjohur"
+  },
+  "home": {
+    "heroTitle": "Ngisni të ardhmen.",
+    "heroSubtitle": "Zbuloni lëvizshmërinë elektrike në Shqipëri.",
+    "heroCta": "Gjeni EV-në tuaj",
+    "searchTitle": "Gjeni makinën tuaj elektrike perfekte",
+    "cityPlaceholder": "Qyteti",
+    "brandPlaceholder": "Marka",
+    "typePlaceholder": "Tipi i makinës",
+    "searchButton": "Kërko",
+    "featuredDealers": "Shitësit e përzgjedhur",
+    "featuredModels": "Modelet më të kërkuara",
+    "fromOurBlog": "Nga blogu ynë",
+    "seeAllDealers": "Shiko të gjithë shitësit",
+    "seeAllModels": "Shiko të gjitha modelet",
+    "seeAllPosts": "Lexo të gjitha artikujt",
+    "metaTitle": "Makina Elektrike | Qendra e automjeteve elektrike në Shqipëri",
+    "metaDescription": "Kërkoni shitës të verifikuar, krahasoni modele elektrike dhe mësoni për karikimin në Shqipëri me Makina Elektrike.",
+    "metaKeywords": [
+      "makina elektrike Shqipëri",
+      "shitës EV",
+      "direktori Makina Elektrike",
+      "automjete hibride"
+    ],
+    "valueTitle": "Gjithçka që ju duhet për të kaluar në elektrik",
+    "valueSubtitle": "Makina Elektrike bashkon të dhëna, udhëzime dhe partnerë të verifikuar që zgjedhja juaj të jetë e sigurt.",
+    "valueHighlights": [
+      {
+        "title": "Shitës të verifikuar",
+        "description": "Profilet kontrollohen rregullisht që të dini gjithmonë kush është i autorizuar për të shitur dhe serviser makina elektrike në Shqipëri."
+      },
+      {
+        "title": "Të dhëna të plota për modelet",
+        "description": "Krahasoni autonominë WLTP, shpejtësitë e karikimit, kapacitetin e baterisë dhe pajisjet e çdo modeli EV ose hibrid."
+      },
+      {
+        "title": "Mbështetje për vendimmarrje",
+        "description": "Gjendeni udhërrëfyes praktikë, informacion për incentiva dhe FAQ të përshtatura për drejtuesit shqiptarë."
+      }
+    ],
+    "insightsTitle": "Pamje e shpejtë e mobilitetit elektrik",
+    "insightsSubtitle": "Kuptoni si po zhvillohet tregu dhe çfarë do të thotë kjo për blerjen tuaj të radhës.",
+    "insights": [
+      {
+        "title": "Rrjeti i karikimit",
+        "description": "Mbi 120 pika publike janë aktive në gjithë vendin, me stacione të shpejta DC që lidhin korridorin Tiranë–Durrës."
+      },
+      {
+        "title": "Kostoja totale",
+        "description": "Energjia për 100 km me një EV kushton mesatarisht 2–3 €, më pak se gjysma e shpenzimeve për karburant të një makine klasike."
+      },
+      {
+        "title": "Mirëmbajtje më e ulët",
+        "description": "Motori elektrik eliminon ndërrimin e vajit, riparimet e shkarkimit dhe rripin e kohës – duke ulur vizitat në servis deri në 40%."
+      },
+      {
+        "title": "Incentivat shtetërore",
+        "description": "TVSH-ja dhe dogana hiqen për importet e reja, ndërsa disa bashki ofrojnë parkim të privilegjuar për EV."
+      }
+    ],
+    "faqTitle": "Pyetjet më të shpeshta",
+    "faqSubtitle": "Përgjigje të shpejta për pyetjet që dëgjojmë më shpesh nga blerësit e EV në Shqipëri.",
+    "faqItems": [
+      {
+        "question": "A më duhet karikues shtëpiak?",
+        "answer": "Një wallbox i dedikuar është i rekomanduar për komoditet ditor, por shumë drejtues mbështeten në pika publike AC ose në karikimin në punë."
+      },
+      {
+        "question": "Sa zgjat regjistrimi i mjetit?",
+        "answer": "Shitësit e listuar te Makina Elektrike merren me homologimin dhe regjistrimin, zakonisht brenda 2–4 ditësh pune."
+      },
+      {
+        "question": "A mund të bëj test drive para blerjes?",
+        "answer": "Po. Çdo faqe shitësi përfshin kontaktet për të rezervuar provat e makinave elektrike në Tiranë, Durrës, Shkodër dhe qytete të tjera."
+      }
+    ]
+  },
+  "dealersPage": {
+    "title": "Konçesionaret në Shqipëri",
+    "subtitle": "Filtroni dhe krahasoni shitës të autorizuar të automjeteve elektrike dhe hibride në gjithë vendin.",
+    "filters": "Filtrat",
+    "city": "Qyteti",
+    "brand": "Marka",
+    "language": "Gjuha",
+    "noResults": "Nuk u gjet asnjë konçesionar që përputhet me kërkimin tuaj.",
+    "viewDetails": "Shiko detajet",
+    "pendingApproval": "Në pritje të aprovimit",
+    "allCities": "Të gjitha qytetet",
+    "allBrands": "Të gjitha markat",
+    "allLanguages": "Të gjitha gjuhët",
+    "sortBy": "Rendit sipas",
+    "clearFilters": "Pastro filtrat",
+    "mapTitle": "Shiko lokacionet në hartë",
+    "sortOptions": {
+      "name_asc": "Emri A–Zh",
+      "name_desc": "Emri Zh–A",
+      "city_asc": "Qyteti A–Zh",
+      "city_desc": "Qyteti Zh–A"
     },
-    "footer": {
-        "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
-        "explore": "Eksploro",
-        "aboutUs": "Rreth Nesh",
-        "contact": "Kontaktoni",
-        "legal": "Ligjore",
-        "privacy": "Politika e Privatësisë",
-        "terms": "Kushtet e Shërbimit",
-        "rightsReserved": "Të gjitha të drejtat e rezervuara."
+    "metaTitle": "Shitësit e makinave elektrike në Shqipëri | Makina Elektrike",
+    "metaDescription": "Eksploroni shitës të verifikuar EV dhe hibride në Tiranë, Durrës, Shkodër e më gjerë. Filtroni sipas markës, gjuhës dhe lokacionit.",
+    "metaKeywords": [
+      "shitës EV Shqipëri",
+      "salon makina elektrike",
+      "Makina Elektrike shitës"
+    ],
+    "introTitle": "Partnerë të besuar, informacion transparent",
+    "introSubtitle": "Çdo listim verifikohet manualisht për të siguruar që përfaqëson një konçesionar aktiv me përvojë në mobilitetin elektrik.",
+    "insightsTitle": "Çfarë të vlerësoni para vizitës",
+    "insightsSubtitle": "Përdorni këto këshilla për të zgjedhur konçesionarin që ju përshtatet më së miri.",
+    "insights": [
+      {
+        "title": "Certifikim dhe servis",
+        "description": "Pyetni për trajnimet zyrtare, pajisjet EV dhe diagnostikimin e baterive për të garantuar mbështetje afatgjatë."
+      },
+      {
+        "title": "Ndihmë për karikimin",
+        "description": "Shumë shitës bashkëpunojnë me instalues të autorizuar – sigurohuni nëse mund t’ju ndihmojnë me wallbox në shtëpi apo biznes."
+      },
+      {
+        "title": "Financim dhe trade-in",
+        "description": "Programet e financimit për EV dhe pranimi i makinës së vjetër mund të ulin kostot fillestare dhe të përshpejtojnë kalimin në elektrik."
+      }
+    ],
+    "faqTitle": "FAQ për listën e shitësve",
+    "faqSubtitle": "Udhëzime të dobishme për të përfituar maksimalisht nga Makina Elektrike.",
+    "faqItems": [
+      {
+        "question": "Sa shpesh përditësohen listimet?",
+        "answer": "Ekipi ynë verifikon të dhënat e kontaktit dhe informacionin kryesor çdo muaj ose sa herë që një partner raporton ndryshime."
+      },
+      {
+        "question": "A mund të sugjeroj një markë të re?",
+        "answer": "Po. Përdorni formularin e kontaktit për të propozuar marka ose importues të rinj elektrikë dhe ne do të ndjekim verifikimin."
+      },
+      {
+        "question": "Çfarë nënkupton distinktivi i aprovimit?",
+        "answer": "Shitësit me këtë shenjë kanë plotësuar listën e kontrollit tonë dhe ofrojnë ekspertizë të konfirmuar EV në Shqipëri."
+      }
+    ]
+  },
+  "dealerDetails": {
+    "brandsSold": "Markat e shitura",
+    "contactInfo": "Informacion kontakti",
+    "address": "Adresa",
+    "phone": "Telefoni",
+    "email": "Email",
+    "website": "Faqja zyrtare",
+    "languagesSpoken": "Gjuhët e folura",
+    "noLanguages": "Nuk janë specifikuar gjuhë",
+    "notes": "Shënime",
+    "modelsAvailable": "Modelet e disponueshme te ky shitës",
+    "backLink": "Kthehu te të gjithë shitësit",
+    "approved": "Shitës i aprovuar",
+    "pendingApproval": "Në pritje të aprovimit",
+    "locationOnMap": "Vendndodhja në hartë",
+    "metaTitleSuffix": "Shitës automjetesh elektrike | Makina Elektrike",
+    "metaDescription": "Zbuloni {{name}} në {{city}} — shitës i autorizuar për {{brands}} dhe mbështetje speciale për drejtuesit elektrikë në Shqipëri.",
+    "aboutTitle": "Rreth {{name}}",
+    "aboutDescription": "{{name}} shërben drejtuesit në {{city}} me këshilltarë të dedikuar dhe servis të certifikuar për markat {{brands}}.",
+    "faqTitle": "FAQ për shitësin",
+    "faqSubtitle": "Detaje praktike para se të vizitoni sallonin.",
+    "faqItems": [
+      {
+        "question": "A ofroni test drive?",
+        "answer": "Shumica e partnerëve organizojnë prova brenda 24–48 orëve. Kontaktoni drejtpërdrejt shitësin për të konfirmuar disponueshmërinë."
+      },
+      {
+        "question": "Çfarë dokumentesh duhen marrë me vete?",
+        "answer": "Siguroni dokument identifikimi, patentë dhe – nëse kërkoni financim – dokumente të të ardhurave që procesi të jetë sa më i shpejtë."
+      },
+      {
+        "question": "A ofroni instalim të karikuesit?",
+        "answer": "Po, shumë shitës bashkëpunojnë me elektrikistë të licencuar dhe mund të koordinojnë instalimin e një karikuesi në shtëpi ose biznes."
+      }
+    ]
+  },
+  "modelsPage": {
+    "title": "Modelet elektrike dhe hibride",
+    "subtitle": "Krahasoni specifikimet, autonominë dhe shpejtësitë e karikimit për modelet e disponueshme në Shqipëri.",
+    "filters": "Filtrat",
+    "brand": "Marka",
+    "bodyType": "Tipi i karrocerisë",
+    "range": "Autonomia (WLTP)",
+    "noResults": "Nuk u gjet asnjë model që përputhet me kërkimin tuaj.",
+    "viewDetails": "Shiko detajet",
+    "rangeUnknown": "Autonomi e panjohur",
+    "allBrands": "Të gjitha markat",
+    "allBodyTypes": "Të gjitha format",
+    "sortBy": "Rendit sipas",
+    "compare": "Krahaso modelet",
+    "clearFilters": "Pastro filtrat",
+    "sortOptions": {
+      "model_asc": "Modeli A–Zh",
+      "model_desc": "Modeli Zh–A",
+      "brand_asc": "Marka A–Zh",
+      "brand_desc": "Marka Zh–A",
+      "range_desc": "Autonomia më e madhe",
+      "range_asc": "Autonomia më e vogël"
     },
-    "common": {
-        "unknownCity": "Lokacion i panjohur"
-    },
-    "home": {
-        "heroTitle": "Ngisni të Ardhmen.",
-        "heroSubtitle": "Zbuloni Lëvizshmërinë Elektrike në Shqipëri.",
-        "heroCta": "Gjeni EV-në Tuaj",
-        "searchTitle": "Gjeni Makinën Tuaj Elektrike Perfekte",
-        "cityPlaceholder": "Qyteti",
-        "brandPlaceholder": "Marka",
-        "typePlaceholder": "Tipi i Makinës",
-        "searchButton": "Kërko",
-        "featuredDealers": "Shitësit e Përzgjedhur",
-        "featuredModels": "Modelet Popullore"
-    },
-    "dealersPage": {
-        "title": "Konçesionarët në Shqipëri",
-        "filters": "Filtrat",
-        "city": "Qyteti",
-        "brand": "Marka",
-        "language": "Gjuha e Folur",
-        "noResults": "Nuk u gjet asnjë konçesionar që përputhet me kriteret tuaja.",
-        "viewDetails": "Shiko Detajet",
-        "pendingApproval": "Në pritje të aprovimit"
-    },
-    "dealerDetails": {
-        "brandsSold": "Markat e Shitura",
-        "contactInfo": "Informacioni i Kontaktit",
-        "address": "Adresa",
-        "phone": "Telefoni",
-        "email": "Email",
-        "website": "Faqja e Internetit",
-        "languagesSpoken": "Gjuhët e Folura",
-        "noLanguages": "Nuk janë specifikuar gjuhë",
-        "notes": "Shënime",
-        "modelsAvailable": "Modelet e Disponueshme në këtë Konçesionar",
-        "backLink": "Kthehu te të gjithë shitësit",
-        "approved": "Shitës i aprovuar",
-        "pendingApproval": "Në pritje të aprovimit"
-    },
-    "modelsPage": {
-        "title": "Modelet Elektrike & Hibride",
-        "filters": "Filtrat",
-        "brand": "Marka",
-        "bodyType": "Tipi i Karrocerisë",
-        "range": "Autonomia (WLTP)",
-        "noResults": "Nuk u gjet asnjë model që përputhet me kriteret tuaja.",
-        "viewDetails": "Shiko Detajet",
-        "rangeUnknown": "Autonomia e panjohur"
-    },
-    "modelDetails": {
-        "specifications": "Specifikimet",
-        "battery": "Bateria",
-        "range": "Autonomia (WLTP)",
-        "power": "Fuqia",
-        "torque": "Forca Rrotulluese",
-        "acceleration": "0-100 km/h",
-        "topSpeed": "Shpejtësia Maksimale",
-        "drive": "Tërheqja",
-        "seats": "Vende",
-        "chargingAC": "Karikimi AC",
-        "chargingDC": "Karikimi DC",
-        "notes": "Shënime",
-        "availableAt": "E disponueshme te këta Shitës",
-        "contactDealer": "Kontakto Shitësin",
-        "backLink": "Kthehu te të gjitha modelet"
-    },
-    "blogPage": {
-        "title": "Blogu Ynë",
-        "subtitle": "Lajme, udhëzues dhe njohuri nga bota e automjeteve elektrike."
-    },
-    "aboutPage": {
-      "title": "Rreth Makina Elektrike",
-      "p1": "Makina Elektrike është drejtoria kryesore online për automjetet elektrike dhe hibride në Shqipëri. Misioni ynë është të përshpejtojmë adoptimin e transportit të qëndrueshëm duke ofruar një platformë gjithëpërfshirëse dhe të lehtë për t'u përdorur për blerësit e ardhshëm.",
-      "p2": "Ne ju lidhim me një rrjet të gjerë konçesionarësh zyrtarë dhe importuesish, duke ofruar informacion të detajuar mbi modelet më të fundit EV të disponueshme në vend. Nga specifikimet teknike deri te vendndodhjet e konçesionarëve, ne synojmë të jemi burimi juaj i vetëm për gjithçka elektrike.",
-      "p3": "Pavarësisht nëse jeni një entuziast i hershëm i EV-ve apo sapo keni filluar të eksploroni opsionet tuaja, Makina Elektrike është këtu për t'ju udhëhequr në udhëtimin tuaj drejt një të ardhmeje më të pastër dhe më të gjelbër në rrugë."
-    },
-    "contactPage": {
-      "title": "Na Kontaktoni",
-      "p1": "Keni një pyetje, feedback, apo një kërkesë biznesi? Do të donim të dëgjonim nga ju. Na kontaktoni përmes kanaleve më poshtë, dhe ekipi ynë do t'ju kthejë përgjigje sa më shpejt të jetë e mundur.",
-      "email": "Email",
-      "phone": "Telefon",
-      "address": "Adresa",
-      "addressDetails": "Tiranë, Shqipëri"
-    },
-    "admin": {
-        "loginTitle": "Hyrje Admin",
-        "loginSubtitle": "Hyni në panelin e administrimit",
-        "loginEmail": "Email",
-        "loginPassword": "Fjalëkalimi",
-        "loginButton": "Hyr",
-        "loginError": "Kredencialet e dhëna janë të pasakta.",
-        "logout": "Dil"
-    }
+    "metaTitle": "Katalogu i makinave elektrike për Shqipërinë | Makina Elektrike",
+    "metaDescription": "Shfletoni të dhëna teknike për EV dhe hibride: autonomi WLTP, bateri, karikim dhe disponueshmëri te shitësit.",
+    "metaKeywords": [
+      "modele makina elektrike",
+      "autonomi EV",
+      "automjete hibride Shqipëri"
+    ],
+    "introTitle": "Eksploroni çdo opsion elektrik",
+    "introSubtitle": "Filtroni sipas formës, autonomisë ose markës për të krijuar listën e shkurtër që përputhet me stilin tuaj të drejtimit dhe buxhetin.",
+    "insightsTitle": "Këshilla për blerjen",
+    "insightsSubtitle": "Çështje kryesore kur krahasoni automjetet elektrike.",
+    "insights": [
+      {
+        "title": "Kapaciteti i baterisë",
+        "description": "Përdoruesit urban zakonisht mjaftohen me 50–60 kWh, ndërsa udhëtarët e shpeshtë autostradash duhet të synojnë 70 kWh+."
+      },
+      {
+        "title": "Kurba e karikimit",
+        "description": "Shikoni jo vetëm kulmin në kW – një kurbë e qëndrueshme DC ul ndalesat gjatë udhëtimeve të gjata."
+      },
+      {
+        "title": "Përditësime softuerike",
+        "description": "Pyesni nëse automjeti mbështet përditësime OTA dhe shërbime të lidhura që rrisin eficiencën me kalimin e kohës."
+      }
+    ],
+    "faqTitle": "FAQ për krahasimin e modeleve",
+    "faqSubtitle": "Përgjigje për pyetjet më të shpeshta nga blerësit e rinj.",
+    "faqItems": [
+      {
+        "question": "Çfarë është WLTP?",
+        "answer": "WLTP është cikli evropian i eficiencës dhe ofron një vlerë të krahasueshme të autonomisë për çdo model."
+      },
+      {
+        "question": "A mund të filtroj vetëm për karikim të shpejtë?",
+        "answer": "Po, përdorni filtrat për të fokusuar modelet me karikim DC 100 kW+ ose shikoni specifikat në faqet e modeleve."
+      },
+      {
+        "question": "A përfshihen hibride plug-in?",
+        "answer": "Kur janë të disponueshme, listojmë PHEV me autonomi elektrike domethënëse për t’i krahasuar me modelet plotësisht elektrike."
+      }
+    ]
+  },
+  "modelDetails": {
+    "specifications": "Specifikimet",
+    "battery": "Bateria",
+    "range": "Autonomia (WLTP)",
+    "power": "Fuqia",
+    "torque": "Forca rrotulluese",
+    "acceleration": "0-100 km/h",
+    "topSpeed": "Shpejtësia maksimale",
+    "drive": "Tërheqja",
+    "seats": "Vendet",
+    "chargingAC": "Karikimi AC",
+    "chargingDC": "Karikimi DC",
+    "notes": "Shënime",
+    "availableAt": "I disponueshëm te këta shitës",
+    "contactDealer": "Kontakto shitësin",
+    "backLink": "Kthehu te të gjitha modelet",
+    "metaTitleSuffix": "Specifikimet e automjetit elektrik | Makina Elektrike",
+    "metaDescription": "Shihni të dhënat e detajuara për {{brand}} {{model}} — autonomi {{range}} km WLTP, bateri {{battery}} kWh dhe performancë karikimi.",
+    "faqTitle": "FAQ për modelin",
+    "faqSubtitle": "Informacione të dobishme para se të kërkoni ofertë ose test drive.",
+    "faqItems": [
+      {
+        "question": "Si ndikon dimri në autonomi?",
+        "answer": "Në dimrin shqiptar prisni një ulje të përkohshme 10–15%. Parangrohja dhe eco-driving ndihmojnë ta mbani autonominë."
+      },
+      {
+        "question": "A mbulohet bateria nga garancia?",
+        "answer": "Shumica e prodhuesve ofrojnë 8 vite / 160,000 km garanci, duke garantuar kapacitet mbi 70%."
+      },
+      {
+        "question": "Çfarë karikuesi shtëpiak më nevojitet?",
+        "answer": "Një wallbox 7.4 kW është ideal; modelet që mbështesin 11 kW trefazor e shkurtëzojnë më tej kohën e karikimit."
+      }
+    ]
+  },
+  "blogPage": {
+    "title": "Blogu ynë",
+    "subtitle": "Lajme, udhëzues dhe analiza nga bota e automjeteve elektrike.",
+    "metaTitle": "Njohuri për mobilitetin elektrik | Blogu Makina Elektrike",
+    "metaDescription": "Lexoni udhëzues për pronësinë e EV, infrastrukturën e karikimit, incentivat dhe krahasimet e modeleve të përshtatura për Shqipërinë.",
+    "metaKeywords": [
+      "blog EV",
+      "këshilla për makina elektrike",
+      "artikuj Makina Elektrike"
+    ],
+    "introTitle": "Njohuri për drejtuesit shqiptarë",
+    "introSubtitle": "Qëndroni të informuar me artikuj të verifikuar që përkthejnë trendet globale EV në mundësi lokale.",
+    "insightsTitle": "Çfarë do të mësoni",
+    "insightsSubtitle": "Blogu mbulon gjithçka nga politikat deri te mirëmbajtja praktike.",
+    "insights": [
+      {
+        "title": "Praktika karikimi",
+        "description": "Zbuloni si të balanconi karikimin në shtëpi, punë dhe publik për komoditet maksimal dhe jetëgjatësi të baterisë."
+      },
+      {
+        "title": "Incentivat e shpjeguara",
+        "description": "Kuptoni heqjen e taksave doganore, TVSH-së dhe programet bashkiake që ulin koston e kalimit në elektrik."
+      },
+      {
+        "title": "Shembuj realë",
+        "description": "Shikoni si familjet dhe flotat shqiptare po ulin kostot e operimit dhe emetimet me automjete elektrike."
+      }
+    ],
+    "faqTitle": "FAQ për blogun",
+    "faqSubtitle": "Si punon redaksia jonë dhe si mund të kontribuoni.",
+    "faqItems": [
+      {
+        "question": "Kush i shkruan artikujt?",
+        "answer": "Ekipi redaksional bashkëpunon me ekspertë lokalë, konçesionare dhe operatorë infrastrukture për të siguruar saktësi."
+      },
+      {
+        "question": "Sa shpesh publikoni?",
+        "answer": "Publikojmë çdo javë dhe herë pas here materiale shtesë kur dalin modele të reja ose ndryshojnë incentivat."
+      },
+      {
+        "question": "A mund të sugjeroj një temë?",
+        "answer": "Po, dërgoni idetë tuaja përmes formularit të kontaktit dhe ne do t'i konsiderojmë për artikujt e ardhshëm."
+      }
+    ]
+  },
+  "aboutPage": {
+    "title": "Rreth Makina Elektrike",
+    "metaTitle": "Rreth nesh | Makina Elektrike",
+    "metaDescription": "Mësoni si Makina Elektrike lidh drejtuesit shqiptarë me automjete elektrike, shitës të besuar dhe këshilla praktike.",
+    "metaKeywords": [
+      "rreth Makina Elektrike",
+      "direktori EV",
+      "mobilitet elektrik Shqipëri"
+    ],
+    "p1": "Makina Elektrike është drejtoria kryesore online për automjetet elektrike dhe hibride në Shqipëri. Misioni ynë është të përshpejtojmë adoptimin e transportit të qëndrueshëm duke ofruar një platformë gjithëpërfshirëse dhe të lehtë për t'u përdorur për blerësit.",
+    "p2": "Ne ju lidhim me një rrjet të gjerë konçesionaresh dhe importuesish zyrtarë, duke ofruar informacione të detajuara për modelet më të fundit të disponueshme në vend.",
+    "p3": "Qoftë entuziast i hershëm i EV-ve apo sapo keni filluar të kërkoni, Makina Elektrike ju udhëheq drejt një të ardhmeje më të pastër në rrugë.",
+    "p4": "Monitorojmë zhvillimet e tregut, infrastrukturën e karikimit dhe politikat për të ndihmuar konsumatorët dhe bizneset shqiptare të marrin vendime të informuara.",
+    "pillars": [
+      {
+        "title": "Transparencë",
+        "description": "Prioritet kemi të dhënat e verifikuara, kontekstin e çmimeve dhe krahasimet paanshme për çdo automjet dhe shitës."
+      },
+      {
+        "title": "Ekspertizë lokale",
+        "description": "Përmbajtja jonë merr parasysh rrugët shqiptare, kostot e energjisë dhe rregulloret vendore."
+      },
+      {
+        "title": "Inovacion i vazhdueshëm",
+        "description": "Përditësojmë platformën me mjete të reja – nga krahasimet vizuale te ndjekja e kontakteve – për të mbështetur ekosistemin EV."
+      }
+    ],
+    "faqTitle": "FAQ për Makina Elektrike",
+    "faqSubtitle": "Mësoni më shumë mbi mënyrën tonë të punës dhe bashkëpunimet.",
+    "faqItems": [
+      {
+        "question": "A jeni të pavarur?",
+        "answer": "Po. Bashkëpunojmë me shitës por ruajmë pavarësi editoriale për të siguruar rekomandime të besueshme."
+      },
+      {
+        "question": "Si mund të bashkëpunojë një shitës?",
+        "answer": "Shitësit aplikojnë përmes faqes së regjistrimit; ekipi ynë verifikon kredencialet dhe i on-bordon partnerët e aprovuar."
+      },
+      {
+        "question": "A mbuloni flota biznesi?",
+        "answer": "Po, po zgjerojmë burimet për flota dhe mirëpresim kërkesa nga transporti, taksitë dhe kompanitë."
+      }
+    ]
+  },
+  "contactPage": {
+    "title": "Na kontaktoni",
+    "metaTitle": "Kontaktoni Makina Elektrike",
+    "metaDescription": "Lidhu me Makina Elektrike për partneritete, media ose mbështetje për EV në Shqipëri.",
+    "metaKeywords": [
+      "kontakto Makina Elektrike",
+      "mbështetje EV",
+      "partneritet shitës"
+    ],
+    "p1": "Keni pyetje, feedback ose interes bashkëpunimi? Kontaktoni ekipin tonë dhe do t'ju përgjigjemi sa më shpejt.",
+    "email": "Email",
+    "phone": "Telefon",
+    "address": "Adresë",
+    "addressDetails": "Tiranë, Shqipëri",
+    "highlights": [
+      {
+        "title": "Partneritete",
+        "description": "Shitësit, ofruesit e karikimit dhe shërbimeve mund të bashkëpunojnë me ne për të arritur më shumë klientë EV."
+      },
+      {
+        "title": "Media",
+        "description": "Ofrëjmë komente për tregun shqiptar dhe ju lidhim me ekspertë lokalë për intervista."
+      },
+      {
+        "title": "Mbështetje komunitare",
+        "description": "Na shkruani për këshilla rreth zgjedhjes së një EV apo karikuesi dhe do t'ju udhëzojmë te burimet e duhura."
+      }
+    ],
+    "faqTitle": "FAQ për kontaktet",
+    "faqSubtitle": "Informacione kryesore për kohën e përgjigjes dhe mbështetjen.",
+    "faqItems": [
+      {
+        "question": "Sa shpejt përgjigjeni?",
+        "answer": "Përgjigjemi brenda një dite pune, duke prioritetizuar mbështetjen për partnerët ekzistues."
+      },
+      {
+        "question": "A ofroni konsultime telefonike?",
+        "answer": "Po, rezervoni një telefonatë përmes emailit dhe do të planifikojmë një sesion për të diskutuar planet tuaja."
+      },
+      {
+        "question": "Ku ndodheni?",
+        "answer": "Ekipi ynë qendror operon në Tiranë dhe mbështetet nga partnerë në qytetet kryesore."
+      }
+    ]
+  },
+  "favoritesPage": {
+    "title": "Të preferuarat tuaja",
+    "subtitle": "Mbani shënim shitësit dhe modelet që përputhen me planet tuaja për mobilitet elektrik.",
+    "dealers": "Shitës të preferuar",
+    "models": "Modele të preferuara",
+    "noDealers": "Nuk keni ruajtur ende asnjë shitës.",
+    "noModels": "Nuk keni ruajtur ende asnjë model.",
+    "metaTitle": "Shitësit dhe modelet e ruajtura | Makina Elektrike",
+    "metaDescription": "Rishikoni shitësit dhe modelet e preferuara në një vend dhe vazhdoni kërkimin tuaj me lehtësi.",
+    "metaKeywords": [
+      "të preferuarat EV",
+      "shitës të ruajtur",
+      "modele të ruajtura"
+    ],
+    "introTitle": "Ndërtoni listën tuaj",
+    "introSubtitle": "Përdorni të preferuarat për të krahasuar ofertat, planifikuar test drive dhe ruajtur lidhjet më të rëndësishme.",
+    "insightsTitle": "Këshilla për hapat e ardhshëm",
+    "insightsSubtitle": "Përfitoni maksimalisht nga lista e ruajtur para se të vizitoni sallonet.",
+    "insights": [
+      {
+        "title": "Caktoni prioritetet",
+        "description": "Shtoni shënime pse ju pëlqeu një shitës ose model që të diskutoni temat e duhura në kontaktet e ardhshme."
+      },
+      {
+        "title": "Ndajeni me familjen",
+        "description": "Dërgojeni listën familjarëve ose kolegëve për të marrë feedback para vendimit final."
+      },
+      {
+        "title": "Përditësoni pas test drive",
+        "description": "Hiqni modelet që nuk ju përshtaten më dhe shtoni përshtypjet nga prova për të ndjekur progresin."
+      }
+    ],
+    "faqTitle": "FAQ për të preferuarat",
+    "faqSubtitle": "Si të menaxhoni listën tuaj personale EV.",
+    "faqItems": [
+      {
+        "question": "A mund ta eksportoj listën?",
+        "answer": "Po, kopjoni listën ose bëni një screenshot për ta ndarë me shitësit ose këshilltarët."
+      },
+      {
+        "question": "A sinkronizohen të preferuarat në pajisje të ndryshme?",
+        "answer": "Po, pasi të identifikoheni, lista shfaqet si në desktop ashtu edhe në celular."
+      },
+      {
+        "question": "Sa elementë mund të ruaj?",
+        "answer": "Nuk ka kufi – ruani aq shitës dhe modele sa ju nevojiten gjatë kërkimit."
+      }
+    ]
+  },
+  "auth": {
+    "awaitingApprovalTitle": "Në pritje të aprovimit",
+    "awaitingApprovalDescription": "Faleminderit për regjistrimin! Llogaria juaj është në verifikim. Do t'ju njoftojmë sapo të përfundojë procesi.",
+    "awaitingApprovalEmail": "Llogaria aktuale",
+    "awaitingMetaTitle": "Llogaria në verifikim | Makina Elektrike",
+    "awaitingMetaDescription": "Aplikimi juaj është në shqyrtim. Do t'ju aktivizojmë hyrjen sapo të përfundojë verifikimi.",
+    "awaitingMetaKeywords": [
+      "aprovim shitësi",
+      "llogari në pritje",
+      "onboarding Makina Elektrike"
+    ],
+    "awaitingNextSteps": "Mund të përgatitni dokumentet shtesë ose të na shkruani nëse keni nevojë të përditësoni aplikimin ndërsa ne kryejmë verifikimin."
+  },
+  "admin": {
+    "loginTitle": "Hyrje admin",
+    "loginSubtitle": "Hyni në panelin e administrimit",
+    "loginEmail": "Email",
+    "loginPassword": "Fjalëkalimi",
+    "loginButton": "Hyr",
+    "loginError": "Kredencialet e dhëna janë të pasakta.",
+    "loginInfo": "Zonë e siguruar për administratorë dhe shitës të aprovuar. Aktiviteti monitorohet dhe ruhet.",
+    "metaTitle": "Hyrje admin Makina Elektrike",
+    "metaDescription": "Identifikohuni për të menaxhuar shitës, modele dhe përmbajtje në Makina Elektrike.",
+    "metaKeywords": [
+      "Makina Elektrike admin",
+      "hyrje shitësi",
+      "menaxhim platforme EV"
+    ],
+    "logout": "Dil",
+    "dashboard": "Paneli i administrimit",
+    "dashboardMetaTitle": "Paneli i administrimit Makina Elektrike",
+    "dashboardMetaDescription": "Menaxhoni profilet e shitësve, modelet EV, përmbajtjen e blogut dhe aprovimet për platformën Makina Elektrike.",
+    "dashboardMetaKeywords": [
+      "panel admin EV",
+      "menaxhim shitësish",
+      "menaxhim përmbajtjeje"
+    ],
+    "manageDealers": "Menaxho shitësit",
+    "manageModels": "Menaxho modelet",
+    "manageBlog": "Menaxho blogun",
+    "bulkUploadDealers": "Ngarko shumë shitës",
+    "bulkUploadModels": "Ngarko shumë modele",
+    "bulkUploadPosts": "Ngarko shumë artikuj",
+    "deleteConfirm": "Jeni të sigurt që dëshironi ta fshini?",
+    "loading": "Po ngarkojmë të dhënat…",
+    "errorTitle": "Diçka shkoi keq",
+    "tryAgain": "Provo sërish",
+    "pendingDealers": "Në pritje të aprovimit",
+    "noPendingDealers": "Asnjë shitës nuk pret aprovimin.",
+    "noBrands": "Nuk ka marka",
+    "ownerUid": "UID i pronarit: {{uid}}",
+    "createdOn": "Krijuar më {{date}}",
+    "updatedOn": "Përditësuar më {{date}}",
+    "editDealer": "Redakto shitësin",
+    "edit": "Redakto",
+    "approve": "Aprovo",
+    "reject": "Refuzo",
+    "approvedDealers": "Shitës aktivë",
+    "noApprovedDealers": "Nuk ka shitës aktivë.",
+    "delete": "Fshi",
+    "modelsList": "Modele",
+    "noModels": "Nuk ka modele të lidhura.",
+    "rangeUnknown": "Autonomi e panjohur",
+    "featured": "E veçuar",
+    "editModel": "Redakto modelin",
+    "addNewDealer": "Shto shitës të ri",
+    "addNewModel": "Shto model të ri",
+    "blogPosts": "Artikujt e blogut",
+    "noBlogPosts": "Ende nuk ka artikuj të publikuar.",
+    "dateUnknown": "Data e panjohur",
+    "editBlogPost": "Redakto artikullin",
+    "addBlogPost": "Shto artikull"
+  }
 }

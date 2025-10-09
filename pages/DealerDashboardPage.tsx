@@ -5,6 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { uploadDealerImage } from '../services/storage';
 import type { Dealer, Model } from '../types';
+import SEO from '../components/SEO';
+import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 
 interface ProfileFormState {
   name: string;
@@ -160,6 +162,18 @@ const DealerDashboardPage: React.FC = () => {
       setSelectedModelId('');
     }
   }, [availableModels, selectedModelId]);
+
+  const metaTitle = 'Paneli i dilerëve | Makina Elektrike';
+  const metaDescription = 'Menaxhoni profilin, modelet dhe ofertat që shfaqen në Makina Elektrike për klientët tuaj.';
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: metaTitle,
+    description: metaDescription,
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'All',
+    url: `${BASE_URL}/#/dealer/dashboard`,
+  };
 
   const handleProfileChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -364,6 +378,32 @@ const DealerDashboardPage: React.FC = () => {
 
   return (
     <div className="py-16">
+      <SEO
+        title={metaTitle}
+        description={metaDescription}
+        keywords={[
+          'paneli i dilerëve',
+          'menaxhim modeli',
+          'makina elektrike',
+          'Makina Elektrike dashboard',
+        ]}
+        canonical={`${BASE_URL}/#/dealer/dashboard`}
+        robots="noindex, nofollow"
+        openGraph={{
+          title: metaTitle,
+          description: metaDescription,
+          url: `${BASE_URL}/#/dealer/dashboard`,
+          type: 'website',
+          images: [DEFAULT_OG_IMAGE],
+        }}
+        twitter={{
+          title: metaTitle,
+          description: metaDescription,
+          image: DEFAULT_OG_IMAGE,
+          site: '@makinaelektrike',
+        }}
+        structuredData={structuredData}
+      />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-white">
         <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
