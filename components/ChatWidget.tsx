@@ -39,7 +39,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ isOpen, onClose }) => {
     useEffect(() => {
         if (isOpen && !chat) {
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+                const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_KEY as string });
                 
                 const modelDataSummary = models.map(m => `${m.brand} ${m.model_name} (Type: ${m.body_type}, Range: ${m.range_wltp}km)`).join(', ');
                 const dealerDataSummary = dealers.map(d => `${d.name} in ${d.city} (Brands: ${d.brands.join('/')})`).join(', ');
