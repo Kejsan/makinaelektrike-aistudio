@@ -10,11 +10,16 @@
   "footer": {
     "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
     "explore": "Esplora",
+    "services": "Servizi",
     "aboutUs": "Chi siamo",
     "contact": "Contatti",
     "legal": "Note legali",
     "privacy": "Privacy",
     "terms": "Termini di servizio",
+    "userSignup": "Registrazione utente",
+    "dealerSignup": "Registrazione concessionari",
+    "sitemap": "Mappa del sito",
+    "credits": "Realizzato da",
     "rightsReserved": "Tutti i diritti riservati."
   },
   "common": {

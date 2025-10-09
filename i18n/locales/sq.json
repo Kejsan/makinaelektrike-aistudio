@@ -10,11 +10,16 @@
   "footer": {
     "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
     "explore": "Eksploro",
+    "services": "Shërbimet",
     "aboutUs": "Rreth Nesh",
     "contact": "Kontaktoni",
     "legal": "Ligjore",
     "privacy": "Politika e Privatësisë",
     "terms": "Kushtet e Shërbimit",
+    "userSignup": "Regjistrohu si përdorues",
+    "dealerSignup": "Regjistrohu si shitës",
+    "sitemap": "Harta e faqes",
+    "credits": "Bërë nga",
     "rightsReserved": "Të gjitha të drejtat e rezervuara."
   },
   "common": {

@@ -10,11 +10,16 @@
   "footer": {
     "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
     "explore": "Explore",
+    "services": "Services",
     "aboutUs": "About Us",
     "contact": "Contact",
     "legal": "Legal",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
+    "userSignup": "User sign up",
+    "dealerSignup": "Dealer sign up",
+    "sitemap": "Sitemap",
+    "credits": "Made by",
     "rightsReserved": "All rights reserved."
   },
   "common": {
