@@ -108,7 +108,7 @@ const SitemapPage: React.FC = () => {
               <p className="mt-2 text-gray-300 max-w-2xl">{t('sitemap.xmlDescription')}</p>
             </div>
             <a
-              href="https://makina-elektrike.netlify.app/sitemap.xml"
+              href={`${BASE_URL}/sitemap.xml`}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center rounded-lg border border-gray-cyan/40 bg-gray-cyan/20 px-6 py-3 text-base font-semibold text-white transition hover:bg-gray-cyan/30"
