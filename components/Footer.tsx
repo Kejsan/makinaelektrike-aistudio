@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
             <p className="text-gray-300 text-base">{t('footer.description')}</p>
             <div className="flex space-x-6">
               <a
-                href="https://www.facebook.com/makinaelektrike"
+                href="https://www.facebook.com/makina-elektrike"
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-gray-cyan transition-colors"
@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
                 <Facebook />
               </a>
               <a
-                href="https://www.instagram.com/makinaelektrike"
+                href="https://www.instagram.com/makina-elektrike"
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-gray-cyan transition-colors"
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
                 <Instagram />
               </a>
               <a
-                href="https://twitter.com/makinaelektrike"
+                href="https://twitter.com/makinae-lektrike"
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-gray-cyan transition-colors"
