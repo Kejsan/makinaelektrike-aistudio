@@ -1,4 +1,116 @@
-User-agent: *
-Allow: /
+# =========================
+# MakinaElektrike robots.txt
+# Updated: 2025-10-04
+# =========================
 
+# --- Sitemaps ---
 Sitemap: https://makinaelektrike.al/sitemap.xml
+
+# --- Allow core resources (important for rendering) ---
+User-agent: *
+Allow: /images/
+Allow: /assets/
+Allow: /fonts/
+Allow: /favicon.ico
+
+# --- Block admin/private/system paths sitewide ---
+User-agent: *
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /private/
+Disallow: /_internal/
+Disallow: /studio/
+Disallow: /scripts/
+Disallow: /404
+Disallow: /500
+
+# --- Prevent index bloat from query params / faceted URLs ---
+# (pages will still be crawlable if linked, but not indexed)
+User-agent: *
+Disallow: /*?*utm_=
+Disallow: /*?*ref=
+Disallow: /*?*session=
+Disallow: /*?*preview=
+Disallow: /*?*debug=
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*?*page=
+Disallow: /*?*q=
+Disallow: /*?*lang=
+# Allow clean URLs
+Allow: /*$
+
+# --- Major Search Engines: full access ---
+User-agent: Googlebot
+Disallow:
+User-agent: Googlebot-Image
+Disallow:
+User-agent: Googlebot-News
+Disallow:
+User-agent: Bingbot
+Disallow:
+User-agent: DuckDuckBot
+Disallow:
+User-agent: Applebot
+Disallow:
+
+# --- Common AI/Research Crawlers: allowed (per your request) ---
+User-agent: GPTBot          # OpenAI
+Disallow:
+User-agent: CCBot           # Common Crawl
+Disallow:
+User-agent: ClaudeBot       # Anthropic
+Disallow:
+User-agent: Google-Extended # Google AI data
+Disallow:
+User-agent: PerplexityBot
+Disallow:
+
+# --- Slow down “*” user agents that respect Crawl-delay (Google ignores) ---
+User-agent: *
+Crawl-delay: 5
+
+# --- Known SEO scrapers / aggressive crawlers: block ---
+User-agent: AhrefsBot
+Disallow: /
+User-agent: SemrushBot
+Disallow: /
+User-agent: MJ12bot
+Disallow: /
+User-agent: DotBot
+Disallow: /
+User-agent: Barkrowler
+Disallow: /
+User-agent: BLEXBot
+Disallow: /
+User-agent: DataForSeoBot
+Disallow: /
+User-agent: SeobilityBot
+Disallow: /
+User-agent: SEOkicks-Robot
+Disallow: /
+User-agent: SISTRIX
+Disallow: /
+User-agent: PetalBot
+Disallow: /
+User-agent: Bytespider
+Disallow: /
+User-agent: Yandex
+Disallow: /
+User-agent: YandexBot
+Disallow: /
+User-agent: Sogou
+Disallow: /
+User-agent: MauiBot
+Disallow: /
+User-agent: ZoominfoBot
+Disallow: /
+User-agent: Exabot
+Disallow: /
+User-agent: Scrapy
+Disallow: /
+User-agent: python-requests
+Disallow: /
+User-agent: curl
+Disallow: /
