@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
                 <Instagram />
               </a>
               <a
-                href="https://twitter.com/makinae-lektrike"
+                href="https://twitter.com/makina-elektrike"
                 target="_blank"
                 rel="noreferrer"
                 className="text-gray-400 hover:text-gray-cyan transition-colors"
