@@ -24,7 +24,7 @@ const DealersListPage: React.FC = () => {
             '@type': 'ListItem',
             position: index + 1,
             name: dealer.name,
-            url: `${BASE_URL}/#/dealers/${dealer.id}`,
+            url: `${BASE_URL}/dealers/${dealer.id}`,
         })),
     };
 
@@ -100,11 +100,11 @@ const DealersListPage: React.FC = () => {
                 title={t('dealersPage.metaTitle')}
                 description={t('dealersPage.metaDescription')}
                 keywords={t('dealersPage.metaKeywords', { returnObjects: true }) as string[]}
-                canonical={`${BASE_URL}/#/dealers`}
+                canonical={`${BASE_URL}/dealers`}
                 openGraph={{
                     title: t('dealersPage.metaTitle'),
                     description: t('dealersPage.metaDescription'),
-                    url: `${BASE_URL}/#/dealers`,
+                    url: `${BASE_URL}/dealers`,
                     type: 'website',
                     images: [DEFAULT_OG_IMAGE],
                 }}

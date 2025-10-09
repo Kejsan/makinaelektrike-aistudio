@@ -53,7 +53,7 @@ const SitemapPage: React.FC = () => {
     '@type': 'CollectionPage',
     name: t('sitemap.metaTitle'),
     description: t('sitemap.metaDescription'),
-    url: `${BASE_URL}/#/sitemap`,
+    url: `${BASE_URL}/sitemap`,
   };
 
   return (
@@ -62,11 +62,11 @@ const SitemapPage: React.FC = () => {
         title={t('sitemap.metaTitle')}
         description={t('sitemap.metaDescription')}
         keywords={t('sitemap.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/#/sitemap`}
+        canonical={`${BASE_URL}/sitemap`}
         openGraph={{
           title: t('sitemap.metaTitle'),
           description: t('sitemap.metaDescription'),
-          url: `${BASE_URL}/#/sitemap`,
+          url: `${BASE_URL}/sitemap`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}

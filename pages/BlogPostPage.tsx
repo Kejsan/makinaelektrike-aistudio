@@ -58,11 +58,11 @@ const BlogPostPage: React.FC = () => {
           <SEO
             title="Artikulli nuk u gjet | Makina Elektrike"
             description="Artikulli i kërkuar nuk ekziston më ose është zhvendosur."
-            canonical={`${BASE_URL}/#/blog/${slug ?? ''}`}
+            canonical={`${BASE_URL}/blog/${slug ?? ''}`}
             openGraph={{
               title: 'Artikulli nuk u gjet | Makina Elektrike',
               description: 'Artikulli i kërkuar nuk ekziston më ose është zhvendosur.',
-              url: `${BASE_URL}/#/blog/${slug ?? ''}`,
+              url: `${BASE_URL}/blog/${slug ?? ''}`,
               type: 'article',
               images: [DEFAULT_OG_IMAGE],
             }}
@@ -89,7 +89,7 @@ const BlogPostPage: React.FC = () => {
     );
   }
 
-  const canonical = `${BASE_URL}/#/blog/${post.slug}`;
+  const canonical = `${BASE_URL}/blog/${post.slug}`;
   const faqEntities = post.faqs?.map(faq => ({
     '@type': 'Question',
     name: faq.question,

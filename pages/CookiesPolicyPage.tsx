@@ -18,11 +18,11 @@ const CookiesPolicyPage: React.FC = () => {
         title={t('legal.cookies.metaTitle')}
         description={t('legal.cookies.metaDescription')}
         keywords={t('legal.cookies.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/#/cookies`}
+        canonical={`${BASE_URL}/cookies`}
         openGraph={{
           title: t('legal.cookies.metaTitle'),
           description: t('legal.cookies.metaDescription'),
-          url: `${BASE_URL}/#/cookies`,
+          url: `${BASE_URL}/cookies`,
           type: 'article',
           images: [DEFAULT_OG_IMAGE],
         }}

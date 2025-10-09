@@ -38,7 +38,7 @@ const HomePage: React.FC = () => {
       description: t('home.metaDescription'),
       potentialAction: {
         '@type': 'SearchAction',
-        target: `${BASE_URL}/#/models?query={search_term_string}`,
+        target: `${BASE_URL}/models?query={search_term_string}`,
         'query-input': 'required name=search_term_string',
       },
     },
@@ -114,11 +114,11 @@ const HomePage: React.FC = () => {
         title={t('home.metaTitle')}
         description={t('home.metaDescription')}
         keywords={t('home.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/#/`}
+        canonical={`${BASE_URL}/`}
         openGraph={{
           title: t('home.metaTitle'),
           description: t('home.metaDescription'),
-          url: `${BASE_URL}/#/`,
+          url: `${BASE_URL}/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE, heroImageUrl],
         }}

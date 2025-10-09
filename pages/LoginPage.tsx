@@ -84,7 +84,7 @@ const LoginPage: React.FC = () => {
     description: t('loginPage.metaDescription'),
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'All',
-    url: `${BASE_URL}/#/login`,
+    url: `${BASE_URL}/login`,
   };
 
   return (
@@ -93,11 +93,11 @@ const LoginPage: React.FC = () => {
         title={t('loginPage.metaTitle')}
         description={t('loginPage.metaDescription')}
         keywords={t('loginPage.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/#/login`}
+        canonical={`${BASE_URL}/login`}
         openGraph={{
           title: t('loginPage.metaTitle'),
           description: t('loginPage.metaDescription'),
-          url: `${BASE_URL}/#/login`,
+          url: `${BASE_URL}/login`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}
@@ -225,7 +225,7 @@ const LoginPage: React.FC = () => {
             <div className="mt-10 border-t border-white/10 pt-6 text-sm text-gray-400">
               <span>{t('loginPage.adminPrompt')}</span>{' '}
               <a
-                href="https://makina-elektrike.netlify.app/#/admin/login"
+                href="https://makina-elektrike.netlify.app/admin/login"
                 target="_blank"
                 rel="noreferrer"
                 className="font-semibold text-gray-cyan hover:text-white"

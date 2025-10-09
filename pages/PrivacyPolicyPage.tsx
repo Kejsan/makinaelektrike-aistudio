@@ -18,11 +18,11 @@ const PrivacyPolicyPage: React.FC = () => {
         title={t('legal.privacy.metaTitle')}
         description={t('legal.privacy.metaDescription')}
         keywords={t('legal.privacy.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/#/privacy`}
+        canonical={`${BASE_URL}/privacy`}
         openGraph={{
           title: t('legal.privacy.metaTitle'),
           description: t('legal.privacy.metaDescription'),
-          url: `${BASE_URL}/#/privacy`,
+          url: `${BASE_URL}/privacy`,
           type: 'article',
           images: [DEFAULT_OG_IMAGE],
         }}

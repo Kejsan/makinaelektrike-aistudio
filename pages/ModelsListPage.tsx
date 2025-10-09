@@ -27,7 +27,7 @@ const ModelsListPage: React.FC = () => {
             '@type': 'ListItem',
             position: index + 1,
             name: `${model.brand} ${model.model_name}`,
-            url: `${BASE_URL}/#/models/${model.id}`,
+            url: `${BASE_URL}/models/${model.id}`,
         })),
     };
 
@@ -115,11 +115,11 @@ const ModelsListPage: React.FC = () => {
                 title={t('modelsPage.metaTitle')}
                 description={t('modelsPage.metaDescription')}
                 keywords={t('modelsPage.metaKeywords', { returnObjects: true }) as string[]}
-                canonical={`${BASE_URL}/#/models`}
+                canonical={`${BASE_URL}/models`}
                 openGraph={{
                     title: t('modelsPage.metaTitle'),
                     description: t('modelsPage.metaDescription'),
-                    url: `${BASE_URL}/#/models`,
+                    url: `${BASE_URL}/models`,
                     type: 'website',
                     images: [DEFAULT_OG_IMAGE],
                 }}
