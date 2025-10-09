@@ -4,21 +4,35 @@
     "dealers": "Concessionari",
     "models": "Modelli",
     "blog": "Blog",
+    "favorites": "Preferiti",
     "about": "Chi siamo",
-    "admin": "Admin"
+    "admin": "Admin",
+    "register": "Registrati",
+    "becomeDealer": "Diventa concessionario",
+    "login": "Accedi",
+    "language": "Lingua",
+    "openMenu": "Apri il menu di navigazione",
+    "closeMenu": "Chiudi il menu di navigazione"
   },
   "footer": {
     "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
     "explore": "Esplora",
+    "services": "Servizi",
     "aboutUs": "Chi siamo",
     "contact": "Contatti",
     "legal": "Note legali",
     "privacy": "Privacy",
     "terms": "Termini di servizio",
+    "userSignup": "Registrazione utente",
+    "dealerSignup": "Registrazione concessionari",
+    "sitemap": "Mappa del sito",
+    "cookies": "Informativa sui cookie",
+    "credits": "Realizzato da",
     "rightsReserved": "Tutti i diritti riservati."
   },
   "common": {
-    "unknownCity": "Località sconosciuta"
+    "unknownCity": "Località sconosciuta",
+    "loading": "Caricamento..."
   },
   "home": {
     "heroTitle": "Guida il futuro.",
@@ -478,6 +492,195 @@
         "answer": "Non c'è un limite: salva tutti i concessionari e modelli necessari durante la tua valutazione."
       }
     ]
+  },
+  "sitemap": {
+    "title": "Mappa del sito",
+    "subtitle": "Raggiungi in un attimo la sezione che ti serve: navigazione principale, servizi e contenuti aggiornati.",
+    "xmlTitle": "Ti serve la sitemap XML?",
+    "xmlDescription": "Apri il file per i motori di ricerca oppure copia il link per Google Search Console.",
+    "xmlCta": "Apri sitemap.xml",
+    "sections": {
+      "explore": { "title": "Esplora" },
+      "services": { "title": "Servizi" },
+      "company": { "title": "Chi siamo" },
+      "legal": { "title": "Legale" }
+    },
+    "dynamic": {
+      "dealers": "Concessionari in evidenza",
+      "dealersDescription": "Una selezione di rivenditori verificati recentemente aggiornati sulla piattaforma.",
+      "viewAllDealers": "Vedi tutti i concessionari",
+      "models": "Modelli popolari",
+      "modelsDescription": "Scopri i modelli elettrici e ibridi più ricercati dagli automobilisti in Albania.",
+      "viewAllModels": "Vedi tutti i modelli",
+      "blog": "Ultimi articoli",
+      "blogDescription": "Leggi notizie, guide e approfondimenti sul mondo della mobilità elettrica.",
+      "viewAllPosts": "Vedi tutti gli articoli"
+    },
+    "metaTitle": "Mappa del sito Makina Elektrike",
+    "metaDescription": "Trova tutte le pagine pubbliche di Makina Elektrike: concessionari, modelli, servizi e risorse legali.",
+    "metaKeywords": [
+      "mappa del sito Makina Elektrike",
+      "sitemap EV",
+      "auto elettriche Albania sitemap"
+    ]
+  },
+  "loginPage": {
+    "title": "Accedi a Makina Elektrike",
+    "subtitle": "Scegli come vuoi utilizzare la piattaforma e continua le tue attività.",
+    "chooseAccount": "Chi sta accedendo?",
+    "userOption": {
+      "title": "Automobilisti ed appassionati",
+      "description": "Accedi ai concessionari salvati, ai modelli preferiti e ai suggerimenti personalizzati."
+    },
+    "dealerOption": {
+      "title": "Concessionari e partner",
+      "description": "Gestisci il profilo del punto vendita, aggiorna l'inventario e rispondi ai nuovi contatti."
+    },
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submitLabel": "Continua",
+    "loading": "Accesso in corso...",
+    "supportTitle": "Non hai ancora un account?",
+    "supportDescription": "Crea un profilo gratuito adatto alle tue esigenze oppure richiedi l'accesso come concessionario.",
+    "registerUserCta": "Crea un account utente",
+    "registerDealerCta": "Richiedi accesso concessionario",
+    "guidance": {
+      "title": "Cosa succede dopo l'accesso",
+      "description": "Personalizziamo l'esperienza in base al ruolo per mostrarti subito gli strumenti giusti.",
+      "userTitle": "Per gli automobilisti",
+      "userDescription": "Gestisci i preferiti, confronta i modelli e contatta i concessionari per prenotare un test drive.",
+      "dealerTitle": "Per i concessionari",
+      "dealerDescription": "Aggiorna orari, aggiungi nuovi modelli e monitora le richieste dei potenziali clienti.",
+      "security": "Tutte le sessioni sono protette da autenticazione crittografata tramite Firebase."
+    },
+    "adminPrompt": "Cerchi l'area di amministrazione?",
+    "adminLinkLabel": "Apri l'accesso admin",
+    "errors": {
+      "missingFields": "Inserisci email e password per continuare."
+    },
+    "metaTitle": "Login Makina Elektrike",
+    "metaDescription": "Accedi per gestire le ricerche sui veicoli elettrici o aggiornare il profilo del concessionario.",
+    "metaKeywords": [
+      "login Makina Elektrike",
+      "account EV",
+      "login concessionario"
+    ]
+  },
+  "legal": {
+    "privacy": {
+      "title": "Informativa sulla privacy",
+      "updated": "Ultimo aggiornamento: marzo 2024",
+      "intro": "Spieghiamo come Makina Elektrike raccoglie, utilizza e protegge i tuoi dati personali quando navighi o crei un account.",
+      "sections": [
+        {
+          "title": "Dati che raccogliamo",
+          "items": [
+            "Informazioni fornite in fase di registrazione come nome, indirizzo email e organizzazione.",
+            "Statistiche di utilizzo che ci aiutano a capire come vengono consultate pagine, filtri di ricerca e schede.",
+            "Contenuti inviati direttamente, inclusi contatti ai concessionari o feedback tramite moduli."
+          ]
+        },
+        {
+          "title": "Come utilizziamo i dati",
+          "items": [
+            "Per offrire funzionalità personalizzate come preferiti salvati e pagine viste di recente.",
+            "Per mettere in contatto i concessionari con gli utenti interessati e agevolare il follow-up.",
+            "Per mantenere sicura la piattaforma, prevenire abusi e rispettare gli obblighi legali."
+          ]
+        },
+        {
+          "title": "I tuoi diritti",
+          "items": [
+            "Richiedere l'accesso ai dati che conserviamo su di te e riceverne una copia portabile.",
+            "Chiedere correzioni, aggiornamenti o cancellazioni delle informazioni personali quando opportuno.",
+            "Revocare in qualsiasi momento il consenso alle comunicazioni marketing tramite i link dedicati."
+          ]
+        }
+      ],
+      "metaTitle": "Privacy Makina Elektrike",
+      "metaDescription": "Scopri come Makina Elektrike gestisce i dati degli account, le statistiche e le comunicazioni.",
+      "metaKeywords": [
+        "privacy Makina Elektrike",
+        "protezione dati",
+        "informativa privacy EV"
+      ]
+    },
+    "terms": {
+      "title": "Termini di servizio",
+      "updated": "Ultimo aggiornamento: marzo 2024",
+      "intro": "Questi termini descrivono l'uso consentito del sito Makina Elektrike e le responsabilità della community.",
+      "sections": [
+        {
+          "title": "Uso della piattaforma",
+          "items": [
+            "Puoi consultare annunci e contenuti per ricerche personali o professionali sulla mobilità elettrica.",
+            "È vietato copiare o ripubblicare dati senza autorizzazione e utilizzare strumenti di scraping automatico.",
+            "Rispetta la proprietà intellettuale e la privacy degli altri utenti quando condividi commenti o link."
+          ]
+        },
+        {
+          "title": "Account e accessi",
+          "items": [
+            "Fornisci informazioni accurate in fase di registrazione e proteggi le credenziali di accesso.",
+            "Gli account concessionario sono soggetti a verifica; l'accesso può essere sospeso se i dati sono incompleti o inesatti.",
+            "Avvisaci subito se sospetti un uso non autorizzato del tuo account."
+          ]
+        },
+        {
+          "title": "Responsabilità",
+          "items": [
+            "Makina Elektrike cura le informazioni ma non può garantire l'assenza totale di errori in listini o prezzi.",
+            "Non siamo responsabili degli accordi conclusi direttamente tra concessionari e automobilisti.",
+            "La piattaforma è fornita “così com'è”; possono verificarsi interruzioni per manutenzione o aggiornamenti."
+          ]
+        }
+      ],
+      "metaTitle": "Termini di servizio Makina Elektrike",
+      "metaDescription": "Consulta le condizioni d'uso di Makina Elektrike, incluse le regole sugli account e le limitazioni di responsabilità.",
+      "metaKeywords": [
+        "termini Makina Elektrike",
+        "regole piattaforma EV",
+        "condizioni d'uso"
+      ]
+    },
+    "cookies": {
+      "title": "Informativa sui cookie",
+      "updated": "Ultimo aggiornamento: marzo 2024",
+      "intro": "I cookie ci aiutano a offrire un'esperienza personalizzata, misurare le performance e ricordare le preferenze.",
+      "sections": [
+        {
+          "title": "Tipologie di cookie",
+          "items": [
+            "I cookie essenziali mantengono attiva la sessione, proteggono i moduli e abilitano le funzionalità di base.",
+            "I cookie analitici mostrano quali pagine riscuotono maggiore interesse per migliorare la navigazione.",
+            "I cookie di preferenza ricordano la lingua scelta e i concessionari o modelli consultati di recente."
+          ]
+        },
+        {
+          "title": "Gestione dei cookie",
+          "items": [
+            "La maggior parte dei browser permette di eliminare o bloccare i cookie tramite le impostazioni.",
+            "Puoi disattivare il tracciamento analitico attivando la funzione “Do Not Track” o modificando le preferenze dei cookie.",
+            "Disabilitare alcuni cookie può ridurre funzionalità personalizzate come i preferiti salvati."
+          ]
+        },
+        {
+          "title": "Servizi di terze parti",
+          "items": [
+            "Possiamo integrare servizi affidabili come mappe o video che impostano cookie propri.",
+            "Tali fornitori seguono informative sulla privacy separate; consultale se hai dubbi specifici.",
+            "Contattaci per maggiori informazioni su integrazioni e responsabili del trattamento."
+          ]
+        }
+      ],
+      "metaTitle": "Cookie policy Makina Elektrike",
+      "metaDescription": "Scopri quali cookie utilizza Makina Elektrike e come gestire preferenze e statistiche.",
+      "metaKeywords": [
+        "cookie Makina Elektrike",
+        "preferenze cookie",
+        "cookie analitici"
+      ]
+    }
   },
   "auth": {
     "awaitingApprovalTitle": "In attesa di approvazione",

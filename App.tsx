@@ -19,6 +19,11 @@ import AdminPage from './pages/AdminPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AwaitingApprovalPage from './pages/AwaitingApprovalPage';
 import DealerDashboardPage from './pages/DealerDashboardPage';
+import LoginPage from './pages/LoginPage';
+import SitemapPage from './pages/SitemapPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import CookiesPolicyPage from './pages/CookiesPolicyPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataContext, DataProvider } from './contexts/DataContext';
 import { ToastProvider, ToastContainer } from './contexts/ToastContext';
@@ -107,6 +112,11 @@ const App: React.FC = () => {
                   <Route path="/favorites" element={<FavoritesPage />} />
                   <Route path="/register" element={<RegisterUserPage />} />
                   <Route path="/register-dealer" element={<RegisterDealerPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/sitemap" element={<SitemapPage />} />
+                  <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                  <Route path="/terms" element={<TermsOfServicePage />} />
+                  <Route path="/cookies" element={<CookiesPolicyPage />} />
                   <Route path="/admin/login" element={<AdminLoginPage />} />
                   <Route path="/awaiting-approval" element={<AwaitingApprovalPage />} />
                   <Route

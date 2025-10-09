@@ -68,6 +68,18 @@ const Header: React.FC = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const navLinkClasses = (path: string) =>
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
       location.pathname === path
@@ -101,7 +113,7 @@ const Header: React.FC = () => {
               <span className="font-bold text-xl">Makina Elektrike</span>
             </Link>
           </div>
-          <nav className="hidden md:flex items-center space-x-4">
+          <nav className="hidden lg:flex items-center gap-2">
             {navigationItems.map((item) => (
               <Link key={item.to} to={item.to} className={navLinkClasses(item.to)}>
                 {item.label}
@@ -109,7 +121,7 @@ const Header: React.FC = () => {
             ))}
           </nav>
           <div className="flex items-center space-x-3">
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden lg:flex items-center space-x-3">
               {!user ? (
                 <>
                   <Link to="/register" className="btn btn-outline">
@@ -118,7 +130,7 @@ const Header: React.FC = () => {
                   <Link to="/register-dealer" className="btn btn-outline">
                     {t('header.becomeDealer')}
                   </Link>
-                  <Link to="/admin/login" className="btn btn-primary">
+                  <Link to="/login" className="btn btn-primary">
                     {t('header.login')}
                   </Link>
                 </>
@@ -146,13 +158,13 @@ const Header: React.FC = () => {
                 </>
               )}
             </div>
-            <div className="hidden md:block">
+            <div className="hidden lg:block">
               <LanguageSwitcher />
             </div>
             <button
               type="button"
               onClick={() => setMobileMenuOpen((open) => !open)}
-              className="inline-flex items-center justify-center rounded-md p-2 text-white hover:text-gray-cyan hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-gray-cyan md:hidden"
+              className="inline-flex items-center justify-center rounded-md p-2 text-white hover:text-gray-cyan hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-gray-cyan lg:hidden"
               aria-expanded={mobileMenuOpen}
               aria-label={mobileMenuOpen ? (t('header.closeMenu') as string) : (t('header.openMenu') as string)}
             >
@@ -160,8 +172,10 @@ const Header: React.FC = () => {
             </button>
           </div>
           {mobileMenuOpen && (
-            <div className="absolute left-0 top-16 w-full rounded-b-lg border border-t-0 border-gray-cyan/20 bg-navy-blue/95 backdrop-blur-md shadow-xl md:hidden">
-              <nav className="px-4 pt-4 pb-6 space-y-3">
+            <>
+              <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
+              <div className="absolute left-0 top-16 z-50 w-full rounded-b-lg border border-t-0 border-gray-cyan/20 bg-navy-blue/95 backdrop-blur-md shadow-xl lg:hidden">
+                <nav className="max-h-[calc(100vh-4rem)] overflow-y-auto px-4 pt-4 pb-6 space-y-3">
                 {navigationItems.map((item) => (
                   <Link key={item.to} to={item.to} className={mobileNavLinkClasses(item.to)}>
                     {item.label}
@@ -169,7 +183,7 @@ const Header: React.FC = () => {
                 ))}
                 {!user ? (
                   <div className="pt-2 space-y-3">
-                    <Link to="/admin/login" className="btn btn-primary w-full justify-center">
+                    <Link to="/login" className="btn btn-primary w-full justify-center">
                       {t('header.login')}
                     </Link>
                     <Link to="/register" className="btn btn-outline w-full justify-center">
@@ -200,7 +214,8 @@ const Header: React.FC = () => {
               <div className="border-t border-white/10 px-4 py-3">
                 <LanguageSwitcher />
               </div>
-            </div>
+              </div>
+            </>
           )}
         </div>
       </div>

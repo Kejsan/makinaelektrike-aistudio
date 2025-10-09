@@ -143,9 +143,9 @@ const ModelsListPage: React.FC = () => {
                         <p className="mt-4 text-gray-300 leading-relaxed text-center max-w-4xl mx-auto">{t('modelsPage.introSubtitle')}</p>
                     </div>
 
-                    <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 p-6 mb-12">
-                        <h2 className="text-xl font-bold text-white mb-4">{t('modelsPage.filters')}</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+                    <div className="mb-12 rounded-xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
+                        <h2 className="mb-4 text-xl font-bold text-white">{t('modelsPage.filters')}</h2>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:items-end">
                             <CustomSelect
                                 icon={<Car size={16} />}
                                 placeholder={t('modelsPage.allBrands')}
@@ -174,18 +174,24 @@ const ModelsListPage: React.FC = () => {
                                 value={sortBy}
                                 onChange={setSortBy}
                             />
-                            <button onClick={() => setIsCompareModalOpen(true)} className="bg-gray-cyan text-white font-bold py-2.5 px-6 rounded-md hover:bg-opacity-90 transition-colors h-[46px] flex items-center justify-center gap-2">
+                            <button
+                                onClick={() => setIsCompareModalOpen(true)}
+                                className="flex h-[46px] w-full items-center justify-center gap-2 rounded-md bg-gray-cyan px-6 py-2.5 font-bold text-white transition-colors hover:bg-opacity-90 sm:col-span-2 xl:col-span-1"
+                            >
                                 <Scale size={16} />
                                 {t('modelsPage.compare')}
                             </button>
-                            <button onClick={clearFilters} className="bg-vivid-red text-white font-bold py-2.5 px-6 rounded-md hover:bg-opacity-90 transition-colors h-[46px]">
+                            <button
+                                onClick={clearFilters}
+                                className="flex h-[46px] w-full items-center justify-center rounded-md bg-vivid-red px-6 py-2.5 font-bold text-white transition-colors hover:bg-opacity-90 sm:col-span-2 xl:col-span-1"
+                            >
                                 {t('modelsPage.clearFilters')}
                             </button>
                         </div>
                     </div>
 
                     {filteredModels.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {filteredModels.map(model => <ModelCard key={model.id} model={model} />)}
                         </div>
                     ) : (
@@ -193,12 +199,12 @@ const ModelsListPage: React.FC = () => {
                     )}
 
                     <section className="mt-16">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-10 shadow-2xl">
-                            <h2 className="text-3xl font-bold text-white text-center">{t('modelsPage.insightsTitle')}</h2>
-                            <p className="mt-4 text-gray-300 text-center max-w-4xl mx-auto">{t('modelsPage.insightsSubtitle')}</p>
-                            <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl sm:p-10">
+                            <h2 className="text-center text-3xl font-bold text-white">{t('modelsPage.insightsTitle')}</h2>
+                            <p className="mt-4 mx-auto max-w-4xl text-center text-gray-300">{t('modelsPage.insightsSubtitle')}</p>
+                            <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                                 {insights.map(item => (
-                                    <div key={item.title} className="bg-black/30 border border-gray-800 rounded-xl p-6">
+                                    <div key={item.title} className="rounded-xl border border-gray-800 bg-black/30 p-6">
                                         <h3 className="text-xl font-semibold text-white">{item.title}</h3>
                                         <p className="mt-3 text-gray-300 leading-relaxed">{item.description}</p>
                                     </div>
