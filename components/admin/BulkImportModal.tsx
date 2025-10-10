@@ -188,6 +188,27 @@ const dealerConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<DealerDocument>;
+    const metadata: Partial<DealerDocument> = {};
+
+    if (input.ownerUid !== undefined) {
+      metadata.ownerUid = input.ownerUid as string | null;
+    }
+    if (input.approvedAt !== undefined) {
+      metadata.approvedAt = input.approvedAt as DealerDocument['approvedAt'];
+    }
+    if (input.rejectedAt !== undefined) {
+      metadata.rejectedAt = input.rejectedAt as DealerDocument['rejectedAt'];
+    }
+    if (input.rejectionReason !== undefined) {
+      metadata.rejectionReason = input.rejectionReason as string | null;
+    }
+    if (input.createdAt !== undefined) {
+      metadata.createdAt = input.createdAt as DealerDocument['createdAt'];
+    }
+    if (input.updatedAt !== undefined) {
+      metadata.updatedAt = input.updatedAt as DealerDocument['updatedAt'];
+    }
+
     return sanitizePayload({
       name: input.name ?? '',
       companyName: input.companyName,
@@ -209,13 +230,8 @@ const dealerConfig: EntityConfig = {
       image_url: input.image_url,
       isFeatured: input.isFeatured,
       imageGallery: (input.imageGallery as string[]) ?? [],
-      ownerUid: (input.ownerUid as string | null | undefined) ?? null,
       approved: (input.approved as boolean | undefined) ?? false,
-      approvedAt: (input.approvedAt as DealerDocument['approvedAt'] | undefined) ?? null,
-      rejectedAt: (input.rejectedAt as DealerDocument['rejectedAt'] | undefined) ?? null,
-      rejectionReason: (input.rejectionReason as string | null | undefined) ?? null,
-      createdAt: (input.createdAt as DealerDocument['createdAt'] | undefined) ?? null,
-      updatedAt: (input.updatedAt as DealerDocument['updatedAt'] | undefined) ?? null,
+      ...metadata,
     });
   },
 };
@@ -231,6 +247,27 @@ const modelConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<Model, 'id'>>;
+    const ownership: Partial<Model> = {};
+
+    if (input.ownerDealerId !== undefined) {
+      ownership.ownerDealerId = input.ownerDealerId as string | null;
+    }
+    if (input.ownerUid !== undefined) {
+      ownership.ownerUid = input.ownerUid as string | null;
+    }
+    if (input.createdBy !== undefined) {
+      ownership.createdBy = input.createdBy as string | null;
+    }
+    if (input.updatedBy !== undefined) {
+      ownership.updatedBy = input.updatedBy as string | null;
+    }
+    if (input.createdAt !== undefined) {
+      ownership.createdAt = input.createdAt as Model['createdAt'];
+    }
+    if (input.updatedAt !== undefined) {
+      ownership.updatedAt = input.updatedAt as Model['updatedAt'];
+    }
+
     return sanitizePayload({
       brand: input.brand ?? '',
       model_name: input.model_name ?? '',
@@ -248,12 +285,7 @@ const modelConfig: EntityConfig = {
       notes: input.notes,
       image_url: input.image_url,
       isFeatured: input.isFeatured,
-      ownerDealerId: (input.ownerDealerId as string | null | undefined) ?? null,
-      ownerUid: (input.ownerUid as string | null | undefined) ?? null,
-      createdBy: (input.createdBy as string | null | undefined) ?? null,
-      updatedBy: (input.updatedBy as string | null | undefined) ?? null,
-      createdAt: (input.createdAt as Model['createdAt'] | undefined) ?? null,
-      updatedAt: (input.updatedAt as Model['updatedAt'] | undefined) ?? null,
+      ...ownership,
     });
   },
 };
