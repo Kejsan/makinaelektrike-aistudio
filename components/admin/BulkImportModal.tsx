@@ -41,8 +41,34 @@ interface EntityConfig {
   buildPayload: (values: GenericRecord) => DealerDocument | Omit<Model, 'id'> | Omit<BlogPost, 'id'>;
 }
 
+const sanitizeValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizeValue(item)).filter(item => item !== undefined);
+  }
+
+  if (value && typeof value === 'object') {
+    const prototype = Object.getPrototypeOf(value);
+    const isPlainObject = prototype === Object.prototype || prototype === null;
+
+    if (!isPlainObject) {
+      return value;
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([key, nestedValue]) => [key, sanitizeValue(nestedValue)])
+      .filter(([, nestedValue]) => nestedValue !== undefined);
+
+    return Object.fromEntries(entries);
+  }
+
+  return value === undefined ? undefined : value;
+};
+
 const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
-  const entries = Object.entries(payload).filter(([, value]) => value !== undefined);
+  const entries = Object.entries(payload)
+    .map(([key, value]) => [key, sanitizeValue(value)])
+    .filter(([, value]) => value !== undefined);
+
   return Object.fromEntries(entries) as T;
 };
 
@@ -183,13 +209,13 @@ const dealerConfig: EntityConfig = {
       image_url: input.image_url,
       isFeatured: input.isFeatured,
       imageGallery: (input.imageGallery as string[]) ?? [],
-      ownerUid: input.ownerUid ?? null,
-      approved: input.approved ?? false,
-      approvedAt: input.approvedAt ?? null,
-      rejectedAt: input.rejectedAt ?? null,
-      rejectionReason: input.rejectionReason ?? null,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
+      ownerUid: (input.ownerUid as string | null | undefined) ?? null,
+      approved: (input.approved as boolean | undefined) ?? false,
+      approvedAt: (input.approvedAt as DealerDocument['approvedAt'] | undefined) ?? null,
+      rejectedAt: (input.rejectedAt as DealerDocument['rejectedAt'] | undefined) ?? null,
+      rejectionReason: (input.rejectionReason as string | null | undefined) ?? null,
+      createdAt: (input.createdAt as DealerDocument['createdAt'] | undefined) ?? null,
+      updatedAt: (input.updatedAt as DealerDocument['updatedAt'] | undefined) ?? null,
     });
   },
 };
@@ -222,12 +248,12 @@ const modelConfig: EntityConfig = {
       notes: input.notes,
       image_url: input.image_url,
       isFeatured: input.isFeatured,
-      ownerDealerId: input.ownerDealerId as string | null | undefined,
-      ownerUid: input.ownerUid as string | null | undefined,
-      createdBy: input.createdBy as string | null | undefined,
-      updatedBy: input.updatedBy as string | null | undefined,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
+      ownerDealerId: (input.ownerDealerId as string | null | undefined) ?? null,
+      ownerUid: (input.ownerUid as string | null | undefined) ?? null,
+      createdBy: (input.createdBy as string | null | undefined) ?? null,
+      updatedBy: (input.updatedBy as string | null | undefined) ?? null,
+      createdAt: (input.createdAt as Model['createdAt'] | undefined) ?? null,
+      updatedAt: (input.updatedAt as Model['updatedAt'] | undefined) ?? null,
     });
   },
 };
