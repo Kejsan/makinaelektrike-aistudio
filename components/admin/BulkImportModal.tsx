@@ -41,6 +41,37 @@ interface EntityConfig {
   buildPayload: (values: GenericRecord) => DealerDocument | Omit<Model, 'id'> | Omit<BlogPost, 'id'>;
 }
 
+const sanitizeValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizeValue(item)).filter(item => item !== undefined);
+  }
+
+  if (value && typeof value === 'object') {
+    const prototype = Object.getPrototypeOf(value);
+    const isPlainObject = prototype === Object.prototype || prototype === null;
+
+    if (!isPlainObject) {
+      return value;
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([key, nestedValue]) => [key, sanitizeValue(nestedValue)])
+      .filter(([, nestedValue]) => nestedValue !== undefined);
+
+    return Object.fromEntries(entries);
+  }
+
+  return value === undefined ? undefined : value;
+};
+
+const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
+  const entries = Object.entries(payload)
+    .map(([key, value]) => [key, sanitizeValue(value)])
+    .filter(([, value]) => value !== undefined);
+
+  return Object.fromEntries(entries) as T;
+};
+
 interface ImportProgress {
   processed: number;
   succeeded: number;
@@ -157,7 +188,28 @@ const dealerConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<DealerDocument>;
-    return {
+    const metadata: Partial<DealerDocument> = {};
+
+    if (input.ownerUid !== undefined) {
+      metadata.ownerUid = input.ownerUid as string | null;
+    }
+    if (input.approvedAt !== undefined) {
+      metadata.approvedAt = input.approvedAt as DealerDocument['approvedAt'];
+    }
+    if (input.rejectedAt !== undefined) {
+      metadata.rejectedAt = input.rejectedAt as DealerDocument['rejectedAt'];
+    }
+    if (input.rejectionReason !== undefined) {
+      metadata.rejectionReason = input.rejectionReason as string | null;
+    }
+    if (input.createdAt !== undefined) {
+      metadata.createdAt = input.createdAt as DealerDocument['createdAt'];
+    }
+    if (input.updatedAt !== undefined) {
+      metadata.updatedAt = input.updatedAt as DealerDocument['updatedAt'];
+    }
+
+    return sanitizePayload({
       name: input.name ?? '',
       companyName: input.companyName,
       contactName: input.contactName,
@@ -178,14 +230,9 @@ const dealerConfig: EntityConfig = {
       image_url: input.image_url,
       isFeatured: input.isFeatured,
       imageGallery: (input.imageGallery as string[]) ?? [],
-      ownerUid: input.ownerUid,
-      approved: input.approved,
-      approvedAt: input.approvedAt,
-      rejectedAt: input.rejectedAt,
-      rejectionReason: input.rejectionReason,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
-    };
+      approved: (input.approved as boolean | undefined) ?? false,
+      ...metadata,
+    });
   },
 };
 
@@ -200,7 +247,28 @@ const modelConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<Model, 'id'>>;
-    return {
+    const ownership: Partial<Model> = {};
+
+    if (input.ownerDealerId !== undefined) {
+      ownership.ownerDealerId = input.ownerDealerId as string | null;
+    }
+    if (input.ownerUid !== undefined) {
+      ownership.ownerUid = input.ownerUid as string | null;
+    }
+    if (input.createdBy !== undefined) {
+      ownership.createdBy = input.createdBy as string | null;
+    }
+    if (input.updatedBy !== undefined) {
+      ownership.updatedBy = input.updatedBy as string | null;
+    }
+    if (input.createdAt !== undefined) {
+      ownership.createdAt = input.createdAt as Model['createdAt'];
+    }
+    if (input.updatedAt !== undefined) {
+      ownership.updatedAt = input.updatedAt as Model['updatedAt'];
+    }
+
+    return sanitizePayload({
       brand: input.brand ?? '',
       model_name: input.model_name ?? '',
       body_type: input.body_type,
@@ -217,13 +285,8 @@ const modelConfig: EntityConfig = {
       notes: input.notes,
       image_url: input.image_url,
       isFeatured: input.isFeatured,
-      ownerDealerId: input.ownerDealerId,
-      ownerUid: input.ownerUid,
-      createdBy: input.createdBy,
-      updatedBy: input.updatedBy,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
-    };
+      ...ownership,
+    });
   },
 };
 
@@ -240,7 +303,7 @@ const blogConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<BlogPost, 'id'>>;
-    return {
+    return sanitizePayload({
       slug: input.slug ?? '',
       title: input.title ?? '',
       excerpt: input.excerpt ?? '',
@@ -254,7 +317,7 @@ const blogConfig: EntityConfig = {
       sections: (input.sections as BlogPost['sections']) ?? [],
       faqs: input.faqs,
       cta: input.cta,
-    };
+    });
   },
 };
 
