@@ -41,6 +41,37 @@ interface EntityConfig {
   buildPayload: (values: GenericRecord) => DealerDocument | Omit<Model, 'id'> | Omit<BlogPost, 'id'>;
 }
 
+const sanitizeValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizeValue(item)).filter(item => item !== undefined);
+  }
+
+  if (value && typeof value === 'object') {
+    const prototype = Object.getPrototypeOf(value);
+    const isPlainObject = prototype === Object.prototype || prototype === null;
+
+    if (!isPlainObject) {
+      return value;
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([key, nestedValue]) => [key, sanitizeValue(nestedValue)])
+      .filter(([, nestedValue]) => nestedValue !== undefined);
+
+    return Object.fromEntries(entries);
+  }
+
+  return value === undefined ? undefined : value;
+};
+
+const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
+  const entries = Object.entries(payload)
+    .map(([key, value]) => [key, sanitizeValue(value)])
+    .filter(([, value]) => value !== undefined);
+
+  return Object.fromEntries(entries) as T;
+};
+
 interface ImportProgress {
   processed: number;
   succeeded: number;
@@ -157,7 +188,7 @@ const dealerConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<DealerDocument>;
-    return {
+    return sanitizePayload({
       name: input.name ?? '',
       companyName: input.companyName,
       contactName: input.contactName,
@@ -178,14 +209,14 @@ const dealerConfig: EntityConfig = {
       image_url: input.image_url,
       isFeatured: input.isFeatured,
       imageGallery: (input.imageGallery as string[]) ?? [],
-      ownerUid: input.ownerUid,
-      approved: input.approved,
-      approvedAt: input.approvedAt,
-      rejectedAt: input.rejectedAt,
-      rejectionReason: input.rejectionReason,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
-    };
+      ownerUid: (input.ownerUid as string | null | undefined) ?? null,
+      approved: (input.approved as boolean | undefined) ?? false,
+      approvedAt: (input.approvedAt as DealerDocument['approvedAt'] | undefined) ?? null,
+      rejectedAt: (input.rejectedAt as DealerDocument['rejectedAt'] | undefined) ?? null,
+      rejectionReason: (input.rejectionReason as string | null | undefined) ?? null,
+      createdAt: (input.createdAt as DealerDocument['createdAt'] | undefined) ?? null,
+      updatedAt: (input.updatedAt as DealerDocument['updatedAt'] | undefined) ?? null,
+    });
   },
 };
 
@@ -200,7 +231,7 @@ const modelConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<Model, 'id'>>;
-    return {
+    return sanitizePayload({
       brand: input.brand ?? '',
       model_name: input.model_name ?? '',
       body_type: input.body_type,
@@ -217,13 +248,13 @@ const modelConfig: EntityConfig = {
       notes: input.notes,
       image_url: input.image_url,
       isFeatured: input.isFeatured,
-      ownerDealerId: input.ownerDealerId,
-      ownerUid: input.ownerUid,
-      createdBy: input.createdBy,
-      updatedBy: input.updatedBy,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
-    };
+      ownerDealerId: (input.ownerDealerId as string | null | undefined) ?? null,
+      ownerUid: (input.ownerUid as string | null | undefined) ?? null,
+      createdBy: (input.createdBy as string | null | undefined) ?? null,
+      updatedBy: (input.updatedBy as string | null | undefined) ?? null,
+      createdAt: (input.createdAt as Model['createdAt'] | undefined) ?? null,
+      updatedAt: (input.updatedAt as Model['updatedAt'] | undefined) ?? null,
+    });
   },
 };
 
@@ -240,7 +271,7 @@ const blogConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<BlogPost, 'id'>>;
-    return {
+    return sanitizePayload({
       slug: input.slug ?? '',
       title: input.title ?? '',
       excerpt: input.excerpt ?? '',
@@ -254,7 +285,7 @@ const blogConfig: EntityConfig = {
       sections: (input.sections as BlogPost['sections']) ?? [],
       faqs: input.faqs,
       cta: input.cta,
-    };
+    });
   },
 };
 
