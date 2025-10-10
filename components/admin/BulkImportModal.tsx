@@ -41,6 +41,11 @@ interface EntityConfig {
   buildPayload: (values: GenericRecord) => DealerDocument | Omit<Model, 'id'> | Omit<BlogPost, 'id'>;
 }
 
+const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
+  const entries = Object.entries(payload).filter(([, value]) => value !== undefined);
+  return Object.fromEntries(entries) as T;
+};
+
 interface ImportProgress {
   processed: number;
   succeeded: number;
@@ -157,7 +162,7 @@ const dealerConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<DealerDocument>;
-    return {
+    return sanitizePayload({
       name: input.name ?? '',
       companyName: input.companyName,
       contactName: input.contactName,
@@ -185,7 +190,7 @@ const dealerConfig: EntityConfig = {
       rejectionReason: input.rejectionReason,
       createdAt: input.createdAt,
       updatedAt: input.updatedAt,
-    };
+    });
   },
 };
 
@@ -200,7 +205,7 @@ const modelConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<Model, 'id'>>;
-    return {
+    return sanitizePayload({
       brand: input.brand ?? '',
       model_name: input.model_name ?? '',
       body_type: input.body_type,
@@ -223,7 +228,7 @@ const modelConfig: EntityConfig = {
       updatedBy: input.updatedBy,
       createdAt: input.createdAt,
       updatedAt: input.updatedAt,
-    };
+    });
   },
 };
 
@@ -240,7 +245,7 @@ const blogConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<BlogPost, 'id'>>;
-    return {
+    return sanitizePayload({
       slug: input.slug ?? '',
       title: input.title ?? '',
       excerpt: input.excerpt ?? '',
@@ -254,7 +259,7 @@ const blogConfig: EntityConfig = {
       sections: (input.sections as BlogPost['sections']) ?? [],
       faqs: input.faqs,
       cta: input.cta,
-    };
+    });
   },
 };
 
