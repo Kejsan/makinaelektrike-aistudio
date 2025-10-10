@@ -3,31 +3,26 @@
 # Updated: 2025-10-04
 # =========================
 
-# --- Sitemaps ---
 Sitemap: https://makina-elektrike.netlify.app/sitemap.xml
 
-# --- Allow core resources (important for rendering) ---
+# Generic rules
 User-agent: *
+# allow render-critical assets
 Allow: /images/
 Allow: /assets/
 Allow: /fonts/
 Allow: /favicon.ico
-
-# --- Block admin/private/system paths sitewide ---
-User-agent: *
+# avoid crawling private/system areas
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /api/
 Disallow: /private/
 Disallow: /_internal/
 Disallow: /studio/
-Disallow: /scripts/
 Disallow: /404
 Disallow: /500
-
-# --- Prevent index bloat from query params / faceted URLs ---
-# (pages will still be crawlable if linked, but not indexed)
-User-agent: *
+# do NOT block JS/CSS folders used for rendering
+# parameter bloat
 Disallow: /*?*utm_=
 Disallow: /*?*ref=
 Disallow: /*?*session=
@@ -38,10 +33,10 @@ Disallow: /*?*filter=
 Disallow: /*?*page=
 Disallow: /*?*q=
 Disallow: /*?*lang=
-# Allow clean URLs
 Allow: /*$
+Crawl-delay: 5
 
-# --- Major Search Engines: full access ---
+# Major search engines (explicit allow)
 User-agent: Googlebot
 Disallow:
 User-agent: Googlebot-Image
@@ -55,23 +50,19 @@ Disallow:
 User-agent: Applebot
 Disallow:
 
-# --- Common AI/Research Crawlers: allowed (per your request) ---
-User-agent: GPTBot          # OpenAI
+# AI / research crawlers (allowed)
+User-agent: GPTBot
 Disallow:
-User-agent: CCBot           # Common Crawl
+User-agent: CCBot
 Disallow:
-User-agent: ClaudeBot       # Anthropic
+User-agent: ClaudeBot
 Disallow:
-User-agent: Google-Extended # Google AI data
+User-agent: Google-Extended
 Disallow:
 User-agent: PerplexityBot
 Disallow:
 
-# --- Slow down “*” user agents that respect Crawl-delay (Google ignores) ---
-User-agent: *
-Crawl-delay: 5
-
-# --- Known SEO scrapers / aggressive crawlers: block ---
+# Aggressive/SEO scrapers (blocked)
 User-agent: AhrefsBot
 Disallow: /
 User-agent: SemrushBot
