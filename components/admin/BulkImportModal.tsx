@@ -43,11 +43,15 @@ interface EntityConfig {
 }
 
 const sanitizeValue = (value: unknown): unknown => {
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+
   if (Array.isArray(value)) {
     return value.map(item => sanitizeValue(item)).filter(item => item !== undefined);
   }
 
-  if (value && typeof value === 'object') {
+  if (typeof value === 'object') {
     const prototype = Object.getPrototypeOf(value);
     const isPlainObject = prototype === Object.prototype || prototype === null;
 
