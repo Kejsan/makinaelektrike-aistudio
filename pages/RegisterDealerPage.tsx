@@ -90,6 +90,9 @@ const RegisterDealerPage: React.FC = () => {
           doc(firestore, 'dealers', currentUser.uid),
           {
             uid: currentUser.uid,
+            ownerUid: currentUser.uid,
+            createdBy: currentUser.uid,
+            updatedBy: currentUser.uid,
             companyName,
             contactName,
             phone,

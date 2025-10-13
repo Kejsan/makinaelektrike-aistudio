@@ -262,12 +262,17 @@ export const subscribeToDealerModelsForDealers = (
 
 const buildDealerModelId = (dealerId: string, modelId: string) => `${dealerId}_${modelId}`;
 
-export const createDealerModel = async (dealerId: string, modelId: string): Promise<DealerModel> => {
+export const createDealerModel = async (
+  dealerId: string,
+  modelId: string,
+  createdBy?: string,
+): Promise<DealerModel> => {
   const linkRef = doc(dealerModelsCollection, buildDealerModelId(dealerId, modelId));
   await setDoc(linkRef, {
     dealer_id: dealerId,
     model_id: modelId,
     createdAt: serverTimestamp(),
+    ...(createdBy ? { createdBy } : {}),
   });
   return { dealer_id: dealerId, model_id: modelId };
 };
