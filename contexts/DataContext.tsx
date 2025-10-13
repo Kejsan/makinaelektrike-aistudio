@@ -9,8 +9,10 @@ import React, {
 import type { Dealer, DealerDocument, Model, BlogPost, DealerModel } from '../types';
 import {
   subscribeToDealers,
+  subscribeToApprovedDealers,
   subscribeToModels,
   subscribeToBlogPosts,
+  subscribeToPublishedBlogPosts,
   subscribeToDealerModels,
   subscribeToDealersByOwner,
   subscribeToModelsByOwner,
@@ -210,6 +212,50 @@ const rejectUsage = async () => {
 
 const defaultMutationState = createInitialMutationState();
 
+const normalizeOptionalString = (value?: string | null): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const enhanceOwnershipMetadata = <T extends Record<string, unknown>>(
+  input: T,
+  actorUid: string | undefined,
+  keys: { ownerUid?: keyof T; createdBy?: keyof T; updatedBy?: keyof T },
+): T => {
+  const payload = { ...input };
+
+  const ownerKey = keys.ownerUid;
+  const createdKey = keys.createdBy;
+  const updatedKey = keys.updatedBy;
+
+  const existingOwner = ownerKey ? normalizeOptionalString(payload[ownerKey] as string | undefined) : undefined;
+  const ownerUid = existingOwner ?? actorUid;
+
+  if (ownerKey && ownerUid) {
+    payload[ownerKey] = ownerUid as T[keyof T];
+  }
+
+  const existingCreated = createdKey ? normalizeOptionalString(payload[createdKey] as string | undefined) : undefined;
+  const createdBy = existingCreated ?? ownerUid ?? actorUid;
+
+  if (createdKey && createdBy) {
+    payload[createdKey] = createdBy as T[keyof T];
+  }
+
+  const existingUpdated = updatedKey ? normalizeOptionalString(payload[updatedKey] as string | undefined) : undefined;
+  const updatedBy = existingUpdated ?? actorUid ?? createdBy ?? ownerUid;
+
+  if (updatedKey && updatedBy) {
+    payload[updatedKey] = updatedBy as T[keyof T];
+  }
+
+  return payload;
+};
+
 export const DataContext = createContext<DataContextType>({
   dealers: [],
   models: [],
@@ -348,33 +394,55 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       );
     } else {
       unsubscribers.push(
-        subscribeToDealers({
-          onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
-          onError: handleSubscriptionError('dealers'),
-        }),
+        (role === 'admin'
+          ? subscribeToDealers({
+              onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
+              onError: handleSubscriptionError('dealers'),
+            })
+          : subscribeToApprovedDealers({
+              onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
+              onError: permissionAwareErrorHandler('dealers', () => dataDispatch({ type: 'SET_DEALERS', payload: [] })),
+            }))
       );
       unsubscribers.push(
         subscribeToModels({
           onData: models => dataDispatch({ type: 'SET_MODELS', payload: models }),
-          onError: handleSubscriptionError('vehicle models'),
+          onError:
+            role === 'admin'
+              ? handleSubscriptionError('vehicle models')
+              : permissionAwareErrorHandler('vehicle models', () =>
+                  dataDispatch({ type: 'SET_MODELS', payload: [] }),
+                ),
         }),
       );
-      unsubscribers.push(
-        subscribeToDealerModels({
-          onData: mappings => setDealerModels(mappings),
-          onError: handleSubscriptionError('dealer relationships'),
-        }),
-      );
+
+      if (role === 'admin') {
+        unsubscribers.push(
+          subscribeToDealerModels({
+            onData: mappings => setDealerModels(mappings),
+            onError: handleSubscriptionError('dealer relationships'),
+          }),
+        );
+      } else {
+        setDealerModels([]);
+      }
     }
 
     if (isFirebaseConfigured) {
       unsubscribers.push(
-        subscribeToBlogPosts({
-          onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
-          onError: permissionAwareErrorHandler('blog posts', () =>
-            dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts }),
-          ),
-        }),
+        (role === 'admin'
+          ? subscribeToBlogPosts({
+              onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
+              onError: permissionAwareErrorHandler('blog posts', () =>
+                dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts }),
+              ),
+            })
+          : subscribeToPublishedBlogPosts({
+              onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
+              onError: permissionAwareErrorHandler('blog posts', () =>
+                dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts }),
+              ),
+            }))
       );
     } else {
       dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts });
@@ -390,6 +458,41 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     role,
     userUid,
   ]);
+
+  useEffect(() => {
+    if (role === 'admin' || role === 'dealer') {
+      return;
+    }
+
+    const dealerIds = dataState.dealers.map(dealer => dealer.id);
+
+    if (dealerIds.length === 0) {
+      dataDispatch({ type: 'SET_DEALER_MODELS', payload: [] });
+      return;
+    }
+
+    const uniqueIds = Array.from(new Set(dealerIds));
+    const aggregated = new Map<string, DealerModel[]>();
+
+    const unsubscribers = uniqueIds.map(dealerId =>
+      subscribeToDealerModelsForDealers([dealerId], {
+        onData: mappings => {
+          aggregated.set(dealerId, mappings);
+          const combined = Array.from(aggregated.values()).flat();
+          dataDispatch({ type: 'SET_DEALER_MODELS', payload: combined });
+        },
+        onError: permissionAwareErrorHandler('dealer relationships', () => {
+          aggregated.delete(dealerId);
+          const combined = Array.from(aggregated.values()).flat();
+          dataDispatch({ type: 'SET_DEALER_MODELS', payload: combined });
+        }),
+      }),
+    );
+
+    return () => {
+      unsubscribers.forEach(unsubscribe => unsubscribe());
+    };
+  }, [dataState.dealers, permissionAwareErrorHandler, role]);
 
   const runMutation = useCallback(
     async <T,>({
@@ -424,16 +527,159 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     [addToast, role],
   );
 
+  const enhanceDealerInput = useCallback(
+    (input: DealerInput): DealerInput => {
+      const actorUid = normalizeOptionalString(userUid);
+
+      return enhanceOwnershipMetadata(input, actorUid, {
+        ownerUid: 'ownerUid',
+        createdBy: 'createdBy',
+        updatedBy: 'updatedBy',
+      });
+    },
+    [userUid],
+  );
+
+  const enhanceDealerUpdate = useCallback(
+    (updates: DealerUpdate): DealerUpdate => {
+      const actorUid = normalizeOptionalString(userUid);
+      const { updatedBy, ...rest } = updates;
+      const normalizedUpdatedBy = normalizeOptionalString(updatedBy);
+
+      if (normalizedUpdatedBy) {
+        return { ...rest, updatedBy: normalizedUpdatedBy };
+      }
+
+      if (actorUid) {
+        return { ...rest, updatedBy: actorUid };
+      }
+
+      return { ...rest };
+    },
+    [userUid],
+  );
+
+  const enhanceModelInput = useCallback(
+    (input: ModelInput): ModelInput => {
+      const actorUid = normalizeOptionalString(userUid);
+
+      const {
+        ownerDealerId: rawOwnerDealerId,
+        ownerUid: rawOwnerUid,
+        createdBy: rawCreatedBy,
+        updatedBy: rawUpdatedBy,
+        ...rest
+      } = input;
+
+      const existingOwnerDealerId = normalizeOptionalString(rawOwnerDealerId);
+      const existingOwnerUid = normalizeOptionalString(rawOwnerUid);
+      const existingCreatedBy = normalizeOptionalString(rawCreatedBy);
+      const existingUpdatedBy = normalizeOptionalString(rawUpdatedBy);
+
+      let derivedOwnerDealerId = existingOwnerDealerId;
+      let derivedOwnerUid = existingOwnerUid;
+
+      if (role === 'dealer') {
+        const ownedDealers = dataState.dealers;
+        const primaryDealer =
+          ownedDealers.find(dealer => normalizeOptionalString(dealer.ownerUid) === actorUid) ??
+          ownedDealers[0];
+
+        if (!derivedOwnerDealerId && primaryDealer) {
+          derivedOwnerDealerId = primaryDealer.id;
+        }
+
+        if (!derivedOwnerUid) {
+          derivedOwnerUid = normalizeOptionalString(primaryDealer?.ownerUid) ?? actorUid;
+        }
+      } else if (!derivedOwnerUid) {
+        derivedOwnerUid = actorUid;
+      }
+
+      const payload: ModelInput = { ...rest } as ModelInput;
+
+      const ownerDealerId = derivedOwnerDealerId ?? existingOwnerDealerId;
+      if (ownerDealerId) {
+        payload.ownerDealerId = ownerDealerId;
+      }
+
+      const ownership = enhanceOwnershipMetadata(payload, actorUid, {
+        ownerUid: 'ownerUid',
+        createdBy: 'createdBy',
+        updatedBy: 'updatedBy',
+      });
+
+      return ownership;
+    },
+    [dataState.dealers, role, userUid],
+  );
+
+  const enhanceModelUpdate = useCallback(
+    (updates: ModelUpdate): ModelUpdate => {
+      const actorUid = normalizeOptionalString(userUid);
+      const { updatedBy: rawUpdatedBy, ...rest } = updates;
+      const existingUpdatedBy = normalizeOptionalString(rawUpdatedBy);
+
+      if (existingUpdatedBy) {
+        return { ...rest, updatedBy: existingUpdatedBy };
+      }
+
+      if (actorUid) {
+        return { ...rest, updatedBy: actorUid };
+      }
+
+      return { ...rest };
+    },
+    [userUid],
+  );
+
+  const enhanceBlogPostInput = useCallback(
+    (input: BlogPostInput): BlogPostInput => {
+      const actorUid = normalizeOptionalString(userUid);
+      const payload = enhanceOwnershipMetadata(input, actorUid, {
+        ownerUid: 'ownerUid',
+        createdBy: 'createdBy',
+        updatedBy: 'updatedBy',
+      });
+
+      if (payload.published === undefined) {
+        payload.published = true;
+      }
+
+      return payload;
+    },
+    [userUid],
+  );
+
+  const enhanceBlogPostUpdate = useCallback(
+    (updates: BlogPostUpdate): BlogPostUpdate => {
+      const actorUid = normalizeOptionalString(userUid);
+      const { updatedBy, ...rest } = updates;
+      const normalizedUpdatedBy = normalizeOptionalString(updatedBy);
+
+      if (normalizedUpdatedBy) {
+        return { ...rest, updatedBy: normalizedUpdatedBy };
+      }
+
+      if (actorUid) {
+        return { ...rest, updatedBy: actorUid };
+      }
+
+      return { ...rest };
+    },
+    [userUid],
+  );
+
   const addDealer = useCallback(
     (dealer: DealerInput) =>
       runMutation({
         entity: 'dealers',
         operation: 'create',
-        action: () => apiCreateDealer(dealer),
+        action: () => apiCreateDealer(enhanceDealerInput(dealer)),
         successMessage: 'Dealer created successfully.',
         errorMessage: 'Failed to create dealer.',
       }),
-    [runMutation],
+    [enhanceDealerInput, runMutation],
   );
 
   const updateDealer = useCallback(
@@ -441,12 +687,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiUpdateDealer(id, updates),
+        action: () => apiUpdateDealer(id, enhanceDealerUpdate(updates)),
         successMessage: 'Dealer updated successfully.',
         errorMessage: 'Failed to update dealer.',
         allowedRoles: ['admin', 'dealer'],
       }),
-    [runMutation],
+    [enhanceDealerUpdate, runMutation],
   );
 
   const deleteDealer = useCallback(
@@ -490,12 +736,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'models',
         operation: 'create',
-        action: () => apiCreateModel(model),
+        action: () => apiCreateModel(enhanceModelInput(model)),
         successMessage: 'Model created successfully.',
         errorMessage: 'Failed to create model.',
         allowedRoles: ['admin', 'dealer'],
       }),
-    [runMutation],
+    [enhanceModelInput, runMutation],
   );
 
   const updateModel = useCallback(
@@ -503,12 +749,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'models',
         operation: 'update',
-        action: () => apiUpdateModel(id, updates),
+        action: () => apiUpdateModel(id, enhanceModelUpdate(updates)),
         successMessage: 'Model updated successfully.',
         errorMessage: 'Failed to update model.',
         allowedRoles: ['admin', 'dealer'],
       }),
-    [runMutation],
+    [enhanceModelUpdate, runMutation],
   );
 
   const deleteModel = useCallback(
@@ -528,12 +774,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiCreateDealerModel(dealerId, modelId),
+        action: () => apiCreateDealerModel(dealerId, modelId, normalizeOptionalString(userUid)),
         successMessage: 'Model linked to dealer successfully.',
         errorMessage: 'Failed to link model to dealer.',
         allowedRoles: ['admin', 'dealer'],
       }),
-    [runMutation],
+    [runMutation, userUid],
   );
 
   const unlinkModelFromDealer = useCallback(
@@ -557,11 +803,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'blogPosts',
         operation: 'create',
-        action: () => apiCreateBlogPost(post),
+        action: () => apiCreateBlogPost(enhanceBlogPostInput(post)),
         successMessage: 'Blog post created successfully.',
         errorMessage: 'Failed to create blog post.',
       }),
-    [runMutation],
+    [enhanceBlogPostInput, runMutation],
   );
 
   const updateBlogPost = useCallback(
@@ -569,11 +815,11 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'blogPosts',
         operation: 'update',
-        action: () => apiUpdateBlogPost(id, updates),
+        action: () => apiUpdateBlogPost(id, enhanceBlogPostUpdate(updates)),
         successMessage: 'Blog post updated successfully.',
         errorMessage: 'Failed to update blog post.',
       }),
-    [runMutation],
+    [enhanceBlogPostUpdate, runMutation],
   );
 
   const deleteBlogPost = useCallback(

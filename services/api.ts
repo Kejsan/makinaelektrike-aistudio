@@ -109,6 +109,17 @@ export const subscribeToDealers = (
   return subscribeToCollection(dealersQuery, mapDealers, options);
 };
 
+export const subscribeToApprovedDealers = (
+  options: SubscriptionOptions<Dealer>,
+): Unsubscribe => {
+  const dealersQuery = query(
+    dealersCollection,
+    where('approved', '==', true),
+    orderBy('name', 'asc'),
+  );
+  return subscribeToCollection(dealersQuery, mapDealers, options);
+};
+
 export const subscribeToDealersByOwner = (
   ownerUid: string,
   options: SubscriptionOptions<Dealer>,
@@ -216,6 +227,17 @@ export const subscribeToBlogPosts = (
   return subscribeToCollection(postsQuery, mapBlogPosts, options);
 };
 
+export const subscribeToPublishedBlogPosts = (
+  options: SubscriptionOptions<BlogPost>,
+): Unsubscribe => {
+  const postsQuery = query(
+    blogPostsCollection,
+    where('published', '==', true),
+    orderBy('date', 'desc'),
+  );
+  return subscribeToCollection(postsQuery, mapBlogPosts, options);
+};
+
 export const listDealerModels = async (): Promise<DealerModel[]> => {
   const snapshot = await getDocs(dealerModelsCollection);
   return mapDealerModels(snapshot).map(({ id: _id, ...rest }) => rest);
@@ -249,25 +271,70 @@ export const subscribeToDealerModelsForDealers = (
     return subscribeToCollection(dealerQuery, mapDealerModelsWithoutId, options);
   }
 
-  const limitedIds = uniqueIds.slice(0, 10);
-  if (uniqueIds.length > limitedIds.length) {
-    console.warn(
-      'subscribeToDealerModelsForDealers: truncating dealer ID list to the first 10 entries to satisfy Firestore query limits.',
-    );
+  const chunkSize = 10;
+  const chunks: string[][] = [];
+  for (let index = 0; index < uniqueIds.length; index += chunkSize) {
+    chunks.push(uniqueIds.slice(index, index + chunkSize));
   }
 
-  const dealerQuery = query(dealerModelsCollection, where('dealer_id', 'in', limitedIds));
-  return subscribeToCollection(dealerQuery, mapDealerModelsWithoutId, options);
+  const state = new Map<string, DealerModel[]>();
+
+  const emit = () => {
+    const combined: DealerModel[] = [];
+    state.forEach(models => {
+      combined.push(...models);
+    });
+    options.onData(combined);
+  };
+
+  const unsubscribers = chunks.map(chunkIds => {
+    const dealerQuery = query(dealerModelsCollection, where('dealer_id', 'in', chunkIds));
+    return onSnapshot(
+      dealerQuery,
+      snapshot => {
+        const mapped = mapDealerModelsWithoutId(snapshot);
+        const grouped = new Map<string, DealerModel[]>();
+
+        mapped.forEach(model => {
+          if (!grouped.has(model.dealer_id)) {
+            grouped.set(model.dealer_id, []);
+          }
+          grouped.get(model.dealer_id)!.push(model);
+        });
+
+        chunkIds.forEach(id => {
+          const modelsForDealer = grouped.get(id);
+          if (modelsForDealer && modelsForDealer.length > 0) {
+            state.set(id, modelsForDealer);
+          } else {
+            state.delete(id);
+          }
+        });
+
+        emit();
+      },
+      options.onError,
+    );
+  });
+
+  return () => {
+    unsubscribers.forEach(unsubscribe => unsubscribe());
+  };
 };
 
 const buildDealerModelId = (dealerId: string, modelId: string) => `${dealerId}_${modelId}`;
 
-export const createDealerModel = async (dealerId: string, modelId: string): Promise<DealerModel> => {
+export const createDealerModel = async (
+  dealerId: string,
+  modelId: string,
+  createdBy?: string,
+): Promise<DealerModel> => {
   const linkRef = doc(dealerModelsCollection, buildDealerModelId(dealerId, modelId));
   await setDoc(linkRef, {
     dealer_id: dealerId,
     model_id: modelId,
     createdAt: serverTimestamp(),
+    ...(createdBy ? { createdBy } : {}),
   });
   return { dealer_id: dealerId, model_id: modelId };
 };
