@@ -505,12 +505,14 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         ...ownership,
       }) as Partial<Omit<Model, 'id'>>;
 
+      const actorUid = normalizeNullableString(userUid) ?? undefined;
+
       if (role === 'dealer' && activeDealer) {
         if (sanitized.ownerDealerId === undefined) {
           sanitized.ownerDealerId = activeDealer.id;
         }
 
-        const ownershipUid = userUid ?? activeDealer.ownerUid ?? null;
+        const ownershipUid = actorUid ?? normalizeNullableString(activeDealer.ownerUid) ?? undefined;
         if (ownershipUid && sanitized.ownerUid === undefined) {
           sanitized.ownerUid = ownershipUid;
         }
@@ -519,6 +521,19 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         }
         if (ownershipUid && sanitized.updatedBy === undefined) {
           sanitized.updatedBy = ownershipUid;
+        }
+      } else if (actorUid) {
+        if (sanitized.ownerUid === undefined) {
+          sanitized.ownerUid = actorUid;
+        }
+      }
+
+      if (actorUid) {
+        if (sanitized.createdBy === undefined) {
+          sanitized.createdBy = actorUid;
+        }
+        if (sanitized.updatedBy === undefined) {
+          sanitized.updatedBy = actorUid;
         }
       }
 
