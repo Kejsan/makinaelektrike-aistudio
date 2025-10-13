@@ -9,8 +9,10 @@ import React, {
 import type { Dealer, DealerDocument, Model, BlogPost, DealerModel } from '../types';
 import {
   subscribeToDealers,
+  subscribeToApprovedDealers,
   subscribeToModels,
   subscribeToBlogPosts,
+  subscribeToPublishedBlogPosts,
   subscribeToDealerModels,
   subscribeToDealersByOwner,
   subscribeToModelsByOwner,
@@ -392,33 +394,55 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       );
     } else {
       unsubscribers.push(
-        subscribeToDealers({
-          onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
-          onError: handleSubscriptionError('dealers'),
-        }),
+        (role === 'admin'
+          ? subscribeToDealers({
+              onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
+              onError: handleSubscriptionError('dealers'),
+            })
+          : subscribeToApprovedDealers({
+              onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
+              onError: permissionAwareErrorHandler('dealers', () => dataDispatch({ type: 'SET_DEALERS', payload: [] })),
+            }))
       );
       unsubscribers.push(
         subscribeToModels({
           onData: models => dataDispatch({ type: 'SET_MODELS', payload: models }),
-          onError: handleSubscriptionError('vehicle models'),
+          onError:
+            role === 'admin'
+              ? handleSubscriptionError('vehicle models')
+              : permissionAwareErrorHandler('vehicle models', () =>
+                  dataDispatch({ type: 'SET_MODELS', payload: [] }),
+                ),
         }),
       );
-      unsubscribers.push(
-        subscribeToDealerModels({
-          onData: mappings => setDealerModels(mappings),
-          onError: handleSubscriptionError('dealer relationships'),
-        }),
-      );
+
+      if (role === 'admin') {
+        unsubscribers.push(
+          subscribeToDealerModels({
+            onData: mappings => setDealerModels(mappings),
+            onError: handleSubscriptionError('dealer relationships'),
+          }),
+        );
+      } else {
+        setDealerModels([]);
+      }
     }
 
     if (isFirebaseConfigured) {
       unsubscribers.push(
-        subscribeToBlogPosts({
-          onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
-          onError: permissionAwareErrorHandler('blog posts', () =>
-            dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts }),
-          ),
-        }),
+        (role === 'admin'
+          ? subscribeToBlogPosts({
+              onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
+              onError: permissionAwareErrorHandler('blog posts', () =>
+                dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts }),
+              ),
+            })
+          : subscribeToPublishedBlogPosts({
+              onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
+              onError: permissionAwareErrorHandler('blog posts', () =>
+                dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts }),
+              ),
+            }))
       );
     } else {
       dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts });
@@ -434,6 +458,41 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     role,
     userUid,
   ]);
+
+  useEffect(() => {
+    if (role === 'admin' || role === 'dealer') {
+      return;
+    }
+
+    const dealerIds = dataState.dealers.map(dealer => dealer.id);
+
+    if (dealerIds.length === 0) {
+      dataDispatch({ type: 'SET_DEALER_MODELS', payload: [] });
+      return;
+    }
+
+    const uniqueIds = Array.from(new Set(dealerIds));
+    const aggregated = new Map<string, DealerModel[]>();
+
+    const unsubscribers = uniqueIds.map(dealerId =>
+      subscribeToDealerModelsForDealers([dealerId], {
+        onData: mappings => {
+          aggregated.set(dealerId, mappings);
+          const combined = Array.from(aggregated.values()).flat();
+          dataDispatch({ type: 'SET_DEALER_MODELS', payload: combined });
+        },
+        onError: permissionAwareErrorHandler('dealer relationships', () => {
+          aggregated.delete(dealerId);
+          const combined = Array.from(aggregated.values()).flat();
+          dataDispatch({ type: 'SET_DEALER_MODELS', payload: combined });
+        }),
+      }),
+    );
+
+    return () => {
+      unsubscribers.forEach(unsubscribe => unsubscribe());
+    };
+  }, [dataState.dealers, permissionAwareErrorHandler, role]);
 
   const runMutation = useCallback(
     async <T,>({
