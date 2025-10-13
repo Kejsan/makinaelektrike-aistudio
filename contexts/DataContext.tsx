@@ -210,6 +210,15 @@ const rejectUsage = async () => {
 
 const defaultMutationState = createInitialMutationState();
 
+const normalizeOptionalString = (value?: string | null): string | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
 export const DataContext = createContext<DataContextType>({
   dealers: [],
   models: [],
@@ -424,6 +433,89 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     [addToast, role],
   );
 
+  const enhanceModelInput = useCallback(
+    (input: ModelInput): ModelInput => {
+      const actorUid = normalizeOptionalString(userUid);
+
+      const {
+        ownerDealerId: rawOwnerDealerId,
+        ownerUid: rawOwnerUid,
+        createdBy: rawCreatedBy,
+        updatedBy: rawUpdatedBy,
+        ...rest
+      } = input;
+
+      const existingOwnerDealerId = normalizeOptionalString(rawOwnerDealerId);
+      const existingOwnerUid = normalizeOptionalString(rawOwnerUid);
+      const existingCreatedBy = normalizeOptionalString(rawCreatedBy);
+      const existingUpdatedBy = normalizeOptionalString(rawUpdatedBy);
+
+      let derivedOwnerDealerId = existingOwnerDealerId;
+      let derivedOwnerUid = existingOwnerUid;
+
+      if (role === 'dealer') {
+        const ownedDealers = dataState.dealers;
+        const primaryDealer =
+          ownedDealers.find(dealer => normalizeOptionalString(dealer.ownerUid) === actorUid) ??
+          ownedDealers[0];
+
+        if (!derivedOwnerDealerId && primaryDealer) {
+          derivedOwnerDealerId = primaryDealer.id;
+        }
+
+        if (!derivedOwnerUid) {
+          derivedOwnerUid = normalizeOptionalString(primaryDealer?.ownerUid) ?? actorUid;
+        }
+      } else if (!derivedOwnerUid) {
+        derivedOwnerUid = actorUid;
+      }
+
+      const payload: ModelInput = { ...rest } as ModelInput;
+
+      const ownerDealerId = derivedOwnerDealerId ?? existingOwnerDealerId;
+      if (ownerDealerId) {
+        payload.ownerDealerId = ownerDealerId;
+      }
+
+      const ownerUid = derivedOwnerUid ?? existingOwnerUid;
+      if (ownerUid) {
+        payload.ownerUid = ownerUid;
+      }
+
+      const createdBy = existingCreatedBy ?? ownerUid ?? actorUid;
+      if (createdBy) {
+        payload.createdBy = createdBy;
+      }
+
+      const updatedBy = existingUpdatedBy ?? actorUid ?? createdBy ?? ownerUid;
+      if (updatedBy) {
+        payload.updatedBy = updatedBy;
+      }
+
+      return payload;
+    },
+    [dataState.dealers, role, userUid],
+  );
+
+  const enhanceModelUpdate = useCallback(
+    (updates: ModelUpdate): ModelUpdate => {
+      const actorUid = normalizeOptionalString(userUid);
+      const { updatedBy: rawUpdatedBy, ...rest } = updates;
+      const existingUpdatedBy = normalizeOptionalString(rawUpdatedBy);
+
+      if (existingUpdatedBy) {
+        return { ...rest, updatedBy: existingUpdatedBy };
+      }
+
+      if (actorUid) {
+        return { ...rest, updatedBy: actorUid };
+      }
+
+      return { ...rest };
+    },
+    [userUid],
+  );
+
   const addDealer = useCallback(
     (dealer: DealerInput) =>
       runMutation({
@@ -490,12 +582,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'models',
         operation: 'create',
-        action: () => apiCreateModel(model),
+        action: () => apiCreateModel(enhanceModelInput(model)),
         successMessage: 'Model created successfully.',
         errorMessage: 'Failed to create model.',
         allowedRoles: ['admin', 'dealer'],
       }),
-    [runMutation],
+    [enhanceModelInput, runMutation],
   );
 
   const updateModel = useCallback(
@@ -503,12 +595,12 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'models',
         operation: 'update',
-        action: () => apiUpdateModel(id, updates),
+        action: () => apiUpdateModel(id, enhanceModelUpdate(updates)),
         successMessage: 'Model updated successfully.',
         errorMessage: 'Failed to update model.',
         allowedRoles: ['admin', 'dealer'],
       }),
-    [runMutation],
+    [enhanceModelUpdate, runMutation],
   );
 
   const deleteModel = useCallback(
