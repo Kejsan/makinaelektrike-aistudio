@@ -41,6 +41,46 @@ interface EntityConfig {
   buildPayload: (values: GenericRecord) => DealerDocument | Omit<Model, 'id'> | Omit<BlogPost, 'id'>;
 }
 
+const sanitizeValue = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(item => sanitizeValue(item)).filter(item => item !== undefined);
+  }
+
+  if (value && typeof value === 'object') {
+    const prototype = Object.getPrototypeOf(value);
+    const isPlainObject = prototype === Object.prototype || prototype === null;
+
+    if (!isPlainObject) {
+      return value;
+    }
+
+    const entries = Object.entries(value as Record<string, unknown>)
+      .map(([key, nestedValue]) => [key, sanitizeValue(nestedValue)])
+      .filter(([, nestedValue]) => nestedValue !== undefined);
+
+    return Object.fromEntries(entries);
+  }
+
+  return value === undefined ? undefined : value;
+};
+
+const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
+  const entries = Object.entries(payload)
+    .map(([key, value]) => [key, sanitizeValue(value)])
+    .filter(([, value]) => value !== undefined);
+
+  return Object.fromEntries(entries) as T;
+};
+
+const normalizeNullableString = (value: string | null | undefined): string | null => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
+};
+
 interface ImportProgress {
   processed: number;
   succeeded: number;
@@ -157,7 +197,16 @@ const dealerConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<DealerDocument>;
-    return {
+    const metadata: Partial<DealerDocument> = {
+      ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
+      approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
+      rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
+      rejectionReason: normalizeNullableString(input.rejectionReason as string | null | undefined),
+      createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
+      updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
+    };
+
+    return sanitizePayload({
       name: input.name ?? '',
       companyName: input.companyName,
       contactName: input.contactName,
@@ -178,14 +227,9 @@ const dealerConfig: EntityConfig = {
       image_url: input.image_url,
       isFeatured: input.isFeatured,
       imageGallery: (input.imageGallery as string[]) ?? [],
-      ownerUid: input.ownerUid,
-      approved: input.approved,
-      approvedAt: input.approvedAt,
-      rejectedAt: input.rejectedAt,
-      rejectionReason: input.rejectionReason,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
-    };
+      approved: (input.approved as boolean | undefined) ?? false,
+      ...metadata,
+    });
   },
 };
 
@@ -200,7 +244,16 @@ const modelConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<Model, 'id'>>;
-    return {
+    const ownership: Partial<Model> = {
+      ownerDealerId: normalizeNullableString(input.ownerDealerId as string | null | undefined),
+      ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
+      createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
+      updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
+      createdAt: (input.createdAt ?? null) as Model['createdAt'],
+      updatedAt: (input.updatedAt ?? null) as Model['updatedAt'],
+    };
+
+    return sanitizePayload({
       brand: input.brand ?? '',
       model_name: input.model_name ?? '',
       body_type: input.body_type,
@@ -217,13 +270,8 @@ const modelConfig: EntityConfig = {
       notes: input.notes,
       image_url: input.image_url,
       isFeatured: input.isFeatured,
-      ownerDealerId: input.ownerDealerId,
-      ownerUid: input.ownerUid,
-      createdBy: input.createdBy,
-      updatedBy: input.updatedBy,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
-    };
+      ...ownership,
+    });
   },
 };
 
@@ -240,7 +288,7 @@ const blogConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<BlogPost, 'id'>>;
-    return {
+    return sanitizePayload({
       slug: input.slug ?? '',
       title: input.title ?? '',
       excerpt: input.excerpt ?? '',
@@ -254,7 +302,7 @@ const blogConfig: EntityConfig = {
       sections: (input.sections as BlogPost['sections']) ?? [],
       faqs: input.faqs,
       cta: input.cta,
-    };
+    });
   },
 };
 

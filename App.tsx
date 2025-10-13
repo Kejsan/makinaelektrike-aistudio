@@ -29,6 +29,7 @@ import { DataContext, DataProvider } from './contexts/DataContext';
 import { ToastProvider, ToastContainer } from './contexts/ToastContext';
 import ChatButton from './components/ChatButton';
 import ChatWidget from './components/ChatWidget';
+import ScrollRestoration from './components/ScrollRestoration';
 
 const LoadingScreen = () => (
   <div className="flex items-center justify-center py-24">
@@ -93,6 +94,7 @@ const App: React.FC = () => {
 
   return (
     <BrowserRouter>
+      <ScrollRestoration />
       <ToastProvider>
         <AuthProvider>
           <DataProvider>
