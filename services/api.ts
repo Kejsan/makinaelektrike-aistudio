@@ -46,6 +46,8 @@ const mapDealers = createCollectionMapper<Dealer>();
 const mapModels = createCollectionMapper<Model>();
 const mapBlogPosts = createCollectionMapper<BlogPost>();
 const mapDealerModels = createCollectionMapper<WithId<DealerModel>>();
+const mapDealerModelsWithoutId = (snapshot: QuerySnapshot<DocumentData>): DealerModel[] =>
+  mapDealerModels(snapshot).map(({ id: _id, ...rest }) => rest);
 
 type SnapshotCallback<T> = (items: T[]) => void;
 
@@ -107,6 +109,14 @@ export const subscribeToDealers = (
   return subscribeToCollection(dealersQuery, mapDealers, options);
 };
 
+export const subscribeToDealersByOwner = (
+  ownerUid: string,
+  options: SubscriptionOptions<Dealer>,
+): Unsubscribe => {
+  const dealersQuery = query(dealersCollection, where('ownerUid', '==', ownerUid));
+  return subscribeToCollection(dealersQuery, mapDealers, options);
+};
+
 export const listModels = async (): Promise<Model[]> => {
   const snapshot = await getDocs(query(modelsCollection, orderBy('brand', 'asc'), orderBy('model_name', 'asc')));
   return mapModels(snapshot);
@@ -150,6 +160,14 @@ export const subscribeToModels = (
   options: SubscriptionOptions<Model>,
 ): Unsubscribe => {
   const modelsQuery = query(modelsCollection, orderBy('brand', 'asc'), orderBy('model_name', 'asc'));
+  return subscribeToCollection(modelsQuery, mapModels, options);
+};
+
+export const subscribeToModelsByOwner = (
+  ownerUid: string,
+  options: SubscriptionOptions<Model>,
+): Unsubscribe => {
+  const modelsQuery = query(modelsCollection, where('ownerUid', '==', ownerUid));
   return subscribeToCollection(modelsQuery, mapModels, options);
 };
 
@@ -214,6 +232,33 @@ export const subscribeToDealerModels = (
     },
     options.onError,
   );
+
+export const subscribeToDealerModelsForDealers = (
+  dealerIds: string[],
+  options: SubscriptionOptions<DealerModel>,
+): Unsubscribe => {
+  const uniqueIds = Array.from(new Set(dealerIds.filter(Boolean)));
+
+  if (uniqueIds.length === 0) {
+    options.onData([]);
+    return () => {};
+  }
+
+  if (uniqueIds.length === 1) {
+    const dealerQuery = query(dealerModelsCollection, where('dealer_id', '==', uniqueIds[0]!));
+    return subscribeToCollection(dealerQuery, mapDealerModelsWithoutId, options);
+  }
+
+  const limitedIds = uniqueIds.slice(0, 10);
+  if (uniqueIds.length > limitedIds.length) {
+    console.warn(
+      'subscribeToDealerModelsForDealers: truncating dealer ID list to the first 10 entries to satisfy Firestore query limits.',
+    );
+  }
+
+  const dealerQuery = query(dealerModelsCollection, where('dealer_id', 'in', limitedIds));
+  return subscribeToCollection(dealerQuery, mapDealerModelsWithoutId, options);
+};
 
 const buildDealerModelId = (dealerId: string, modelId: string) => `${dealerId}_${modelId}`;
 

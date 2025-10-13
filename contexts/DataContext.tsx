@@ -12,6 +12,9 @@ import {
   subscribeToModels,
   subscribeToBlogPosts,
   subscribeToDealerModels,
+  subscribeToDealersByOwner,
+  subscribeToModelsByOwner,
+  subscribeToDealerModelsForDealers,
   createDealer as apiCreateDealer,
   updateDealer as apiUpdateDealer,
   deleteDealer as apiDeleteDealer,
@@ -271,8 +274,9 @@ interface MutationRequest<T> {
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [dataState, dataDispatch] = useReducer(dataReducer, initialDataState);
   const [mutationState, mutationDispatch] = useReducer(mutationReducer, createInitialMutationState());
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const { addToast } = useToast();
+  const userUid = user?.uid ?? null;
 
   const handleSubscriptionError = useCallback(
     (resource: string) => (error: FirestoreError) => {
@@ -284,29 +288,92 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     [addToast],
   );
 
+  const permissionAwareErrorHandler = useCallback(
+    (resource: string, fallback?: () => void) => (error: FirestoreError) => {
+      if (error.code === 'permission-denied') {
+        console.warn(`Permission denied while subscribing to ${resource}.`, error);
+        fallback?.();
+        return;
+      }
+      handleSubscriptionError(resource)(error);
+    },
+    [handleSubscriptionError],
+  );
+
   useEffect(() => {
     dataDispatch({ type: 'LOAD_START' });
 
-    const unsubscribers: Unsubscribe[] = [
-      subscribeToDealers({
-        onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
-        onError: handleSubscriptionError('dealers'),
-      }),
-      subscribeToModels({
-        onData: models => dataDispatch({ type: 'SET_MODELS', payload: models }),
-        onError: handleSubscriptionError('vehicle models'),
-      }),
-      subscribeToDealerModels({
-        onData: mappings => dataDispatch({ type: 'SET_DEALER_MODELS', payload: mappings }),
-        onError: handleSubscriptionError('dealer relationships'),
-      }),
-    ];
+    const unsubscribers: Unsubscribe[] = [];
+    let dealerModelsUnsubscribe: Unsubscribe | null = null;
+
+    const cleanupDealerModelsSubscription = () => {
+      if (dealerModelsUnsubscribe) {
+        dealerModelsUnsubscribe();
+        dealerModelsUnsubscribe = null;
+      }
+    };
+
+    const setDealerModels = (mappings: DealerModel[]) => {
+      dataDispatch({ type: 'SET_DEALER_MODELS', payload: mappings });
+    };
+
+    if (role === 'dealer' && userUid) {
+      unsubscribers.push(
+        subscribeToDealersByOwner(userUid, {
+          onData: dealers => {
+            dataDispatch({ type: 'SET_DEALERS', payload: dealers });
+            cleanupDealerModelsSubscription();
+
+            if (dealers.length > 0) {
+              dealerModelsUnsubscribe = subscribeToDealerModelsForDealers(
+                dealers.map(dealer => dealer.id),
+                {
+                  onData: setDealerModels,
+                  onError: permissionAwareErrorHandler('dealer relationships', () => setDealerModels([])),
+                },
+              );
+            } else {
+              setDealerModels([]);
+            }
+          },
+          onError: permissionAwareErrorHandler('dealers', () => dataDispatch({ type: 'SET_DEALERS', payload: [] })),
+        }),
+      );
+
+      unsubscribers.push(
+        subscribeToModelsByOwner(userUid, {
+          onData: models => dataDispatch({ type: 'SET_MODELS', payload: models }),
+          onError: permissionAwareErrorHandler('vehicle models', () => dataDispatch({ type: 'SET_MODELS', payload: [] })),
+        }),
+      );
+    } else {
+      unsubscribers.push(
+        subscribeToDealers({
+          onData: dealers => dataDispatch({ type: 'SET_DEALERS', payload: dealers }),
+          onError: handleSubscriptionError('dealers'),
+        }),
+      );
+      unsubscribers.push(
+        subscribeToModels({
+          onData: models => dataDispatch({ type: 'SET_MODELS', payload: models }),
+          onError: handleSubscriptionError('vehicle models'),
+        }),
+      );
+      unsubscribers.push(
+        subscribeToDealerModels({
+          onData: mappings => setDealerModels(mappings),
+          onError: handleSubscriptionError('dealer relationships'),
+        }),
+      );
+    }
 
     if (isFirebaseConfigured) {
       unsubscribers.push(
         subscribeToBlogPosts({
           onData: posts => dataDispatch({ type: 'SET_BLOG_POSTS', payload: posts }),
-          onError: handleSubscriptionError('blog posts'),
+          onError: permissionAwareErrorHandler('blog posts', () =>
+            dataDispatch({ type: 'SET_BLOG_POSTS', payload: staticBlogPosts }),
+          ),
         }),
       );
     } else {
@@ -314,9 +381,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
 
     return () => {
+      cleanupDealerModelsSubscription();
       unsubscribers.forEach(unsubscribe => unsubscribe());
     };
-  }, [handleSubscriptionError]);
+  }, [
+    handleSubscriptionError,
+    permissionAwareErrorHandler,
+    role,
+    userUid,
+  ]);
 
   const runMutation = useCallback(
     async <T,>({
