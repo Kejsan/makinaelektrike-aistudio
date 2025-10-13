@@ -72,6 +72,15 @@ const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
   return Object.fromEntries(entries) as T;
 };
 
+const normalizeNullableString = (value: string | null | undefined): string | null => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? null : trimmed;
+};
+
 interface ImportProgress {
   processed: number;
   succeeded: number;
@@ -188,26 +197,14 @@ const dealerConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<DealerDocument>;
-    const metadata: Partial<DealerDocument> = {};
-
-    if (input.ownerUid !== undefined) {
-      metadata.ownerUid = input.ownerUid as string | null;
-    }
-    if (input.approvedAt !== undefined) {
-      metadata.approvedAt = input.approvedAt as DealerDocument['approvedAt'];
-    }
-    if (input.rejectedAt !== undefined) {
-      metadata.rejectedAt = input.rejectedAt as DealerDocument['rejectedAt'];
-    }
-    if (input.rejectionReason !== undefined) {
-      metadata.rejectionReason = input.rejectionReason as string | null;
-    }
-    if (input.createdAt !== undefined) {
-      metadata.createdAt = input.createdAt as DealerDocument['createdAt'];
-    }
-    if (input.updatedAt !== undefined) {
-      metadata.updatedAt = input.updatedAt as DealerDocument['updatedAt'];
-    }
+    const metadata: Partial<DealerDocument> = {
+      ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
+      approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
+      rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
+      rejectionReason: normalizeNullableString(input.rejectionReason as string | null | undefined),
+      createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
+      updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
+    };
 
     return sanitizePayload({
       name: input.name ?? '',
@@ -247,26 +244,14 @@ const modelConfig: EntityConfig = {
   ],
   buildPayload: values => {
     const input = values as Partial<Omit<Model, 'id'>>;
-    const ownership: Partial<Model> = {};
-
-    if (input.ownerDealerId !== undefined) {
-      ownership.ownerDealerId = input.ownerDealerId as string | null;
-    }
-    if (input.ownerUid !== undefined) {
-      ownership.ownerUid = input.ownerUid as string | null;
-    }
-    if (input.createdBy !== undefined) {
-      ownership.createdBy = input.createdBy as string | null;
-    }
-    if (input.updatedBy !== undefined) {
-      ownership.updatedBy = input.updatedBy as string | null;
-    }
-    if (input.createdAt !== undefined) {
-      ownership.createdAt = input.createdAt as Model['createdAt'];
-    }
-    if (input.updatedAt !== undefined) {
-      ownership.updatedAt = input.updatedAt as Model['updatedAt'];
-    }
+    const ownership: Partial<Model> = {
+      ownerDealerId: normalizeNullableString(input.ownerDealerId as string | null | undefined),
+      ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
+      createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
+      updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
+      createdAt: (input.createdAt ?? null) as Model['createdAt'],
+      updatedAt: (input.updatedAt ?? null) as Model['updatedAt'],
+    };
 
     return sanitizePayload({
       brand: input.brand ?? '',
