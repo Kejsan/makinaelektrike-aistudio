@@ -96,14 +96,23 @@ const Footer: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="mt-12 border-t border-gray-500/50 pt-8 flex flex-col gap-2 text-center md:flex-row md:items-center md:justify-between md:text-left">
-          <p className="text-base text-gray-400">&copy; {new Date().getFullYear()} Makina Elektrike. {t('footer.rightsReserved')}</p>
-          <p className="text-base text-gray-400">
-            {t('footer.credits')}{' '}
-            <a href="https://kejsan-coku.netlify.app/" target="_blank" rel="noreferrer" className="text-gray-cyan hover:text-white">
-              Kejsan Coku
-            </a>
+        <div className="mt-12 border-t border-gray-500/50 pt-8 flex flex-col gap-6 text-center md:text-left">
+          <p className="text-sm text-gray-400 leading-relaxed">
+            The information on this website is provided on "as is, as available basis" without warranty of any kind. Makina Elektrike is
+            not responsible for any omissions, inaccuracies or other errors in the information it publishes. All warranties with respect to
+            this information are disclaimed. Reproduction of any part of this website in its entirety or partially or in any form or medium
+            without prior written permission is prohibited. The trademarks, marques and logos of the manufacturers of devices and/or
+            dealerships described and/or promoted, software, hardware, etc. are the property of their respective owners.
           </p>
+          <div className="flex flex-col gap-2 text-center md:flex-row md:items-center md:justify-between">
+            <p className="text-base text-gray-400">&copy; {new Date().getFullYear()} Makina Elektrike. {t('footer.rightsReserved')}</p>
+            <p className="text-base text-gray-400">
+              {t('footer.credits')}{' '}
+              <a href="https://kejsan-coku.netlify.app/" target="_blank" rel="noreferrer" className="text-gray-cyan hover:text-white">
+                Kejsan Coku
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
