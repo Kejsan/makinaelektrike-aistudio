@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, FileSpreadsheet, Loader2, Upload } from 'l
 import { useTranslation } from 'react-i18next';
 import { DataContext } from '../../contexts/DataContext';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 import type { DealerDocument, Model, BlogPost } from '../../types';
 
 export type BulkImportEntity = 'dealers' | 'models' | 'blog';
@@ -185,8 +186,8 @@ const blogFields: FieldDefinition[] = [
   },
 ];
 
-const dealerConfig: EntityConfig = {
-  key: 'dealers',
+const dealerConfigBase = {
+  key: 'dealers' as const,
   label: 'Dealers',
   fields: dealerFields,
   templateHeaders: dealerFields.map(field => field.key),
@@ -195,46 +196,10 @@ const dealerConfig: EntityConfig = {
     'Provide latitude and longitude in decimal degrees (for example 41.3275, 19.8189).',
     'The social_links column accepts a JSON object with facebook/instagram/twitter/youtube keys (optional).',
   ],
-  buildPayload: values => {
-    const input = values as Partial<DealerDocument>;
-    const metadata: Partial<DealerDocument> = {
-      ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
-      approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
-      rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
-      rejectionReason: normalizeNullableString(input.rejectionReason as string | null | undefined),
-      createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
-      updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
-    };
-
-    return sanitizePayload({
-      name: input.name ?? '',
-      companyName: input.companyName,
-      contactName: input.contactName,
-      address: input.address ?? '',
-      city: input.city ?? '',
-      lat: Number(input.lat ?? 0),
-      lng: Number(input.lng ?? 0),
-      phone: input.phone,
-      email: input.email,
-      website: input.website,
-      social_links: input.social_links as DealerDocument['social_links'],
-      brands: (input.brands as string[]) ?? [],
-      languages: (input.languages as string[]) ?? [],
-      notes: input.notes,
-      typeOfCars: input.typeOfCars ?? '',
-      priceRange: input.priceRange,
-      modelsAvailable: (input.modelsAvailable as string[]) ?? [],
-      image_url: input.image_url,
-      isFeatured: input.isFeatured,
-      imageGallery: (input.imageGallery as string[]) ?? [],
-      approved: (input.approved as boolean | undefined) ?? false,
-      ...metadata,
-    });
-  },
 };
 
-const modelConfig: EntityConfig = {
-  key: 'models',
+const modelConfigBase = {
+  key: 'models' as const,
   label: 'Models',
   fields: modelFields,
   templateHeaders: modelFields.map(field => field.key),
@@ -242,41 +207,10 @@ const modelConfig: EntityConfig = {
     'Leave numeric cells empty if a specification is unknown (battery_capacity, range_wltp, etc.).',
     'isFeatured accepts true/false values (also yes/no or 1/0).',
   ],
-  buildPayload: values => {
-    const input = values as Partial<Omit<Model, 'id'>>;
-    const ownership: Partial<Model> = {
-      ownerDealerId: normalizeNullableString(input.ownerDealerId as string | null | undefined),
-      ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
-      createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
-      updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
-      createdAt: (input.createdAt ?? null) as Model['createdAt'],
-      updatedAt: (input.updatedAt ?? null) as Model['updatedAt'],
-    };
-
-    return sanitizePayload({
-      brand: input.brand ?? '',
-      model_name: input.model_name ?? '',
-      body_type: input.body_type,
-      battery_capacity: input.battery_capacity as number | undefined,
-      range_wltp: input.range_wltp as number | undefined,
-      power_kw: input.power_kw as number | undefined,
-      torque_nm: input.torque_nm as number | undefined,
-      acceleration_0_100: input.acceleration_0_100 as number | undefined,
-      top_speed: input.top_speed as number | undefined,
-      drive_type: input.drive_type,
-      seats: input.seats as number | undefined,
-      charging_ac: input.charging_ac,
-      charging_dc: input.charging_dc,
-      notes: input.notes,
-      image_url: input.image_url,
-      isFeatured: input.isFeatured,
-      ...ownership,
-    });
-  },
 };
 
-const blogConfig: EntityConfig = {
-  key: 'blog',
+const blogConfigBase = {
+  key: 'blog' as const,
   label: 'Blog posts',
   fields: blogFields,
   templateHeaders: blogFields.map(field => field.key),
@@ -286,30 +220,6 @@ const blogConfig: EntityConfig = {
     'faqs should be provided as a JSON array of { question, answer } objects when included.',
     'cta should be a JSON object with text and url fields when included.',
   ],
-  buildPayload: values => {
-    const input = values as Partial<Omit<BlogPost, 'id'>>;
-    return sanitizePayload({
-      slug: input.slug ?? '',
-      title: input.title ?? '',
-      excerpt: input.excerpt ?? '',
-      author: input.author ?? '',
-      date: input.date ?? '',
-      readTime: input.readTime ?? '',
-      imageUrl: input.imageUrl ?? '',
-      metaTitle: input.metaTitle ?? '',
-      metaDescription: input.metaDescription ?? '',
-      tags: (input.tags as string[]) ?? [],
-      sections: (input.sections as BlogPost['sections']) ?? [],
-      faqs: input.faqs,
-      cta: input.cta,
-    });
-  },
-};
-
-const entityConfigs: Record<BulkImportEntity, EntityConfig> = {
-  dealers: dealerConfig,
-  models: modelConfig,
-  blog: blogConfig,
 };
 
 const isEmptyValue = (value: unknown) => {
@@ -500,8 +410,142 @@ const parseSpreadsheetFile = async (file: File): Promise<{ headers: string[]; ro
 
 const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) => {
   const { t } = useTranslation();
-  const { addDealer, addModel, addBlogPost } = useContext(DataContext);
+  const { user, role } = useAuth();
+  const { dealers, addDealer, addModel, addBlogPost } = useContext(DataContext);
   const { addToast } = useToast();
+
+  const userUid = user?.uid ?? null;
+
+  const activeDealer = useMemo(() => {
+    if (!userUid || role !== 'dealer') {
+      return null;
+    }
+
+    return (
+      dealers.find(entry => entry.ownerUid === userUid || entry.id === userUid) ?? null
+    );
+  }, [dealers, role, userUid]);
+
+  const entityConfigs = useMemo<Record<BulkImportEntity, EntityConfig>>(() => {
+    const buildDealerPayload: EntityConfig['buildPayload'] = values => {
+      const input = values as Partial<DealerDocument>;
+      const metadata: Partial<DealerDocument> = {
+        ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
+        approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
+        rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
+        rejectionReason: normalizeNullableString(input.rejectionReason as string | null | undefined),
+        createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
+        updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
+      };
+
+      const sanitized = sanitizePayload({
+        name: input.name ?? '',
+        companyName: input.companyName,
+        contactName: input.contactName,
+        address: input.address ?? '',
+        city: input.city ?? '',
+        lat: Number(input.lat ?? 0),
+        lng: Number(input.lng ?? 0),
+        phone: input.phone,
+        email: input.email,
+        website: input.website,
+        social_links: input.social_links as DealerDocument['social_links'],
+        brands: (input.brands as string[]) ?? [],
+        languages: (input.languages as string[]) ?? [],
+        notes: input.notes,
+        typeOfCars: input.typeOfCars ?? '',
+        priceRange: input.priceRange,
+        modelsAvailable: (input.modelsAvailable as string[]) ?? [],
+        image_url: input.image_url,
+        isFeatured: input.isFeatured,
+        imageGallery: (input.imageGallery as string[]) ?? [],
+        approved: (input.approved as boolean | undefined) ?? false,
+        ...metadata,
+      }) as Partial<DealerDocument>;
+
+      if (role === 'dealer' && userUid && sanitized.ownerUid === undefined) {
+        sanitized.ownerUid = userUid;
+      }
+
+      return sanitized as DealerDocument;
+    };
+
+    const buildModelPayload: EntityConfig['buildPayload'] = values => {
+      const input = values as Partial<Omit<Model, 'id'>>;
+      const ownership: Partial<Model> = {
+        ownerDealerId: normalizeNullableString(input.ownerDealerId as string | null | undefined),
+        ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
+        createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
+        updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
+        createdAt: (input.createdAt ?? null) as Model['createdAt'],
+        updatedAt: (input.updatedAt ?? null) as Model['updatedAt'],
+      };
+
+      const sanitized = sanitizePayload({
+        brand: input.brand ?? '',
+        model_name: input.model_name ?? '',
+        body_type: input.body_type,
+        battery_capacity: input.battery_capacity as number | undefined,
+        range_wltp: input.range_wltp as number | undefined,
+        power_kw: input.power_kw as number | undefined,
+        torque_nm: input.torque_nm as number | undefined,
+        acceleration_0_100: input.acceleration_0_100 as number | undefined,
+        top_speed: input.top_speed as number | undefined,
+        drive_type: input.drive_type,
+        seats: input.seats as number | undefined,
+        charging_ac: input.charging_ac,
+        charging_dc: input.charging_dc,
+        notes: input.notes,
+        image_url: input.image_url,
+        isFeatured: input.isFeatured,
+        ...ownership,
+      }) as Partial<Omit<Model, 'id'>>;
+
+      if (role === 'dealer' && activeDealer) {
+        if (sanitized.ownerDealerId === undefined) {
+          sanitized.ownerDealerId = activeDealer.id;
+        }
+
+        const ownershipUid = userUid ?? activeDealer.ownerUid ?? null;
+        if (ownershipUid && sanitized.ownerUid === undefined) {
+          sanitized.ownerUid = ownershipUid;
+        }
+        if (ownershipUid && sanitized.createdBy === undefined) {
+          sanitized.createdBy = ownershipUid;
+        }
+        if (ownershipUid && sanitized.updatedBy === undefined) {
+          sanitized.updatedBy = ownershipUid;
+        }
+      }
+
+      return sanitized as Omit<Model, 'id'>;
+    };
+
+    const buildBlogPayload: EntityConfig['buildPayload'] = values => {
+      const input = values as Partial<Omit<BlogPost, 'id'>>;
+      return sanitizePayload({
+        slug: input.slug ?? '',
+        title: input.title ?? '',
+        excerpt: input.excerpt ?? '',
+        author: input.author ?? '',
+        date: input.date ?? '',
+        readTime: input.readTime ?? '',
+        imageUrl: input.imageUrl ?? '',
+        metaTitle: input.metaTitle ?? '',
+        metaDescription: input.metaDescription ?? '',
+        tags: (input.tags as string[]) ?? [],
+        sections: (input.sections as BlogPost['sections']) ?? [],
+        faqs: input.faqs,
+        cta: input.cta,
+      }) as Omit<BlogPost, 'id'>;
+    };
+
+    return {
+      dealers: { ...dealerConfigBase, buildPayload: buildDealerPayload },
+      models: { ...modelConfigBase, buildPayload: buildModelPayload },
+      blog: { ...blogConfigBase, buildPayload: buildBlogPayload },
+    };
+  }, [activeDealer, role, userUid]);
 
   const config = entityConfigs[entity];
 
@@ -619,6 +663,16 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
 
     if (validRows.length === 0) {
       addToast(t('admin.bulkImport.noValidRows', { defaultValue: 'No valid rows to import.' }), 'error');
+      return;
+    }
+
+    if (entity === 'models' && role === 'dealer' && !activeDealer) {
+      addToast(
+        t('admin.bulkImport.dealerProfileMissing', {
+          defaultValue: 'Your dealer profile must be loaded before importing models.',
+        }),
+        'error'
+      );
       return;
     }
 
