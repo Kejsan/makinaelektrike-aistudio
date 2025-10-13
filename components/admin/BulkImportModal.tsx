@@ -73,13 +73,13 @@ const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
   return Object.fromEntries(entries) as T;
 };
 
-const normalizeNullableString = (value: string | null | undefined): string | null => {
+const normalizeNullableString = (value: string | null | undefined): string | undefined => {
   if (value === undefined || value === null) {
-    return null;
+    return undefined;
   }
 
   const trimmed = value.trim();
-  return trimmed.length === 0 ? null : trimmed;
+  return trimmed.length === 0 ? undefined : trimmed;
 };
 
 interface ImportProgress {
