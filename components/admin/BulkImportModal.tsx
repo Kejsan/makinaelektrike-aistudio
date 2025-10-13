@@ -119,6 +119,13 @@ const dealerFields: FieldDefinition[] = [
   { key: 'image_url', label: 'Image URL', type: 'string' },
   { key: 'isFeatured', label: 'Is featured', type: 'boolean', description: 'Accepted values: true/false, yes/no, 1/0' },
   { key: 'imageGallery', label: 'Image gallery', type: 'string[]', description: 'Comma separated list of URLs' },
+  { key: 'ownerUid', label: 'Owner UID', type: 'string', description: 'Optional UID of the dealer owner' },
+  { key: 'createdBy', label: 'Created by UID', type: 'string' },
+  { key: 'updatedBy', label: 'Updated by UID', type: 'string' },
+  { key: 'approved', label: 'Approved', type: 'boolean', description: 'true/false' },
+  { key: 'approvedAt', label: 'Approved at (timestamp)', type: 'string', description: 'ISO timestamp' },
+  { key: 'rejectedAt', label: 'Rejected at (timestamp)', type: 'string', description: 'ISO timestamp' },
+  { key: 'rejectionReason', label: 'Rejection reason', type: 'string' },
 ];
 
 const modelFields: FieldDefinition[] = [
@@ -188,6 +195,11 @@ const blogFields: FieldDefinition[] = [
       return 'CTA must be a JSON object when provided';
     },
   },
+  { key: 'ownerUid', label: 'Owner UID', type: 'string' },
+  { key: 'createdBy', label: 'Created by UID', type: 'string' },
+  { key: 'updatedBy', label: 'Updated by UID', type: 'string' },
+  { key: 'published', label: 'Published', type: 'boolean', description: 'true/false' },
+  { key: 'publishedAt', label: 'Published at (timestamp)', type: 'string', description: 'ISO timestamp' },
 ];
 
 const dealerConfigBase = {
@@ -440,6 +452,8 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         rejectionReason: normalizeNullableString(input.rejectionReason as string | null | undefined),
         createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
         updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
+        createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
+        updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
       };
 
       const sanitized = sanitizePayload({
@@ -467,8 +481,19 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         ...metadata,
       }) as Partial<DealerDocument>;
 
+      const actorUid = normalizeNullableString(userUid);
+
       if (role === 'dealer' && userUid && sanitized.ownerUid === undefined) {
         sanitized.ownerUid = userUid;
+      }
+
+      if (actorUid) {
+        if (sanitized.createdBy === undefined) {
+          sanitized.createdBy = actorUid;
+        }
+        if (sanitized.updatedBy === undefined) {
+          sanitized.updatedBy = actorUid;
+        }
       }
 
       return sanitized as DealerDocument;
@@ -542,7 +567,15 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
 
     const buildBlogPayload: EntityConfig['buildPayload'] = values => {
       const input = values as Partial<Omit<BlogPost, 'id'>>;
-      return sanitizePayload({
+      const ownership = {
+        ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
+        createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
+        updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
+        published: input.published,
+        publishedAt: (input.publishedAt ?? null) as BlogPost['publishedAt'],
+      };
+
+      const sanitized = sanitizePayload({
         slug: input.slug ?? '',
         title: input.title ?? '',
         excerpt: input.excerpt ?? '',
@@ -556,7 +589,28 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         sections: (input.sections as BlogPost['sections']) ?? [],
         faqs: input.faqs,
         cta: input.cta,
-      }) as Omit<BlogPost, 'id'>;
+        ...ownership,
+      }) as Partial<Omit<BlogPost, 'id'>>;
+
+      const actorUid = normalizeNullableString(userUid);
+
+      if (actorUid) {
+        if (sanitized.ownerUid === undefined) {
+          sanitized.ownerUid = actorUid;
+        }
+        if (sanitized.createdBy === undefined) {
+          sanitized.createdBy = actorUid;
+        }
+        if (sanitized.updatedBy === undefined) {
+          sanitized.updatedBy = actorUid;
+        }
+      }
+
+      if (sanitized.published === undefined) {
+        sanitized.published = true;
+      }
+
+      return sanitized as Omit<BlogPost, 'id'>;
     };
 
     return {

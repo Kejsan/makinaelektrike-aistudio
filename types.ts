@@ -45,6 +45,8 @@ interface DealerCore {
 
 export interface DealerDocument extends DealerCore, FirestoreTimestamps {
   ownerUid?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
   approved?: boolean;
   approvedAt?: Timestamp | null;
   rejectedAt?: Timestamp | null;
@@ -122,7 +124,15 @@ export interface BlogPostCta {
   url: string;
 }
 
-export interface BlogPost {
+interface BlogPostMetadata extends FirestoreTimestamps {
+  ownerUid?: string | null;
+  createdBy?: string | null;
+  updatedBy?: string | null;
+  published?: boolean;
+  publishedAt?: Timestamp | null;
+}
+
+export interface BlogPost extends BlogPostMetadata {
   id: string;
   slug: string;
   title: string;
