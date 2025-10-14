@@ -141,7 +141,7 @@ const RegisterDealerPage: React.FC = () => {
     '@type': 'WebPage',
     name: metaTitle,
     description: metaDescription,
-    url: `${BASE_URL}/register/-dealer`,
+    url: `${BASE_URL}/register-dealer/`,
   };
 
   return (
@@ -150,11 +150,11 @@ const RegisterDealerPage: React.FC = () => {
         title={metaTitle}
         description={metaDescription}
         keywords={['regjistrim dealer', 'makina elektrike', 'listo dilerin', 'Makina Elektrike']}
-        canonical={`${BASE_URL}/register/-dealer`}
+        canonical={`${BASE_URL}/register-dealer/`}
         openGraph={{
           title: metaTitle,
           description: metaDescription,
-          url: `${BASE_URL}/register/-dealer`,
+          url: `${BASE_URL}/register-dealer/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}
