@@ -246,7 +246,7 @@ const convertValue = (rawValue: unknown, field: FieldDefinition) => {
     if (text === '') {
       return undefined;
     }
-    const num = Number(text);
+    const num = parseFloat(text);
     if (Number.isNaN(num)) {
       throw new Error('Expected a numeric value');
     }
