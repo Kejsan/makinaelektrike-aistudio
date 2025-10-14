@@ -105,12 +105,10 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialValues, onSubmit, on
     const baseExcerpt = formState.excerpt.trim();
 
     const payload: BlogPostFormValues = {
-      id: initialValues?.id,
       title: baseTitle,
       excerpt: baseExcerpt,
       author: formState.author.trim(),
       date: formState.date,
-      imageUrl: formState.imageUrl.trim() || initialValues?.imageUrl,
       slug:
         initialValues?.slug ??
         baseTitle
@@ -131,9 +129,26 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialValues, onSubmit, on
             paragraphs: [baseExcerpt],
           },
         ],
-      faqs: initialValues?.faqs,
-      cta: initialValues?.cta,
     };
+
+    if (initialValues?.id) {
+      payload.id = initialValues.id;
+    }
+
+    const resolvedImageUrl = formState.imageUrl.trim() || initialValues?.imageUrl || '';
+    if (resolvedImageUrl) {
+      payload.imageUrl = resolvedImageUrl;
+    } else {
+      payload.imageUrl = '';
+    }
+
+    if (initialValues?.faqs) {
+      payload.faqs = initialValues.faqs;
+    }
+
+    if (initialValues?.cta) {
+      payload.cta = initialValues.cta;
+    }
 
     await onSubmit(payload);
   };

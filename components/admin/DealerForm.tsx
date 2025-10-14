@@ -184,37 +184,76 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
         .map(item => item.trim())
         .filter(Boolean);
 
+    const latValue = formState.lat.trim();
+    const lngValue = formState.lng.trim();
     const payload: DealerFormValues = {
-      id: initialValues?.id,
       name: formState.name.trim(),
       address: formState.address.trim(),
       city: formState.city.trim(),
-      lat: formState.lat.trim() ? Number(formState.lat) : 0,
-      lng: formState.lng.trim() ? Number(formState.lng) : 0,
-      phone: formState.phone.trim() || undefined,
-      email: formState.email.trim() || undefined,
-      website: formState.website.trim() || undefined,
+      lat: latValue ? Number(latValue) : 0,
+      lng: lngValue ? Number(lngValue) : 0,
       brands: parseList(formState.brands),
       languages: parseList(formState.languages),
-      notes: formState.notes.trim() || undefined,
       typeOfCars: formState.typeOfCars.trim() || 'Unknown',
-      priceRange: formState.priceRange.trim() || undefined,
-      image_url: formState.image_url.trim() || undefined,
       modelsAvailable: parseList(formState.modelsAvailable),
-      social_links:
-        formState.socialFacebook ||
-        formState.socialInstagram ||
-        formState.socialTwitter ||
-        formState.socialYoutube
-          ? {
-              facebook: formState.socialFacebook.trim() || undefined,
-              instagram: formState.socialInstagram.trim() || undefined,
-              twitter: formState.socialTwitter.trim() || undefined,
-              youtube: formState.socialYoutube.trim() || undefined,
-            }
-          : undefined,
       isFeatured: formState.isFeatured,
     };
+
+    if (initialValues?.id) {
+      payload.id = initialValues.id;
+    }
+
+    const phone = formState.phone.trim();
+    if (phone) {
+      payload.phone = phone;
+    }
+
+    const email = formState.email.trim();
+    if (email) {
+      payload.email = email;
+    }
+
+    const website = formState.website.trim();
+    if (website) {
+      payload.website = website;
+    }
+
+    const notes = formState.notes.trim();
+    if (notes) {
+      payload.notes = notes;
+    }
+
+    const priceRange = formState.priceRange.trim();
+    if (priceRange) {
+      payload.priceRange = priceRange;
+    }
+
+    const imageUrl = formState.image_url.trim();
+    if (imageUrl) {
+      payload.image_url = imageUrl;
+    }
+
+    const socialLinks: NonNullable<DealerFormValues['social_links']> = {};
+    const facebook = formState.socialFacebook.trim();
+    if (facebook) {
+      socialLinks.facebook = facebook;
+    }
+    const instagram = formState.socialInstagram.trim();
+    if (instagram) {
+      socialLinks.instagram = instagram;
+    }
+    const twitter = formState.socialTwitter.trim();
+    if (twitter) {
+      socialLinks.twitter = twitter;
+    }
+    const youtube = formState.socialYoutube.trim();
+    if (youtube) {
+      socialLinks.youtube = youtube;
+    }
+
+    if (Object.keys(socialLinks).length > 0) {
+      payload.social_links = socialLinks;
+    }
 
     await onSubmit(payload);
   };

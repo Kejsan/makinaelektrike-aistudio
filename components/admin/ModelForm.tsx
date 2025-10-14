@@ -157,25 +157,82 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       return;
     }
 
+    const brand = formState.brand.trim();
+    const modelName = formState.model_name.trim();
     const payload: ModelFormValues = {
-      id: initialValues?.id,
-      brand: formState.brand.trim(),
-      model_name: formState.model_name.trim(),
-      body_type: formState.body_type.trim() || undefined,
-      battery_capacity: parseNumber(formState.battery_capacity),
-      range_wltp: parseNumber(formState.range_wltp),
-      power_kw: parseNumber(formState.power_kw),
-      torque_nm: parseNumber(formState.torque_nm),
-      acceleration_0_100: parseNumber(formState.acceleration_0_100),
-      top_speed: parseNumber(formState.top_speed),
-      drive_type: formState.drive_type.trim() || undefined,
-      seats: parseInteger(formState.seats),
-      charging_ac: formState.charging_ac.trim() || undefined,
-      charging_dc: formState.charging_dc.trim() || undefined,
-      notes: formState.notes.trim() || undefined,
-      image_url: formState.image_url.trim() || undefined,
+      brand,
+      model_name: modelName,
       isFeatured: formState.isFeatured,
     };
+
+    if (initialValues?.id) {
+      payload.id = initialValues.id;
+    }
+
+    const bodyType = formState.body_type.trim();
+    if (bodyType) {
+      payload.body_type = bodyType;
+    }
+
+    const batteryCapacity = parseNumber(formState.battery_capacity);
+    if (batteryCapacity !== undefined) {
+      payload.battery_capacity = batteryCapacity;
+    }
+
+    const rangeWltp = parseNumber(formState.range_wltp);
+    if (rangeWltp !== undefined) {
+      payload.range_wltp = rangeWltp;
+    }
+
+    const powerKw = parseNumber(formState.power_kw);
+    if (powerKw !== undefined) {
+      payload.power_kw = powerKw;
+    }
+
+    const torqueNm = parseNumber(formState.torque_nm);
+    if (torqueNm !== undefined) {
+      payload.torque_nm = torqueNm;
+    }
+
+    const acceleration = parseNumber(formState.acceleration_0_100);
+    if (acceleration !== undefined) {
+      payload.acceleration_0_100 = acceleration;
+    }
+
+    const topSpeed = parseNumber(formState.top_speed);
+    if (topSpeed !== undefined) {
+      payload.top_speed = topSpeed;
+    }
+
+    const driveType = formState.drive_type.trim();
+    if (driveType) {
+      payload.drive_type = driveType;
+    }
+
+    const seats = parseInteger(formState.seats);
+    if (seats !== undefined) {
+      payload.seats = seats;
+    }
+
+    const chargingAc = formState.charging_ac.trim();
+    if (chargingAc) {
+      payload.charging_ac = chargingAc;
+    }
+
+    const chargingDc = formState.charging_dc.trim();
+    if (chargingDc) {
+      payload.charging_dc = chargingDc;
+    }
+
+    const notes = formState.notes.trim();
+    if (notes) {
+      payload.notes = notes;
+    }
+
+    const imageUrl = formState.image_url.trim();
+    if (imageUrl) {
+      payload.image_url = imageUrl;
+    }
 
     await onSubmit(payload);
   };

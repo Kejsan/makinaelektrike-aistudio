@@ -49,6 +49,44 @@ const mapDealerModels = createCollectionMapper<WithId<DealerModel>>();
 const mapDealerModelsWithoutId = (snapshot: QuerySnapshot<DocumentData>): DealerModel[] =>
   mapDealerModels(snapshot).map(({ id: _id, ...rest }) => rest);
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
+export const omitUndefined = <T extends Record<string, unknown>>(input: T): T => {
+  const result: Record<string, unknown> = {};
+
+  Object.entries(input).forEach(([key, value]) => {
+    if (value === undefined) {
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      result[key] = value.map(item => {
+        if (isPlainObject(item)) {
+          return omitUndefined(item);
+        }
+        return item;
+      });
+      return;
+    }
+
+    if (isPlainObject(value)) {
+      result[key] = omitUndefined(value);
+      return;
+    }
+
+    result[key] = value;
+  });
+
+  return result as T;
+};
+
 type SnapshotCallback<T> = (items: T[]) => void;
 
 type SubscriptionOptions<T> = {
@@ -77,8 +115,9 @@ export const getDealerById = async (id: string): Promise<Dealer | null> => {
 };
 
 export const createDealer = async (payload: DealerDocument): Promise<Dealer> => {
+  const sanitizedPayload = omitUndefined(payload as Record<string, unknown>);
   const docRef = await addDoc(dealersCollection, {
-    ...payload,
+    ...sanitizedPayload,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -89,7 +128,8 @@ export const createDealer = async (payload: DealerDocument): Promise<Dealer> => 
 
 export const updateDealer = async (id: string, updates: Partial<DealerDocument>): Promise<Dealer> => {
   const dealerRef = doc(dealersCollection, id);
-  await updateDoc(dealerRef, { ...updates, updatedAt: serverTimestamp() });
+  const sanitizedUpdates = omitUndefined(updates as Record<string, unknown>);
+  await updateDoc(dealerRef, { ...sanitizedUpdates, updatedAt: serverTimestamp() });
   const snapshot = await getDoc(dealerRef);
   return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
 };
@@ -142,8 +182,9 @@ export const getModelById = async (id: string): Promise<Model | null> => {
 };
 
 export const createModel = async (payload: Omit<Model, 'id'>): Promise<Model> => {
+  const sanitizedPayload = omitUndefined(payload as Record<string, unknown>);
   const docRef = await addDoc(modelsCollection, {
-    ...payload,
+    ...sanitizedPayload,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -154,7 +195,8 @@ export const createModel = async (payload: Omit<Model, 'id'>): Promise<Model> =>
 
 export const updateModel = async (id: string, updates: Partial<Omit<Model, 'id'>>): Promise<Model> => {
   const modelRef = doc(modelsCollection, id);
-  await updateDoc(modelRef, { ...updates, updatedAt: serverTimestamp() });
+  const sanitizedUpdates = omitUndefined(updates as Record<string, unknown>);
+  await updateDoc(modelRef, { ...sanitizedUpdates, updatedAt: serverTimestamp() });
   const snapshot = await getDoc(modelRef);
   return { id: snapshot.id, ...(snapshot.data() as Omit<Model, 'id'>) };
 };
@@ -196,8 +238,9 @@ export const getBlogPostById = async (id: string): Promise<BlogPost | null> => {
 };
 
 export const createBlogPost = async (payload: Omit<BlogPost, 'id'>): Promise<BlogPost> => {
+  const sanitizedPayload = omitUndefined(payload as Record<string, unknown>);
   const docRef = await addDoc(blogPostsCollection, {
-    ...payload,
+    ...sanitizedPayload,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -210,7 +253,8 @@ export const createBlogPost = async (payload: Omit<BlogPost, 'id'>): Promise<Blo
 
 export const updateBlogPost = async (id: string, updates: Partial<BlogPost>): Promise<BlogPost> => {
   const postRef = doc(blogPostsCollection, id);
-  await updateDoc(postRef, { ...updates, updatedAt: serverTimestamp() });
+  const sanitizedUpdates = omitUndefined(updates as Record<string, unknown>);
+  await updateDoc(postRef, { ...sanitizedUpdates, updatedAt: serverTimestamp() });
   const snapshot = await getDoc(postRef);
   const { createdAt: _createdAt, updatedAt: _updatedAt, ...rest } = snapshot.data() as Record<string, unknown>;
   return { id: snapshot.id, ...(rest as Omit<BlogPost, 'id'>) };
@@ -330,12 +374,13 @@ export const createDealerModel = async (
   createdBy?: string,
 ): Promise<DealerModel> => {
   const linkRef = doc(dealerModelsCollection, buildDealerModelId(dealerId, modelId));
-  await setDoc(linkRef, {
+  const payload = {
     dealer_id: dealerId,
     model_id: modelId,
     createdAt: serverTimestamp(),
     ...(createdBy ? { createdBy } : {}),
-  });
+  };
+  await setDoc(linkRef, omitUndefined(payload as Record<string, unknown>));
   return { dealer_id: dealerId, model_id: modelId };
 };
 
