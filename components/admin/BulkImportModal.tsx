@@ -42,40 +42,6 @@ interface EntityConfig {
   buildPayload: (values: GenericRecord) => DealerDocument | Omit<Model, 'id'> | Omit<BlogPost, 'id'>;
 }
 
-const sanitizeValue = (value: unknown): unknown => {
-  if (value === null || value === undefined) {
-    return undefined;
-  }
-
-  if (Array.isArray(value)) {
-    return value.map(item => sanitizeValue(item)).filter(item => item !== undefined);
-  }
-
-  if (typeof value === 'object') {
-    const prototype = Object.getPrototypeOf(value);
-    const isPlainObject = prototype === Object.prototype || prototype === null;
-
-    if (!isPlainObject) {
-      return value;
-    }
-
-    const entries = Object.entries(value as Record<string, unknown>)
-      .map(([key, nestedValue]) => [key, sanitizeValue(nestedValue)])
-      .filter(([, nestedValue]) => nestedValue !== undefined);
-
-    return Object.fromEntries(entries);
-  }
-
-  return value === undefined ? undefined : value;
-};
-
-const sanitizePayload = <T extends Record<string, unknown>>(payload: T): T => {
-  const entries = Object.entries(payload)
-    .map(([key, value]) => [key, sanitizeValue(value)])
-    .filter(([, value]) => value !== undefined);
-
-  return Object.fromEntries(entries) as T;
-};
 
 const normalizeNullableString = (value: string | null | undefined): string | undefined => {
   if (value === undefined || value === null) {
@@ -445,124 +411,120 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
   const entityConfigs = useMemo<Record<BulkImportEntity, EntityConfig>>(() => {
     const buildDealerPayload: EntityConfig['buildPayload'] = values => {
       const input = values as Partial<DealerDocument>;
-      const metadata: Partial<DealerDocument> = {
-        ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
-        approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
-        rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
-        rejectionReason: normalizeNullableString(input.rejectionReason as string | null | undefined),
-        createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
-        updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
-        createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
-        updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
-      };
 
-      const sanitized = sanitizePayload({
+      const payload: DealerDocument = {
         name: input.name ?? '',
-        companyName: input.companyName,
-        contactName: input.contactName,
+        companyName: input.companyName ?? null,
+        contactName: input.contactName ?? null,
         address: input.address ?? '',
         city: input.city ?? '',
         lat: Number(input.lat ?? 0),
         lng: Number(input.lng ?? 0),
-        phone: input.phone,
-        email: input.email,
-        website: input.website,
-        social_links: input.social_links as DealerDocument['social_links'],
+        phone: input.phone ?? null,
+        email: input.email ?? null,
+        website: input.website ?? null,
+        social_links: (input.social_links as DealerDocument['social_links']) ?? null,
         brands: (input.brands as string[]) ?? [],
         languages: (input.languages as string[]) ?? [],
-        notes: input.notes,
+        notes: input.notes ?? null,
         typeOfCars: input.typeOfCars ?? '',
-        priceRange: input.priceRange,
+        priceRange: input.priceRange ?? null,
         modelsAvailable: (input.modelsAvailable as string[]) ?? [],
-        image_url: input.image_url,
-        isFeatured: input.isFeatured,
+        image_url: input.image_url ?? null,
+        isFeatured: input.isFeatured ?? false,
         imageGallery: (input.imageGallery as string[]) ?? [],
         approved: (input.approved as boolean | undefined) ?? false,
-        ...metadata,
-      }) as Partial<DealerDocument>;
+        approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
+        rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
+        rejectionReason: (input.rejectionReason as string | null | undefined) ?? null,
+        ownerUid: (input.ownerUid as string | null | undefined) ?? null,
+        createdBy: (input.createdBy as string | null | undefined) ?? null,
+        updatedBy: (input.updatedBy as string | null | undefined) ?? null,
+        createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
+        updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
+      };
 
       const actorUid = normalizeNullableString(userUid);
 
-      if (role === 'dealer' && userUid && sanitized.ownerUid === undefined) {
-        sanitized.ownerUid = userUid;
+      if (role === 'dealer' && userUid && !payload.ownerUid) {
+        payload.ownerUid = userUid;
       }
 
       if (actorUid) {
-        if (sanitized.createdBy === undefined) {
-          sanitized.createdBy = actorUid;
+        if (!payload.createdBy) {
+          payload.createdBy = actorUid;
         }
-        if (sanitized.updatedBy === undefined) {
-          sanitized.updatedBy = actorUid;
+        if (!payload.updatedBy) {
+          payload.updatedBy = actorUid;
         }
       }
 
-      return sanitized as DealerDocument;
+      return payload;
     };
 
     const buildModelPayload: EntityConfig['buildPayload'] = values => {
       const input = values as Partial<Omit<Model, 'id'>>;
-      const ownership: Partial<Model> = {
-        ownerDealerId: normalizeNullableString(input.ownerDealerId as string | null | undefined),
-        ownerUid: normalizeNullableString(input.ownerUid as string | null | undefined),
-        createdBy: normalizeNullableString(input.createdBy as string | null | undefined),
-        updatedBy: normalizeNullableString(input.updatedBy as string | null | undefined),
+
+      const payload: Omit<Model, 'id'> = {
+        brand: input.brand ?? '',
+        model_name: input.model_name ?? '',
+        body_type: input.body_type ?? null,
+        battery_capacity: (input.battery_capacity as number) ?? null,
+        range_wltp: (input.range_wltp as number) ?? null,
+        power_kw: (input.power_kw as number) ?? null,
+        torque_nm: (input.torque_nm as number) ?? null,
+        acceleration_0_100: (input.acceleration_0_100 as number) ?? null,
+        top_speed: (input.top_speed as number) ?? null,
+        drive_type: input.drive_type ?? null,
+        seats: (input.seats as number) ?? null,
+        charging_ac: input.charging_ac ?? null,
+        charging_dc: input.charging_dc ?? null,
+        notes: input.notes ?? null,
+        image_url: input.image_url ?? null,
+        isFeatured: input.isFeatured ?? false,
+        ownerDealerId: (input.ownerDealerId as string | null | undefined) ?? null,
+        ownerUid: (input.ownerUid as string | null | undefined) ?? null,
+        createdBy: (input.createdBy as string | null | undefined) ?? null,
+        updatedBy: (input.updatedBy as string | null | undefined) ?? null,
         createdAt: (input.createdAt ?? null) as Model['createdAt'],
         updatedAt: (input.updatedAt ?? null) as Model['updatedAt'],
       };
 
-      const sanitized = sanitizePayload({
-        brand: input.brand ?? '',
-        model_name: input.model_name ?? '',
-        body_type: input.body_type,
-        battery_capacity: input.battery_capacity as number | undefined,
-        range_wltp: input.range_wltp as number | undefined,
-        power_kw: input.power_kw as number | undefined,
-        torque_nm: input.torque_nm as number | undefined,
-        acceleration_0_100: input.acceleration_0_100 as number | undefined,
-        top_speed: input.top_speed as number | undefined,
-        drive_type: input.drive_type,
-        seats: input.seats as number | undefined,
-        charging_ac: input.charging_ac,
-        charging_dc: input.charging_dc,
-        notes: input.notes,
-        image_url: input.image_url,
-        isFeatured: input.isFeatured,
-        ...ownership,
-      }) as Partial<Omit<Model, 'id'>>;
-
-      const actorUid = normalizeNullableString(userUid) ?? undefined;
+      const actorUid = normalizeNullableString(userUid);
 
       if (role === 'dealer' && activeDealer) {
-        if (sanitized.ownerDealerId === undefined) {
-          sanitized.ownerDealerId = activeDealer.id;
+        if (!payload.ownerDealerId) {
+          payload.ownerDealerId = activeDealer.id;
         }
 
-        const ownershipUid = actorUid ?? normalizeNullableString(activeDealer.ownerUid) ?? undefined;
-        if (ownershipUid && sanitized.ownerUid === undefined) {
-          sanitized.ownerUid = ownershipUid;
-        }
-        if (ownershipUid && sanitized.createdBy === undefined) {
-          sanitized.createdBy = ownershipUid;
-        }
-        if (ownershipUid && sanitized.updatedBy === undefined) {
-          sanitized.updatedBy = ownershipUid;
+        const ownershipUid = actorUid ?? normalizeNullableString(activeDealer.ownerUid);
+        if (ownershipUid) {
+          if (!payload.ownerUid) {
+            payload.ownerUid = ownershipUid;
+          }
+          if (!payload.createdBy) {
+            payload.createdBy = ownershipUid;
+          }
+          if (!payload.updatedBy) {
+            payload.updatedBy = ownershipUid;
+          }
         }
       } else if (actorUid) {
-        if (sanitized.ownerUid === undefined) {
-          sanitized.ownerUid = actorUid;
+        if (!payload.ownerUid) {
+          payload.ownerUid = actorUid;
         }
       }
 
       if (actorUid) {
-        if (sanitized.createdBy === undefined) {
-          sanitized.createdBy = actorUid;
+        if (!payload.createdBy) {
+          payload.createdBy = actorUid;
         }
-        if (sanitized.updatedBy === undefined) {
-          sanitized.updatedBy = actorUid;
+        if (!payload.updatedBy) {
+          payload.updatedBy = actorUid;
         }
       }
 
-      return sanitized as Omit<Model, 'id'>;
+      return payload;
     };
 
     const buildBlogPayload: EntityConfig['buildPayload'] = values => {
@@ -575,7 +537,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         publishedAt: (input.publishedAt ?? null) as BlogPost['publishedAt'],
       };
 
-      const sanitized = sanitizePayload({
+      const payload = {
         slug: input.slug ?? '',
         title: input.title ?? '',
         excerpt: input.excerpt ?? '',
@@ -587,30 +549,30 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         metaDescription: input.metaDescription ?? '',
         tags: (input.tags as string[]) ?? [],
         sections: (input.sections as BlogPost['sections']) ?? [],
-        faqs: input.faqs,
-        cta: input.cta,
+        faqs: input.faqs ?? [],
+        cta: input.cta ?? null,
         ...ownership,
-      }) as Partial<Omit<BlogPost, 'id'>>;
+      } as Omit<BlogPost, 'id'>;
 
       const actorUid = normalizeNullableString(userUid);
 
       if (actorUid) {
-        if (sanitized.ownerUid === undefined) {
-          sanitized.ownerUid = actorUid;
+        if (payload.ownerUid === undefined) {
+          payload.ownerUid = actorUid;
         }
-        if (sanitized.createdBy === undefined) {
-          sanitized.createdBy = actorUid;
+        if (payload.createdBy === undefined) {
+          payload.createdBy = actorUid;
         }
-        if (sanitized.updatedBy === undefined) {
-          sanitized.updatedBy = actorUid;
+        if (payload.updatedBy === undefined) {
+          payload.updatedBy = actorUid;
         }
       }
 
-      if (sanitized.published === undefined) {
-        sanitized.published = true;
+      if (payload.published === undefined) {
+        payload.published = true;
       }
 
-      return sanitized as Omit<BlogPost, 'id'>;
+      return payload;
     };
 
     return {
