@@ -33,7 +33,9 @@ export interface SEOProps {
   robots?: string;
   openGraph?: OpenGraphConfig;
   twitter?: TwitterConfig;
-  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
+  structuredData?:
+    | Record<string, unknown>
+    | Array<Record<string, unknown>>;
   additionalMeta?: AdditionalMetaTag[];
 }
 
@@ -42,10 +44,14 @@ const setMetaTag = (
   createElement: () => HTMLElement,
   update: (element: HTMLElement) => void,
 ) => {
-  const element = document.head.querySelector(selector) as HTMLElement | null;
+  const element = document.head.querySelector(selector) as
+    | HTMLElement
+    | null;
+
   if (element) {
     const previous = element.getAttribute('content');
     update(element);
+
     return () => {
       if (previous !== null) {
         element.setAttribute('content', previous);
@@ -58,6 +64,7 @@ const setMetaTag = (
   const newElement = createElement();
   update(newElement);
   document.head.appendChild(newElement);
+
   return () => {
     newElement.remove();
   };
@@ -376,10 +383,13 @@ const SEO = ({
 
     let canonicalCleanup: (() => void) | undefined;
     if (canonical) {
-      const existingCanonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+      const existingCanonical =
+        document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+
       if (existingCanonical) {
         const previousHref = existingCanonical.getAttribute('href');
         existingCanonical.setAttribute('href', canonical);
+
         canonicalCleanup = () => {
           if (previousHref) {
             existingCanonical.setAttribute('href', previousHref);
@@ -392,6 +402,7 @@ const SEO = ({
         link.setAttribute('rel', 'canonical');
         link.setAttribute('href', canonical);
         document.head.appendChild(link);
+
         canonicalCleanup = () => {
           link.remove();
         };
@@ -404,6 +415,7 @@ const SEO = ({
       script.setAttribute('type', 'application/ld+json');
       script.textContent = JSON.stringify(structuredData, null, 2);
       document.head.appendChild(script);
+
       structuredDataCleanup = () => {
         script.remove();
       };
@@ -431,4 +443,3 @@ const SEO = ({
 };
 
 export default SEO;
-

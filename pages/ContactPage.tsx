@@ -16,7 +16,7 @@ const ContactPage: React.FC = () => {
       '@type': 'ContactPage',
       name: t('contactPage.metaTitle'),
       description: t('contactPage.metaDescription'),
-      url: `${BASE_URL}/contact`,
+      url: `${BASE_URL}/contact/`,
     },
     {
       '@context': 'https://schema.org',
@@ -51,11 +51,11 @@ const ContactPage: React.FC = () => {
         title={t('contactPage.metaTitle')}
         description={t('contactPage.metaDescription')}
         keywords={t('contactPage.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/contact`}
+        canonical={`${BASE_URL}/contact/`}
         openGraph={{
           title: t('contactPage.metaTitle'),
           description: t('contactPage.metaDescription'),
-          url: `${BASE_URL}/contact`,
+          url: `${BASE_URL}/contact/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}
