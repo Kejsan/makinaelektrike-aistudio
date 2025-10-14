@@ -13,7 +13,7 @@ const AwaitingApprovalPage: React.FC = () => {
     '@type': 'WebPage',
     name: t('auth.awaitingMetaTitle'),
     description: t('auth.awaitingMetaDescription'),
-    url: `${BASE_URL}/awaiting-approval`,
+    url: `${BASE_URL}/awaiting-approval/`,
   };
 
   return (
@@ -22,12 +22,12 @@ const AwaitingApprovalPage: React.FC = () => {
         title={t('auth.awaitingMetaTitle')}
         description={t('auth.awaitingMetaDescription')}
         keywords={t('auth.awaitingMetaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/awaiting-approval`}
+        canonical={`${BASE_URL}/awaiting-approval/`}
         robots="noindex, nofollow"
         openGraph={{
           title: t('auth.awaitingMetaTitle'),
           description: t('auth.awaitingMetaDescription'),
-          url: `${BASE_URL}/awaiting-approval`,
+          url: `${BASE_URL}/awaiting-approval/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}

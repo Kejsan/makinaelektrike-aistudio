@@ -38,7 +38,7 @@ const HomePage: React.FC = () => {
       description: t('home.metaDescription'),
       potentialAction: {
         '@type': 'SearchAction',
-        target: `${BASE_URL}/models?query={search_term_string}`,
+        target: `${BASE_URL}/models/?query={search_term_string}`,
         'query-input': 'required name=search_term_string',
       },
     },

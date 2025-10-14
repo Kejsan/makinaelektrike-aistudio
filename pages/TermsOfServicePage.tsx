@@ -18,11 +18,11 @@ const TermsOfServicePage: React.FC = () => {
         title={t('legal.terms.metaTitle')}
         description={t('legal.terms.metaDescription')}
         keywords={t('legal.terms.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/terms`}
+        canonical={`${BASE_URL}/terms/`}
         openGraph={{
           title: t('legal.terms.metaTitle'),
           description: t('legal.terms.metaDescription'),
-          url: `${BASE_URL}/terms`,
+          url: `${BASE_URL}/terms/`,
           type: 'article',
           images: [DEFAULT_OG_IMAGE],
         }}
