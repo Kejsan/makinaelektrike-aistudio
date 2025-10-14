@@ -84,7 +84,7 @@ const LoginPage: React.FC = () => {
     description: t('loginPage.metaDescription'),
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'All',
-    url: `${BASE_URL}/login`,
+    url: `${BASE_URL}/login/`,
   };
 
   return (
@@ -93,11 +93,11 @@ const LoginPage: React.FC = () => {
         title={t('loginPage.metaTitle')}
         description={t('loginPage.metaDescription')}
         keywords={t('loginPage.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/login`}
+        canonical={`${BASE_URL}/login/`}
         openGraph={{
           title: t('loginPage.metaTitle'),
           description: t('loginPage.metaDescription'),
-          url: `${BASE_URL}/login`,
+          url: `${BASE_URL}/login/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}

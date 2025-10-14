@@ -18,7 +18,7 @@ const BlogPage: React.FC = () => {
       '@type': 'Blog',
       name: t('blogPage.metaTitle'),
       description: t('blogPage.metaDescription'),
-      url: `${BASE_URL}/blog`,
+      url: `${BASE_URL}/blog/`,
     },
     {
       '@context': 'https://schema.org',
@@ -55,11 +55,11 @@ const BlogPage: React.FC = () => {
         title={t('blogPage.metaTitle')}
         description={t('blogPage.metaDescription')}
         keywords={t('blogPage.metaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/blog`}
+        canonical={`${BASE_URL}/blog/`}
         openGraph={{
           title: t('blogPage.metaTitle'),
           description: t('blogPage.metaDescription'),
-          url: `${BASE_URL}/blog`,
+          url: `${BASE_URL}/blog/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}
