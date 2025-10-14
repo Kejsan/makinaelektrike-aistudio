@@ -4,12 +4,13 @@ import { useTranslation } from 'react-i18next';
 import type { Model } from '../types';
 import { Heart, ArrowRight, Battery, Gauge, ShieldCheck } from 'lucide-react';
 import { useFavorites } from '../hooks/useFavorites';
+import { MODEL_PLACEHOLDER_IMAGE } from '../constants/media';
 
 const ModelCard: React.FC<{ model: Model }> = ({ model }) => {
     const { t } = useTranslation();
     const { isFavorite, toggleFavorite } = useFavorites();
     const favorited = isFavorite(model.id);
-    const imageUrl = model.image_url || 'https://picsum.photos/seed/model-placeholder/800/600';
+    const imageUrl = model.image_url || MODEL_PLACEHOLDER_IMAGE;
     const battery = model.battery_capacity ? `${model.battery_capacity} kWh` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
     const range = model.range_wltp ? `${model.range_wltp} km` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
 
