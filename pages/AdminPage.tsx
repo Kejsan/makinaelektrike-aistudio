@@ -1,5 +1,17 @@
-import React, { useContext, useMemo, useState } from 'react';
-import { Shield, LogOut, Plus, Pencil, Trash2, X, Check, XCircle, Loader2, Upload } from 'lucide-react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
+import {
+  Shield,
+  LogOut,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Check,
+  XCircle,
+  Loader2,
+  Upload,
+  ClipboardList,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,8 +21,10 @@ import DealerForm, { DealerFormValues } from '../components/admin/DealerForm';
 import ModelForm, { ModelFormValues } from '../components/admin/ModelForm';
 import BlogPostForm, { BlogPostFormValues } from '../components/admin/BlogPostForm';
 import BulkImportModal, { BulkImportEntity } from '../components/admin/BulkImportModal';
+import OfflineQueuePanel from '../components/admin/OfflineQueuePanel';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
+import { listOfflineMutations, OFFLINE_QUEUE_EVENT } from '../services/offlineQueue';
 
 interface ModalProps {
   title: string;
@@ -95,6 +109,22 @@ const AdminPage: React.FC = () => {
   const [modelSubmitting, setModelSubmitting] = useState(false);
   const [blogSubmitting, setBlogSubmitting] = useState(false);
   const [dealerAction, setDealerAction] = useState<{ id: string; type: 'approve' | 'reject' } | null>(null);
+  const [offlineQueueOpen, setOfflineQueueOpen] = useState(false);
+  const [offlineQueueCount, setOfflineQueueCount] = useState(() =>
+    typeof window !== 'undefined' ? listOfflineMutations().length : 0,
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const updateCount = () => setOfflineQueueCount(listOfflineMutations().length);
+    window.addEventListener(OFFLINE_QUEUE_EVENT, updateCount);
+    return () => {
+      window.removeEventListener(OFFLINE_QUEUE_EVENT, updateCount);
+    };
+  }, []);
 
   const tabs = useMemo(
     () => [
@@ -689,13 +719,27 @@ const AdminPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan/20 px-4 py-2 font-semibold text-white transition hover:bg-gray-cyan/30"
-            >
-              <LogOut size={18} />
-              <span>{t('admin.logout')}</span>
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <button
+                onClick={() => setOfflineQueueOpen(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
+              >
+                <ClipboardList size={18} />
+                <span>{t('admin.offlineQueueButton', { defaultValue: 'Offline queue' })}</span>
+                {offlineQueueCount > 0 && (
+                  <span className="rounded-full bg-gray-cyan px-2 py-0.5 text-xs font-semibold text-white">
+                    {offlineQueueCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center space-x-2 rounded-lg bg-gray-cyan/20 px-4 py-2 font-semibold text-white transition hover:bg-gray-cyan/30"
+              >
+                <LogOut size={18} />
+                <span>{t('admin.logout')}</span>
+              </button>
+            </div>
           </div>
 
           <div className="mt-10">
@@ -765,6 +809,15 @@ const AdminPage: React.FC = () => {
             onCancel={closeAllModals}
             isSubmitting={blogSubmitting}
           />
+        </AdminModal>
+      )}
+
+      {offlineQueueOpen && (
+        <AdminModal
+          title={t('admin.offlineQueueTitle', { defaultValue: 'Offline submissions' })}
+          onClose={() => setOfflineQueueOpen(false)}
+        >
+          <OfflineQueuePanel onClose={() => setOfflineQueueOpen(false)} />
         </AdminModal>
       )}
 

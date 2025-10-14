@@ -20,6 +20,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from './firebase';
 import type { Dealer, DealerDocument, Model, DealerModel, BlogPost } from '../types';
+import { omitUndefined } from '../utils/object';
 
 type WithId<T> = T & { id: string };
 
@@ -48,44 +49,6 @@ const mapBlogPosts = createCollectionMapper<BlogPost>();
 const mapDealerModels = createCollectionMapper<WithId<DealerModel>>();
 const mapDealerModelsWithoutId = (snapshot: QuerySnapshot<DocumentData>): DealerModel[] =>
   mapDealerModels(snapshot).map(({ id: _id, ...rest }) => rest);
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> => {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const prototype = Object.getPrototypeOf(value);
-  return prototype === Object.prototype || prototype === null;
-};
-
-export const omitUndefined = <T extends Record<string, unknown>>(input: T): T => {
-  const result: Record<string, unknown> = {};
-
-  Object.entries(input).forEach(([key, value]) => {
-    if (value === undefined) {
-      return;
-    }
-
-    if (Array.isArray(value)) {
-      result[key] = value.map(item => {
-        if (isPlainObject(item)) {
-          return omitUndefined(item);
-        }
-        return item;
-      });
-      return;
-    }
-
-    if (isPlainObject(value)) {
-      result[key] = omitUndefined(value);
-      return;
-    }
-
-    result[key] = value;
-  });
-
-  return result as T;
-};
 
 type SnapshotCallback<T> = (items: T[]) => void;
 
