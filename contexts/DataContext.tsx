@@ -34,6 +34,8 @@ import type { UserRole } from '../types';
 import { useToast } from './ToastContext';
 import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
 import blogPostsData from '../data/blogPosts';
+import { FirebaseError } from 'firebase/app';
+import { addOfflineMutation } from '../services/offlineQueue';
 
 type DealerInput = DealerDocument;
 type DealerUpdate = Partial<DealerDocument>;
@@ -42,8 +44,8 @@ type ModelUpdate = Partial<Omit<Model, 'id'>>;
 type BlogPostInput = Omit<BlogPost, 'id'>;
 type BlogPostUpdate = Partial<BlogPost>;
 
-type EntityKey = 'dealers' | 'models' | 'blogPosts';
-type Operation = 'create' | 'update' | 'delete';
+export type EntityKey = 'dealers' | 'models' | 'blogPosts';
+export type Operation = 'create' | 'update' | 'delete';
 
 type MutationFlag = {
   loading: boolean;
@@ -315,7 +317,13 @@ interface MutationRequest<T> {
   successMessage: string;
   errorMessage: string;
   allowedRoles?: UserRole[];
+  payloadForExport?: unknown;
 }
+
+const permissionErrorCodes = new Set(['permission-denied', 'unauthenticated']);
+
+const shouldPersistOffline = (error: unknown): error is FirebaseError =>
+  error instanceof FirebaseError && permissionErrorCodes.has(error.code);
 
 export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [dataState, dataDispatch] = useReducer(dataReducer, initialDataState);
@@ -502,6 +510,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       successMessage,
       errorMessage,
       allowedRoles = ['admin'],
+      payloadForExport,
     }: MutationRequest<T>) => {
       if (!role || !allowedRoles.includes(role)) {
         const permissionMessage = 'You do not have permission to perform this action.';
@@ -521,6 +530,20 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         const message = error instanceof Error ? error.message : 'Unknown error';
         mutationDispatch({ type: 'error', entity, operation, error: message });
         addToast(errorMessage, 'error');
+
+        if (payloadForExport && shouldPersistOffline(error)) {
+          addOfflineMutation({
+            entity,
+            operation,
+            payload: payloadForExport,
+            error: message,
+          });
+          addToast(
+            'Firebase rejected this request. The data was stored in the Offline queue so you can import it manually.',
+            'warning',
+          );
+        }
+
         throw error;
       }
     },
@@ -671,14 +694,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   );
 
   const addDealer = useCallback(
-    (dealer: DealerInput) =>
-      runMutation({
+    (dealer: DealerInput) => {
+      const payload = enhanceDealerInput(dealer);
+      return runMutation({
         entity: 'dealers',
         operation: 'create',
-        action: () => apiCreateDealer(enhanceDealerInput(dealer)),
+        action: () => apiCreateDealer(payload),
         successMessage: 'Dealer created successfully.',
         errorMessage: 'Failed to create dealer.',
-      }),
+        payloadForExport: payload,
+      });
+    },
     [enhanceDealerInput, runMutation],
   );
 
@@ -732,15 +758,18 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   );
 
   const addModel = useCallback(
-    (model: ModelInput) =>
-      runMutation({
+    (model: ModelInput) => {
+      const payload = enhanceModelInput(model);
+      return runMutation({
         entity: 'models',
         operation: 'create',
-        action: () => apiCreateModel(enhanceModelInput(model)),
+        action: () => apiCreateModel(payload),
         successMessage: 'Model created successfully.',
         errorMessage: 'Failed to create model.',
         allowedRoles: ['admin', 'dealer'],
-      }),
+        payloadForExport: payload,
+      });
+    },
     [enhanceModelInput, runMutation],
   );
 
@@ -799,14 +828,17 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   );
 
   const addBlogPost = useCallback(
-    (post: BlogPostInput) =>
-      runMutation({
+    (post: BlogPostInput) => {
+      const payload = enhanceBlogPostInput(post);
+      return runMutation({
         entity: 'blogPosts',
         operation: 'create',
-        action: () => apiCreateBlogPost(enhanceBlogPostInput(post)),
+        action: () => apiCreateBlogPost(payload),
         successMessage: 'Blog post created successfully.',
         errorMessage: 'Failed to create blog post.',
-      }),
+        payloadForExport: payload,
+      });
+    },
     [enhanceBlogPostInput, runMutation],
   );
 
