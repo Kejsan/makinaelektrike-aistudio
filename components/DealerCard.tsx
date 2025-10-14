@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { Dealer } from '../types';
 import { MapPin, Heart, ArrowRight, ShieldAlert } from 'lucide-react';
 import { useFavorites } from '../hooks/useFavorites';
+import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../constants/media';
 
 interface DealerCardProps {
   dealer?: Dealer | null;
@@ -30,7 +31,7 @@ const DealerCard: React.FC<DealerCardProps> = ({ dealer, isLoading = false }) =>
   }
 
   const favorited = isFavorite(dealer.id);
-  const imageUrl = dealer.image_url || 'https://picsum.photos/seed/placeholder/800/600';
+  const imageUrl = dealer.image_url || DEALERSHIP_PLACEHOLDER_IMAGE;
   const city = dealer.city || t('common.unknownCity', { defaultValue: 'Unknown location' });
   const approved = dealer.approved ?? true;
 
