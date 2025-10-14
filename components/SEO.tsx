@@ -1,5 +1,4 @@
-import React from 'react';
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 
 export interface OpenGraphConfig {
   title?: string;
@@ -34,9 +33,42 @@ export interface SEOProps {
   robots?: string;
   openGraph?: OpenGraphConfig;
   twitter?: TwitterConfig;
-  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
+  structuredData?:
+    | Record<string, unknown>
+    | Array<Record<string, unknown>>;
   additionalMeta?: AdditionalMetaTag[];
 }
+
+const setMetaTag = (
+  selector: string,
+  createElement: () => HTMLElement,
+  update: (element: HTMLElement) => void,
+) => {
+  const element = document.head.querySelector(selector) as
+    | HTMLElement
+    | null;
+
+  if (element) {
+    const previous = element.getAttribute('content');
+    update(element);
+
+    return () => {
+      if (previous !== null) {
+        element.setAttribute('content', previous);
+      } else {
+        element.removeAttribute('content');
+      }
+    };
+  }
+
+  const newElement = createElement();
+  update(newElement);
+  document.head.appendChild(newElement);
+
+  return () => {
+    newElement.remove();
+  };
+};
 
 const SEO = ({
   title,
@@ -49,62 +81,365 @@ const SEO = ({
   structuredData,
   additionalMeta,
 }: SEOProps) => {
-  const ogImages = openGraph?.images ?? [];
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = title;
 
-  return (
-    <Helmet prioritizeSeoTags>
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      {keywords && keywords.length > 0 && (
-        <meta name="keywords" content={keywords.join(', ')} />
-      )}
-      <meta name="robots" content={robots} />
-      {canonical && <link rel="canonical" href={canonical} />}
+    const cleanups: Array<() => void> = [];
 
-      {openGraph && (
-        <>
-          <meta property="og:title" content={openGraph.title ?? title} />
-          <meta property="og:description" content={openGraph.description ?? description} />
-          {openGraph.url && <meta property="og:url" content={openGraph.url} />}
-          <meta property="og:type" content={openGraph.type ?? 'website'} />
-          <meta property="og:locale" content={openGraph.locale ?? 'sq_AL'} />
-          <meta property="og:site_name" content={openGraph.siteName ?? 'Makina Elektrike'} />
-          {ogImages.map((imageUrl, index) => (
-            <meta key={`og:image:${index}`} property="og:image" content={imageUrl} />
-          ))}
-        </>
-      )}
+    cleanups.push(
+      setMetaTag(
+        'meta[name="description"]',
+        () => {
+          const meta = document.createElement('meta');
+          meta.setAttribute('name', 'description');
+          return meta;
+        },
+        element => {
+          element.setAttribute('content', description);
+        },
+      ),
+    );
 
-      {twitter && (
-        <>
-          <meta name="twitter:card" content={twitter.card ?? 'summary_large_image'} />
-          <meta name="twitter:title" content={twitter.title ?? title} />
-          <meta name="twitter:description" content={twitter.description ?? description} />
-          {twitter.image && <meta name="twitter:image" content={twitter.image} />}
-          {twitter.site && <meta name="twitter:site" content={twitter.site} />}
-          {twitter.creator && <meta name="twitter:creator" content={twitter.creator} />}
-        </>
-      )}
+    if (keywords && keywords.length > 0) {
+      cleanups.push(
+        setMetaTag(
+          'meta[name="keywords"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', 'keywords');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', keywords.join(', '));
+          },
+        ),
+      );
+    }
 
-      {additionalMeta?.map((metaConfig, index) => (
-        <meta
-          key={`additional-meta-${index}`}
-          {...(metaConfig.name ? { name: metaConfig.name } : {})}
-          {...(metaConfig.property ? { property: metaConfig.property } : {})}
-          content={metaConfig.content}
-        />
-      ))}
+    cleanups.push(
+      setMetaTag(
+        'meta[name="robots"]',
+        () => {
+          const meta = document.createElement('meta');
+          meta.setAttribute('name', 'robots');
+          return meta;
+        },
+        element => {
+          element.setAttribute('content', robots);
+        },
+      ),
+    );
 
-      {structuredData && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
-          }}
-        />
-      )}
-    </Helmet>
-  );
+    if (openGraph) {
+      const {
+        title: ogTitle = title,
+        description: ogDescription = description,
+        url: ogUrl = canonical,
+        type = 'website',
+        images,
+        locale = 'sq_AL',
+        siteName = 'Makina Elektrike',
+      } = openGraph;
+
+      cleanups.push(
+        setMetaTag(
+          'meta[property="og:title"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('property', 'og:title');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', ogTitle);
+          },
+        ),
+      );
+
+      cleanups.push(
+        setMetaTag(
+          'meta[property="og:description"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('property', 'og:description');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', ogDescription);
+          },
+        ),
+      );
+
+      if (ogUrl) {
+        cleanups.push(
+          setMetaTag(
+            'meta[property="og:url"]',
+            () => {
+              const meta = document.createElement('meta');
+              meta.setAttribute('property', 'og:url');
+              return meta;
+            },
+            element => {
+              element.setAttribute('content', ogUrl);
+            },
+          ),
+        );
+      }
+
+      cleanups.push(
+        setMetaTag(
+          'meta[property="og:type"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('property', 'og:type');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', type);
+          },
+        ),
+      );
+
+      cleanups.push(
+        setMetaTag(
+          'meta[property="og:locale"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('property', 'og:locale');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', locale);
+          },
+        ),
+      );
+
+      cleanups.push(
+        setMetaTag(
+          'meta[property="og:site_name"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('property', 'og:site_name');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', siteName);
+          },
+        ),
+      );
+
+      if (images && images.length > 0) {
+        const cleanupFns = images.map((imageUrl, index) =>
+          setMetaTag(
+            `meta[property="og:image"][data-position="${index}"]`,
+            () => {
+              const meta = document.createElement('meta');
+              meta.setAttribute('property', 'og:image');
+              meta.setAttribute('data-position', index.toString());
+              return meta;
+            },
+            element => {
+              element.setAttribute('content', imageUrl);
+            },
+          ),
+        );
+        cleanups.push(...cleanupFns);
+      }
+    }
+
+    if (twitter) {
+      const {
+        card = 'summary_large_image',
+        title: twitterTitle = title,
+        description: twitterDescription = description,
+        image,
+        site,
+        creator,
+      } = twitter;
+
+      cleanups.push(
+        setMetaTag(
+          'meta[name="twitter:card"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', 'twitter:card');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', card);
+          },
+        ),
+      );
+
+      cleanups.push(
+        setMetaTag(
+          'meta[name="twitter:title"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', 'twitter:title');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', twitterTitle);
+          },
+        ),
+      );
+
+      cleanups.push(
+        setMetaTag(
+          'meta[name="twitter:description"]',
+          () => {
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', 'twitter:description');
+            return meta;
+          },
+          element => {
+            element.setAttribute('content', twitterDescription);
+          },
+        ),
+      );
+
+      if (image) {
+        cleanups.push(
+          setMetaTag(
+            'meta[name="twitter:image"]',
+            () => {
+              const meta = document.createElement('meta');
+              meta.setAttribute('name', 'twitter:image');
+              return meta;
+            },
+            element => {
+              element.setAttribute('content', image);
+            },
+          ),
+        );
+      }
+
+      if (site) {
+        cleanups.push(
+          setMetaTag(
+            'meta[name="twitter:site"]',
+            () => {
+              const meta = document.createElement('meta');
+              meta.setAttribute('name', 'twitter:site');
+              return meta;
+            },
+            element => {
+              element.setAttribute('content', site);
+            },
+          ),
+        );
+      }
+
+      if (creator) {
+        cleanups.push(
+          setMetaTag(
+            'meta[name="twitter:creator"]',
+            () => {
+              const meta = document.createElement('meta');
+              meta.setAttribute('name', 'twitter:creator');
+              return meta;
+            },
+            element => {
+              element.setAttribute('content', creator);
+            },
+          ),
+        );
+      }
+    }
+
+    if (additionalMeta) {
+      additionalMeta.forEach(metaConfig => {
+        const selector = metaConfig.name
+          ? `meta[name="${metaConfig.name}"]`
+          : metaConfig.property
+            ? `meta[property="${metaConfig.property}"]`
+            : '';
+
+        if (!selector) {
+          return;
+        }
+
+        cleanups.push(
+          setMetaTag(
+            selector,
+            () => {
+              const meta = document.createElement('meta');
+              if (metaConfig.name) {
+                meta.setAttribute('name', metaConfig.name);
+              }
+              if (metaConfig.property) {
+                meta.setAttribute('property', metaConfig.property);
+              }
+              return meta;
+            },
+            element => {
+              element.setAttribute('content', metaConfig.content);
+            },
+          ),
+        );
+      });
+    }
+
+    let canonicalCleanup: (() => void) | undefined;
+    if (canonical) {
+      const existingCanonical =
+        document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+
+      if (existingCanonical) {
+        const previousHref = existingCanonical.getAttribute('href');
+        existingCanonical.setAttribute('href', canonical);
+
+        canonicalCleanup = () => {
+          if (previousHref) {
+            existingCanonical.setAttribute('href', previousHref);
+          } else {
+            existingCanonical.removeAttribute('href');
+          }
+        };
+      } else {
+        const link = document.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        link.setAttribute('href', canonical);
+        document.head.appendChild(link);
+
+        canonicalCleanup = () => {
+          link.remove();
+        };
+      }
+    }
+
+    let structuredDataCleanup: (() => void) | undefined;
+    if (structuredData) {
+      const script = document.createElement('script');
+      script.setAttribute('type', 'application/ld+json');
+      script.textContent = JSON.stringify(structuredData, null, 2);
+      document.head.appendChild(script);
+
+      structuredDataCleanup = () => {
+        script.remove();
+      };
+    }
+
+    return () => {
+      document.title = previousTitle;
+      cleanups.forEach(cleanup => cleanup());
+      canonicalCleanup?.();
+      structuredDataCleanup?.();
+    };
+  }, [
+    title,
+    description,
+    keywords?.join(',') ?? '',
+    canonical,
+    robots,
+    JSON.stringify(openGraph ?? {}),
+    JSON.stringify(twitter ?? {}),
+    structuredData ? JSON.stringify(structuredData) : '',
+    JSON.stringify(additionalMeta ?? []),
+  ]);
+
+  return null;
 };
 
 export default SEO;
