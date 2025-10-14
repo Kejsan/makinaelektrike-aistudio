@@ -25,6 +25,7 @@ import OfflineQueuePanel from '../components/admin/OfflineQueuePanel';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 import { listOfflineMutations, OFFLINE_QUEUE_EVENT } from '../services/offlineQueue';
+import { uploadDealerImage, uploadModelImage } from '../services/storage';
 
 interface ModalProps {
   title: string;
@@ -217,12 +218,29 @@ const AdminPage: React.FC = () => {
   const handleDealerSubmit = async (values: DealerFormValues) => {
     setDealerSubmitting(true);
     try {
+      const { imageFile, ...restValues } = values;
+
       if (dealerFormState?.mode === 'edit' && dealerFormState.entity) {
-        const { id, ...rest } = values;
-        await updateDealer(dealerFormState.entity.id, rest);
+        const { id, ...rest } = restValues;
+        const dealerId = dealerFormState.entity.id;
+        await updateDealer(dealerId, rest);
+
+        if (imageFile) {
+          const imageUrl = await uploadDealerImage(dealerId, imageFile);
+          const existingGallery = dealerFormState.entity.imageGallery ?? [];
+          const imageGallery = Array.from(new Set([...existingGallery, imageUrl]));
+          await updateDealer(dealerId, { image_url: imageUrl, imageGallery });
+        }
       } else {
-        const { id: _omit, ...rest } = values;
-        await addDealer(rest);
+        const { id: _omit, ...rest } = restValues;
+        const createdDealer = await addDealer(rest);
+
+        if (imageFile && createdDealer?.id) {
+          const imageUrl = await uploadDealerImage(createdDealer.id, imageFile);
+          const gallery = createdDealer.imageGallery ?? [];
+          const imageGallery = Array.from(new Set([...gallery, imageUrl]));
+          await updateDealer(createdDealer.id, { image_url: imageUrl, imageGallery });
+        }
       }
       closeAllModals();
     } catch (error) {
@@ -235,12 +253,25 @@ const AdminPage: React.FC = () => {
   const handleModelSubmit = async (values: ModelFormValues) => {
     setModelSubmitting(true);
     try {
+      const { imageFile, ...restValues } = values;
+
       if (modelFormState?.mode === 'edit' && modelFormState.entity) {
-        const { id, ...rest } = values;
-        await updateModel(modelFormState.entity.id, rest);
+        const { id, ...rest } = restValues;
+        const modelId = modelFormState.entity.id;
+        await updateModel(modelId, rest);
+
+        if (imageFile) {
+          const imageUrl = await uploadModelImage(modelId, imageFile);
+          await updateModel(modelId, { image_url: imageUrl });
+        }
       } else {
-        const { id: _omit, ...rest } = values;
-        await addModel(rest);
+        const { id: _omit, ...rest } = restValues;
+        const createdModel = await addModel(rest);
+
+        if (imageFile && createdModel?.id) {
+          const imageUrl = await uploadModelImage(createdModel.id, imageFile);
+          await updateModel(createdModel.id, { image_url: imageUrl });
+        }
       }
       closeAllModals();
     } catch (error) {

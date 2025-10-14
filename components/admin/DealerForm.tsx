@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dealer } from '../../types';
+import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../../constants/media';
 
 export interface DealerFormValues extends Omit<Dealer, 'id'> {
   id?: string;
+  imageFile?: File | null;
 }
 
 interface DealerFormProps {
@@ -78,10 +80,16 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
   const { t } = useTranslation();
   const [formState, setFormState] = useState<DealerFormState>(defaultState);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [previewFromFile, setPreviewFromFile] = useState(false);
 
   useEffect(() => {
     if (!initialValues) {
       setFormState(defaultState);
+      setImageFile(null);
+      setImagePreview('');
+      setPreviewFromFile(false);
       return;
     }
 
@@ -107,7 +115,27 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       socialYoutube: initialValues.social_links?.youtube ?? '',
       isFeatured: Boolean(initialValues.isFeatured),
     });
+    setImageFile(null);
+    setImagePreview(initialValues.image_url ?? '');
+    setPreviewFromFile(false);
   }, [initialValues]);
+
+  useEffect(() => {
+    if (imageFile) {
+      return;
+    }
+    setImagePreview(formState.image_url.trim());
+    setPreviewFromFile(false);
+  }, [formState.image_url, imageFile]);
+
+  useEffect(
+    () => () => {
+      if (previewFromFile && imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    },
+    [imagePreview, previewFromFile],
+  );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = event.target;
@@ -115,6 +143,33 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (previewFromFile && imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    const nextPreview = URL.createObjectURL(file);
+    setImageFile(file);
+    setImagePreview(nextPreview);
+    setPreviewFromFile(true);
+  };
+
+  const handleImageClear = () => {
+    if (previewFromFile && imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    setImageFile(null);
+    const trimmedUrl = formState.image_url.trim();
+    setImagePreview(trimmedUrl);
+    setPreviewFromFile(false);
   };
 
   const validate = () => {
@@ -255,6 +310,10 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       payload.social_links = socialLinks;
     }
 
+    if (imageFile) {
+      payload.imageFile = imageFile;
+    }
+
     await onSubmit(payload);
   };
 
@@ -304,7 +363,38 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
         {renderInput(t('dealerDetails.phone', { defaultValue: 'Phone' }), 'phone')}
         {renderInput(t('dealerDetails.email', { defaultValue: 'Email' }), 'email')}
         {renderInput(t('dealerDetails.website', { defaultValue: 'Website' }), 'website')}
-        {renderInput('Image URL', 'image_url')}
+      {renderInput('Image URL', 'image_url')}
+
+      <div className="space-y-3">
+        <span className="block text-sm font-medium text-gray-300">
+          {t('admin.uploadDealerImageLabel', { defaultValue: 'Upload dealer image' })}
+        </span>
+        <div className="flex flex-wrap items-center gap-4">
+          <img
+            src={imagePreview || DEALERSHIP_PLACEHOLDER_IMAGE}
+            alt={formState.name || t('admin.uploadDealerImagePreviewAlt', { defaultValue: 'Dealer image preview' })}
+            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
+          />
+          <div className="flex flex-col gap-2">
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
+              <span>{t('admin.uploadImage', { defaultValue: 'Upload image' })}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+            </label>
+            {(imageFile || previewFromFile) && (
+              <button
+                type="button"
+                onClick={handleImageClear}
+                className="text-left text-xs text-gray-300 transition hover:text-white"
+              >
+                {t('admin.removeImage', { defaultValue: 'Remove selected image' })}
+              </button>
+            )}
+            <p className="text-xs text-gray-400">
+              {t('admin.imageUploadHint', { defaultValue: 'JPEG or PNG recommended, up to 5MB.' })}
+            </p>
+          </div>
+        </div>
+      </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

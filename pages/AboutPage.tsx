@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Zap } from 'lucide-react';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
+import { SITE_LOGO, SITE_LOGO_ALT } from '../constants/media';
 
 const AboutPage: React.FC = () => {
   const { t } = useTranslation();
@@ -65,7 +65,11 @@ const AboutPage: React.FC = () => {
         <div className="bg-white/5 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden">
           <div className="p-8 md:p-12">
             <div className="text-center mb-8">
-                <Zap className="mx-auto text-gray-cyan h-12 w-12"/>
+                <img
+                  src={SITE_LOGO}
+                  alt={SITE_LOGO_ALT}
+                  className="mx-auto h-16 w-auto rounded"
+                />
                 <h1 className="text-4xl font-extrabold text-white sm:text-5xl mt-4">
                   {t('aboutPage.title')}
                 </h1>

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Model } from '../../types';
+import { MODEL_PLACEHOLDER_IMAGE } from '../../constants/media';
 
 export interface ModelFormValues extends Omit<Model, 'id'> {
   id?: string;
+  imageFile?: File | null;
 }
 
 interface ModelFormProps {
@@ -77,10 +79,16 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
   const { t } = useTranslation();
   const [formState, setFormState] = useState<ModelFormState>(defaultState);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [previewFromFile, setPreviewFromFile] = useState(false);
 
   useEffect(() => {
     if (!initialValues) {
       setFormState(defaultState);
+      setImageFile(null);
+      setImagePreview('');
+      setPreviewFromFile(false);
       return;
     }
 
@@ -102,7 +110,27 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       image_url: initialValues.image_url ?? '',
       isFeatured: Boolean(initialValues.isFeatured),
     });
+    setImageFile(null);
+    setImagePreview(initialValues.image_url ?? '');
+    setPreviewFromFile(false);
   }, [initialValues]);
+
+  useEffect(() => {
+    if (imageFile) {
+      return;
+    }
+    setImagePreview(formState.image_url.trim());
+    setPreviewFromFile(false);
+  }, [formState.image_url, imageFile]);
+
+  useEffect(
+    () => () => {
+      if (previewFromFile && imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    },
+    [imagePreview, previewFromFile],
+  );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = event.target;
@@ -110,6 +138,33 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (previewFromFile && imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    const nextPreview = URL.createObjectURL(file);
+    setImageFile(file);
+    setImagePreview(nextPreview);
+    setPreviewFromFile(true);
+  };
+
+  const handleImageClear = () => {
+    if (previewFromFile && imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    setImageFile(null);
+    const trimmedUrl = formState.image_url.trim();
+    setImagePreview(trimmedUrl);
+    setPreviewFromFile(false);
   };
 
   const validate = () => {
@@ -234,6 +289,10 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       payload.image_url = imageUrl;
     }
 
+    if (imageFile) {
+      payload.imageFile = imageFile;
+    }
+
     await onSubmit(payload);
   };
 
@@ -294,6 +353,37 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       {renderInput(t('modelDetails.notes', { defaultValue: 'Notes' }), 'notes', 'text', undefined, { isTextArea: true, rows: 4 })}
 
       {renderInput('Image URL', 'image_url')}
+
+      <div className="space-y-3">
+        <span className="block text-sm font-medium text-gray-300">
+          {t('admin.uploadModelImageLabel', { defaultValue: 'Upload model image' })}
+        </span>
+        <div className="flex flex-wrap items-center gap-4">
+          <img
+            src={imagePreview || MODEL_PLACEHOLDER_IMAGE}
+            alt={`${formState.brand || 'Model'} preview`}
+            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
+          />
+          <div className="flex flex-col gap-2">
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
+              <span>{t('admin.uploadImage', { defaultValue: 'Upload image' })}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+            </label>
+            {(imageFile || previewFromFile) && (
+              <button
+                type="button"
+                onClick={handleImageClear}
+                className="text-left text-xs text-gray-300 transition hover:text-white"
+              >
+                {t('admin.removeImage', { defaultValue: 'Remove selected image' })}
+              </button>
+            )}
+            <p className="text-xs text-gray-400">
+              {t('admin.imageUploadHint', { defaultValue: 'JPEG or PNG recommended, up to 5MB.' })}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="flex items-center space-x-3">
         <input

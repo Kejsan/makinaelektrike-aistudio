@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Zap, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Globe, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { SITE_LOGO, SITE_LOGO_ALT } from '../constants/media';
 
 const LanguageSwitcher: React.FC = () => {
   const { i18n, t } = useTranslation();
@@ -108,9 +109,12 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center text-white space-x-2">
-              <Zap className="text-gray-cyan" size={28}/>
-              <span className="font-bold text-xl">Makina Elektrike</span>
+            <Link to="/" className="flex-shrink-0 flex items-center text-white">
+              <img
+                src={SITE_LOGO}
+                alt={SITE_LOGO_ALT}
+                className="h-10 w-auto rounded"
+              />
             </Link>
           </div>
           <nav className="hidden lg:flex items-center gap-2">

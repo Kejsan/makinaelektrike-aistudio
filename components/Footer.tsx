@@ -2,7 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Facebook, Instagram, Twitter, Linkedin, Zap } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Linkedin } from 'lucide-react';
+import { SITE_LOGO, SITE_LOGO_ALT } from '../constants/media';
 
 const Footer: React.FC = () => {
   const { t } = useTranslation();
@@ -12,9 +13,8 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8 xl:col-span-1">
-            <Link to="/" className="flex items-center text-white space-x-2">
-              <Zap size={32} className="text-gray-cyan" />
-              <span className="font-bold text-2xl">Makina Elektrike</span>
+            <Link to="/" className="inline-flex items-center text-white">
+              <img src={SITE_LOGO} alt={SITE_LOGO_ALT} className="h-12 w-auto rounded" />
             </Link>
             <p className="text-gray-300 text-base">{t('footer.description')}</p>
             <div className="flex space-x-6">

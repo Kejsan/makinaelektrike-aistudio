@@ -9,6 +9,7 @@ import { useFavorites } from '../hooks/useFavorites';
 import { DataContext } from '../contexts/DataContext';
 import SEO from '../components/SEO';
 import { BASE_URL } from '../constants/seo';
+import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../constants/media';
 
 const DealerDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -45,7 +46,7 @@ const DealerDetailPage: React.FC = () => {
     }
 
     const favorited = isFavorite(dealer.id);
-    const heroImage = dealer.image_url || 'https://picsum.photos/seed/placeholder/1200/800';
+    const heroImage = dealer.image_url || DEALERSHIP_PLACEHOLDER_IMAGE;
     const isApproved = dealer.approved ?? true;
     const canonical = `${BASE_URL}/dealers/${dealer.id}`;
     const description = t('dealerDetails.metaDescription', {

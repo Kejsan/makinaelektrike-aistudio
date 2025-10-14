@@ -3,10 +3,11 @@ import { Loader2, Plus, Save, Trash2, Upload } from 'lucide-react';
 import { DataContext } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { uploadDealerImage } from '../services/storage';
+import { uploadDealerImage, uploadModelImage } from '../services/storage';
 import type { Dealer, Model } from '../types';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
+import { DEALERSHIP_PLACEHOLDER_IMAGE, MODEL_PLACEHOLDER_IMAGE } from '../constants/media';
 
 interface ProfileFormState {
   name: string;
@@ -90,6 +91,7 @@ const DealerDashboardPage: React.FC = () => {
     models,
     getModelsForDealer,
     updateDealer,
+    updateModel,
     addModel,
     linkModelToDealer,
     unlinkModelFromDealer,
@@ -101,6 +103,9 @@ const DealerDashboardPage: React.FC = () => {
 
   const [profileState, setProfileState] = useState<ProfileFormState>(defaultProfileState);
   const [newModelState, setNewModelState] = useState<NewModelFormState>(defaultModelState);
+  const [newModelImageFile, setNewModelImageFile] = useState<File | null>(null);
+  const [newModelImagePreview, setNewModelImagePreview] = useState('');
+  const [newModelPreviewFromFile, setNewModelPreviewFromFile] = useState(false);
   const [selectedModelId, setSelectedModelId] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [creatingModel, setCreatingModel] = useState(false);
@@ -162,6 +167,23 @@ const DealerDashboardPage: React.FC = () => {
       setSelectedModelId('');
     }
   }, [availableModels, selectedModelId]);
+
+  useEffect(() => {
+    if (newModelImageFile) {
+      return;
+    }
+    setNewModelImagePreview(newModelState.image_url.trim());
+    setNewModelPreviewFromFile(false);
+  }, [newModelState.image_url, newModelImageFile]);
+
+  useEffect(
+    () => () => {
+      if (newModelPreviewFromFile && newModelImagePreview) {
+        URL.revokeObjectURL(newModelImagePreview);
+      }
+    },
+    [newModelImagePreview, newModelPreviewFromFile],
+  );
 
   const metaTitle = 'Paneli i dilerëve | Makina Elektrike';
   const metaDescription = 'Menaxhoni profilin, modelet dhe ofertat që shfaqen në Makina Elektrike për klientët tuaj.';
@@ -317,6 +339,33 @@ const DealerDashboardPage: React.FC = () => {
     setNewModelState(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleNewModelImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (newModelPreviewFromFile && newModelImagePreview) {
+      URL.revokeObjectURL(newModelImagePreview);
+    }
+
+    const nextPreview = URL.createObjectURL(file);
+    setNewModelImageFile(file);
+    setNewModelImagePreview(nextPreview);
+    setNewModelPreviewFromFile(true);
+  };
+
+  const handleNewModelImageClear = () => {
+    if (newModelPreviewFromFile && newModelImagePreview) {
+      URL.revokeObjectURL(newModelImagePreview);
+    }
+
+    setNewModelImageFile(null);
+    const trimmedUrl = newModelState.image_url.trim();
+    setNewModelImagePreview(trimmedUrl);
+    setNewModelPreviewFromFile(false);
+  };
+
   const handleCreateModel = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!dealer) {
@@ -329,6 +378,7 @@ const DealerDashboardPage: React.FC = () => {
     }
 
     setCreatingModel(true);
+    const selectedFile = newModelImageFile;
     try {
       const payload = {
         brand: newModelState.brand.trim(),
@@ -344,7 +394,12 @@ const DealerDashboardPage: React.FC = () => {
 
       const createdModel = await addModel(payload);
       await linkModelToDealer(dealer.id, createdModel.id);
+      if (selectedFile) {
+        const imageUrl = await uploadModelImage(createdModel.id, selectedFile);
+        await updateModel(createdModel.id, { image_url: imageUrl });
+      }
       setNewModelState(defaultModelState);
+      handleNewModelImageClear();
     } catch (error) {
       console.error('Failed to create and attach model', error);
     } finally {
@@ -823,6 +878,46 @@ const DealerDashboardPage: React.FC = () => {
                           placeholder="https://"
                         />
                       </div>
+                      <div className="md:col-span-2">
+                        <span className="mb-2 block text-sm font-medium text-gray-200">
+                          Upload model image
+                        </span>
+                        <div className="flex flex-wrap items-center gap-4">
+                          <img
+                            src={newModelImagePreview || MODEL_PLACEHOLDER_IMAGE}
+                            alt={`${newModelState.brand || 'Model'} preview`}
+                            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
+                          />
+                          <div className="flex flex-col gap-2">
+                            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
+                              {creatingModel ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Upload className="h-4 w-4" />
+                              )}
+                              <span>{creatingModel ? 'Uploading…' : 'Upload image'}</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleNewModelImageChange}
+                                disabled={creatingModel}
+                              />
+                            </label>
+                            {(newModelImageFile || newModelPreviewFromFile) && (
+                              <button
+                                type="button"
+                                onClick={handleNewModelImageClear}
+                                className="text-left text-xs text-gray-300 transition hover:text-white"
+                                disabled={creatingModel}
+                              >
+                                Remove selected image
+                              </button>
+                            )}
+                            <p className="text-xs text-gray-400">JPEG or PNG recommended, up to 5MB.</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-200" htmlFor="notes">
@@ -863,18 +958,17 @@ const DealerDashboardPage: React.FC = () => {
                 Upload a feature image that appears on your public dealer page. High-resolution landscape photos work best.
               </p>
               <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-gray-900/60">
-                {profileState.imageUrl ? (
-                  <img
-                    src={profileState.imageUrl}
-                    alt={profileState.name}
-                    className="h-48 w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-48 items-center justify-center text-sm text-gray-500">
-                    No image uploaded yet
-                  </div>
-                )}
+                <img
+                  src={profileState.imageUrl || DEALERSHIP_PLACEHOLDER_IMAGE}
+                  alt={profileState.name || 'Dealer image preview'}
+                  className="h-48 w-full object-cover"
+                />
               </div>
+              {!profileState.imageUrl && (
+                <p className="mt-2 text-xs text-gray-400">
+                  We&apos;re showing a placeholder image until you upload your own photo.
+                </p>
+              )}
               <label className="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
                 {uploadingImage ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
