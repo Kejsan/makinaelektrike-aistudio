@@ -43,6 +43,45 @@ const modelsCollection = collection(firestore, 'models');
 const blogPostsCollection = collection(firestore, 'blogPosts');
 const dealerModelsCollection = collection(firestore, 'dealerModels');
 
+const compareStrings = (a?: string | null, b?: string | null) => {
+  const first = (a ?? '').trim().toLocaleLowerCase();
+  const second = (b ?? '').trim().toLocaleLowerCase();
+  return first.localeCompare(second);
+};
+
+const sortDealersByName = (dealers: Dealer[]) =>
+  [...dealers].sort((first, second) => compareStrings(first.name, second.name));
+
+const sortModels = (models: Model[]) =>
+  [...models].sort((first, second) => {
+    const brandComparison = compareStrings(first.brand, second.brand);
+    if (brandComparison !== 0) {
+      return brandComparison;
+    }
+
+    return compareStrings(first.model_name, second.model_name);
+  });
+
+const sortBlogPostsByDateDesc = (posts: BlogPost[]) =>
+  [...posts].sort((first, second) => {
+    const firstTime = new Date(first.date ?? '').getTime();
+    const secondTime = new Date(second.date ?? '').getTime();
+
+    if (Number.isNaN(firstTime) && Number.isNaN(secondTime)) {
+      return compareStrings(first.title, second.title);
+    }
+
+    if (Number.isNaN(firstTime)) {
+      return 1;
+    }
+
+    if (Number.isNaN(secondTime)) {
+      return -1;
+    }
+
+    return secondTime - firstTime;
+  });
+
 const mapDealers = createCollectionMapper<Dealer>();
 const mapModels = createCollectionMapper<Model>();
 const mapBlogPosts = createCollectionMapper<BlogPost>();
@@ -115,12 +154,12 @@ export const subscribeToDealers = (
 export const subscribeToApprovedDealers = (
   options: SubscriptionOptions<Dealer>,
 ): Unsubscribe => {
-  const dealersQuery = query(
-    dealersCollection,
-    where('approved', '==', true),
-    orderBy('name', 'asc'),
+  const dealersQuery = query(dealersCollection, where('approved', '==', true));
+  return subscribeToCollection(
+    dealersQuery,
+    snapshot => sortDealersByName(mapDealers(snapshot)),
+    options,
   );
-  return subscribeToCollection(dealersQuery, mapDealers, options);
 };
 
 export const subscribeToDealersByOwner = (
@@ -132,8 +171,8 @@ export const subscribeToDealersByOwner = (
 };
 
 export const listModels = async (): Promise<Model[]> => {
-  const snapshot = await getDocs(query(modelsCollection, orderBy('brand', 'asc'), orderBy('model_name', 'asc')));
-  return mapModels(snapshot);
+  const snapshot = await getDocs(query(modelsCollection));
+  return sortModels(mapModels(snapshot));
 };
 
 export const getModelById = async (id: string): Promise<Model | null> => {
@@ -175,8 +214,12 @@ export const deleteModel = async (id: string): Promise<void> => {
 export const subscribeToModels = (
   options: SubscriptionOptions<Model>,
 ): Unsubscribe => {
-  const modelsQuery = query(modelsCollection, orderBy('brand', 'asc'), orderBy('model_name', 'asc'));
-  return subscribeToCollection(modelsQuery, mapModels, options);
+  const modelsQuery = query(modelsCollection);
+  return subscribeToCollection(
+    modelsQuery,
+    snapshot => sortModels(mapModels(snapshot)),
+    options,
+  );
 };
 
 export const subscribeToModelsByOwner = (
@@ -188,8 +231,8 @@ export const subscribeToModelsByOwner = (
 };
 
 export const listBlogPosts = async (): Promise<BlogPost[]> => {
-  const snapshot = await getDocs(query(blogPostsCollection, orderBy('date', 'desc')));
-  return mapBlogPosts(snapshot);
+  const snapshot = await getDocs(query(blogPostsCollection));
+  return sortBlogPostsByDateDesc(mapBlogPosts(snapshot));
 };
 
 export const getBlogPostById = async (id: string): Promise<BlogPost | null> => {
@@ -237,12 +280,12 @@ export const subscribeToBlogPosts = (
 export const subscribeToPublishedBlogPosts = (
   options: SubscriptionOptions<BlogPost>,
 ): Unsubscribe => {
-  const postsQuery = query(
-    blogPostsCollection,
-    where('published', '==', true),
-    orderBy('date', 'desc'),
+  const postsQuery = query(blogPostsCollection, where('published', '==', true));
+  return subscribeToCollection(
+    postsQuery,
+    snapshot => sortBlogPostsByDateDesc(mapBlogPosts(snapshot)),
+    options,
   );
-  return subscribeToCollection(postsQuery, mapBlogPosts, options);
 };
 
 export const listDealerModels = async (): Promise<DealerModel[]> => {
