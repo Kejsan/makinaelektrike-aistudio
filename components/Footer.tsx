@@ -13,9 +13,8 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="space-y-8 xl:col-span-1">
-            <Link to="/" className="flex items-center text-white space-x-3">
+            <Link to="/" className="inline-flex items-center text-white">
               <img src={SITE_LOGO} alt={SITE_LOGO_ALT} className="h-12 w-auto rounded" />
-              <span className="font-bold text-2xl">Makina Elektrike</span>
             </Link>
             <p className="text-gray-300 text-base">{t('footer.description')}</p>
             <div className="flex space-x-6">

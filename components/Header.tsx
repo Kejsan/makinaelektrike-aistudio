@@ -109,13 +109,12 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center gap-3 text-white">
+            <Link to="/" className="flex-shrink-0 flex items-center text-white">
               <img
                 src={SITE_LOGO}
                 alt={SITE_LOGO_ALT}
                 className="h-10 w-auto rounded"
               />
-              <span className="font-bold text-xl">Makina Elektrike</span>
             </Link>
           </div>
           <nav className="hidden lg:flex items-center gap-2">
