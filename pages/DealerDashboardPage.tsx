@@ -1,12 +1,18 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, Plus, Save, Trash2, Upload } from 'lucide-react';
 import { DataContext } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { uploadDealerImage } from '../services/storage';
+import {
+  uploadDealerGalleryImage,
+  uploadDealerHeroImage,
+  uploadModelGalleryImage,
+  uploadModelHeroImage,
+} from '../services/storage';
 import type { Dealer, Model } from '../types';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
+import { DEALERSHIP_PLACEHOLDER_IMAGE, MODEL_PLACEHOLDER_IMAGE } from '../constants/media';
 
 interface ProfileFormState {
   name: string;
@@ -36,6 +42,11 @@ interface NewModelFormState {
   power_kw: string;
   notes: string;
   image_url: string;
+}
+
+interface GalleryDraft {
+  file: File;
+  preview: string;
 }
 
 const defaultProfileState: ProfileFormState = {
@@ -90,6 +101,7 @@ const DealerDashboardPage: React.FC = () => {
     models,
     getModelsForDealer,
     updateDealer,
+    updateModel,
     addModel,
     linkModelToDealer,
     unlinkModelFromDealer,
@@ -101,10 +113,17 @@ const DealerDashboardPage: React.FC = () => {
 
   const [profileState, setProfileState] = useState<ProfileFormState>(defaultProfileState);
   const [newModelState, setNewModelState] = useState<NewModelFormState>(defaultModelState);
+  const [newModelImageFile, setNewModelImageFile] = useState<File | null>(null);
+  const [newModelImagePreview, setNewModelImagePreview] = useState('');
+  const [newModelPreviewFromFile, setNewModelPreviewFromFile] = useState(false);
   const [selectedModelId, setSelectedModelId] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [creatingModel, setCreatingModel] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const [galleryRemoving, setGalleryRemoving] = useState<string | null>(null);
+  const [newModelGalleryDrafts, setNewModelGalleryDrafts] = useState<GalleryDraft[]>([]);
+  const newModelGalleryDraftsRef = useRef<GalleryDraft[]>([]);
 
   const dealer: Dealer | null = useMemo(() => {
     if (!user) {
@@ -158,10 +177,38 @@ const DealerDashboardPage: React.FC = () => {
   }, [dealer]);
 
   useEffect(() => {
+    newModelGalleryDraftsRef.current = newModelGalleryDrafts;
+  }, [newModelGalleryDrafts]);
+
+  useEffect(
+    () => () => {
+      newModelGalleryDraftsRef.current.forEach(draft => URL.revokeObjectURL(draft.preview));
+    },
+    [],
+  );
+
+  useEffect(() => {
     if (!availableModels.find(model => model.id === selectedModelId)) {
       setSelectedModelId('');
     }
   }, [availableModels, selectedModelId]);
+
+  useEffect(() => {
+    if (newModelImageFile) {
+      return;
+    }
+    setNewModelImagePreview(newModelState.image_url.trim());
+    setNewModelPreviewFromFile(false);
+  }, [newModelState.image_url, newModelImageFile]);
+
+  useEffect(
+    () => () => {
+      if (newModelPreviewFromFile && newModelImagePreview) {
+        URL.revokeObjectURL(newModelImagePreview);
+      }
+    },
+    [newModelImagePreview, newModelPreviewFromFile],
+  );
 
   const metaTitle = 'Paneli i dilerëve | Makina Elektrike';
   const metaDescription = 'Menaxhoni profilin, modelet dhe ofertat që shfaqen në Makina Elektrike për klientët tuaj.';
@@ -250,17 +297,19 @@ const DealerDashboardPage: React.FC = () => {
 
     setUploadingImage(true);
     try {
-      const imageUrl = await uploadDealerImage(dealer.id, file);
+      const imageUrl = await uploadDealerHeroImage(dealer.id, file);
       setProfileState(prev => ({ ...prev, imageUrl }));
+      const nextGallery = Array.from(new Set([imageUrl, ...(dealer.imageGallery ?? [])])).slice(0, 3);
       await updateDealer(dealer.id, {
         image_url: imageUrl,
-        imageGallery: Array.from(new Set([...(dealer.imageGallery ?? []), imageUrl])),
+        imageGallery: nextGallery,
       });
     } catch (error) {
       console.error('Failed to upload dealer image', error);
       addToast('Image upload failed. Please try again.', 'error');
     } finally {
       setUploadingImage(false);
+      event.target.value = '';
     }
   };
 
@@ -277,6 +326,58 @@ const DealerDashboardPage: React.FC = () => {
       await updateDealer(dealer.id, { image_url: '', imageGallery: updatedGallery });
     } catch (error) {
       console.error('Failed to remove dealer image', error);
+    }
+  };
+
+  const handleGalleryUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!dealer) {
+      return;
+    }
+
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) {
+      return;
+    }
+
+    const existingCount = dealer.imageGallery?.length ?? 0;
+    const availableSlots = Math.max(0, 3 - existingCount);
+    if (availableSlots <= 0) {
+      addToast('Gallery limit reached. Remove an image before uploading a new one.', 'warning');
+      event.target.value = '';
+      return;
+    }
+
+    const selectedFiles = files.slice(0, availableSlots);
+    setGalleryUploading(true);
+    try {
+      const uploaded = await Promise.all(
+        selectedFiles.map(file => uploadDealerGalleryImage(dealer.id, file)),
+      );
+      const nextGallery = Array.from(new Set([...(dealer.imageGallery ?? []), ...uploaded])).slice(0, 3);
+      await updateDealer(dealer.id, { imageGallery: nextGallery });
+    } catch (error) {
+      console.error('Failed to upload gallery image', error);
+      addToast('Gallery upload failed. Please try again.', 'error');
+    } finally {
+      setGalleryUploading(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleGalleryImageRemove = async (imageUrl: string) => {
+    if (!dealer) {
+      return;
+    }
+
+    setGalleryRemoving(imageUrl);
+    try {
+      const nextGallery = (dealer.imageGallery ?? []).filter(url => url !== imageUrl);
+      await updateDealer(dealer.id, { imageGallery: nextGallery });
+    } catch (error) {
+      console.error('Failed to remove gallery image', error);
+      addToast('Could not remove that gallery image.', 'error');
+    } finally {
+      setGalleryRemoving(null);
     }
   };
 
@@ -317,6 +418,70 @@ const DealerDashboardPage: React.FC = () => {
     setNewModelState(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleNewModelImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (newModelPreviewFromFile && newModelImagePreview) {
+      URL.revokeObjectURL(newModelImagePreview);
+    }
+
+    const nextPreview = URL.createObjectURL(file);
+    setNewModelImageFile(file);
+    setNewModelImagePreview(nextPreview);
+    setNewModelPreviewFromFile(true);
+  };
+
+  const handleNewModelImageClear = () => {
+    if (newModelPreviewFromFile && newModelImagePreview) {
+      URL.revokeObjectURL(newModelImagePreview);
+    }
+
+    setNewModelImageFile(null);
+    const trimmedUrl = newModelState.image_url.trim();
+    setNewModelImagePreview(trimmedUrl);
+    setNewModelPreviewFromFile(false);
+  };
+
+  const handleNewModelGalleryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) {
+      return;
+    }
+
+    const availableSlots = Math.max(0, 3 - newModelGalleryDrafts.length);
+    if (availableSlots <= 0) {
+      event.target.value = '';
+      addToast('Gallery limit reached for this model. Remove an image before adding another.', 'warning');
+      return;
+    }
+
+    const selected = files.slice(0, availableSlots);
+    const drafts = selected.map(file => ({ file, preview: URL.createObjectURL(file) }));
+    setNewModelGalleryDrafts(prev => [...prev, ...drafts]);
+    event.target.value = '';
+  };
+
+  const handleNewModelGalleryRemove = (index: number) => {
+    setNewModelGalleryDrafts(prev => {
+      const next = [...prev];
+      const [removed] = next.splice(index, 1);
+      if (removed) {
+        URL.revokeObjectURL(removed.preview);
+      }
+      return next;
+    });
+  };
+
+  const resetNewModelGalleryDrafts = () => {
+    setNewModelGalleryDrafts(prev => {
+      prev.forEach(draft => URL.revokeObjectURL(draft.preview));
+      return [];
+    });
+  };
+
   const handleCreateModel = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!dealer) {
@@ -329,6 +494,8 @@ const DealerDashboardPage: React.FC = () => {
     }
 
     setCreatingModel(true);
+    const selectedFile = newModelImageFile;
+    const galleryFiles = newModelGalleryDrafts.map(draft => draft.file);
     try {
       const payload = {
         brand: newModelState.brand.trim(),
@@ -344,7 +511,20 @@ const DealerDashboardPage: React.FC = () => {
 
       const createdModel = await addModel(payload);
       await linkModelToDealer(dealer.id, createdModel.id);
+      if (selectedFile) {
+        const imageUrl = await uploadModelHeroImage(createdModel.id, selectedFile);
+        await updateModel(createdModel.id, { image_url: imageUrl });
+      }
+      if (galleryFiles.length > 0) {
+        const uploadedGallery = await Promise.all(
+          galleryFiles.map(file => uploadModelGalleryImage(createdModel.id, file)),
+        );
+        const limitedGallery = Array.from(new Set(uploadedGallery)).slice(0, 3);
+        await updateModel(createdModel.id, { imageGallery: limitedGallery });
+      }
       setNewModelState(defaultModelState);
+      handleNewModelImageClear();
+      resetNewModelGalleryDrafts();
     } catch (error) {
       console.error('Failed to create and attach model', error);
     } finally {
@@ -375,6 +555,9 @@ const DealerDashboardPage: React.FC = () => {
   const isApprovedDealer = dealer.approved ?? false;
   const isUpdatingDealer = savingProfile || dealerMutations.update.loading || uploadingImage;
   const isCreatingModel = creatingModel || modelMutations.create.loading;
+  const newModelGalleryLimit = 3;
+  const newModelGalleryUploadDisabled = newModelGalleryDrafts.length >= newModelGalleryLimit;
+  const dealerGallery = (dealer.imageGallery ?? []).filter(Boolean);
 
   return (
     <div className="py-16">
@@ -823,6 +1006,103 @@ const DealerDashboardPage: React.FC = () => {
                           placeholder="https://"
                         />
                       </div>
+                      <div className="md:col-span-2">
+                        <span className="mb-2 block text-sm font-medium text-gray-200">
+                          Upload model image
+                        </span>
+                        <div className="flex flex-wrap items-center gap-4">
+                          <img
+                            src={newModelImagePreview || MODEL_PLACEHOLDER_IMAGE}
+                            alt={`${newModelState.brand || 'Model'} preview`}
+                            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
+                          />
+                          <div className="flex flex-col gap-2">
+                            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
+                              {creatingModel ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Upload className="h-4 w-4" />
+                              )}
+                              <span>{creatingModel ? 'Uploading…' : 'Upload image'}</span>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={handleNewModelImageChange}
+                                disabled={creatingModel}
+                              />
+                            </label>
+                            {(newModelImageFile || newModelPreviewFromFile) && (
+                              <button
+                                type="button"
+                                onClick={handleNewModelImageClear}
+                                className="text-left text-xs text-gray-300 transition hover:text-white"
+                                disabled={creatingModel}
+                              >
+                                Remove selected image
+                              </button>
+                            )}
+                            <p className="text-xs text-gray-400">JPEG or PNG recommended, up to 5MB.</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <span className="mb-2 block text-sm font-medium text-gray-200">
+                          Gallery images
+                        </span>
+                        <p className="mb-3 text-xs text-gray-400">
+                          Add up to three supporting images for this model. They will appear on the public page below the dealer list.
+                        </p>
+                        <div className="flex flex-wrap gap-4">
+                          {newModelGalleryDrafts.map((draft, index) => (
+                            <div key={draft.preview} className="relative">
+                              <img
+                                src={draft.preview}
+                                alt="Model gallery preview"
+                                className="h-24 w-32 rounded-lg border border-dashed border-white/20 object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleNewModelGalleryRemove(index)}
+                                className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white transition hover:bg-black/80"
+                                disabled={creatingModel}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))}
+                          {newModelGalleryDrafts.length === 0 && (
+                            <p className="text-sm text-gray-400">No gallery images selected yet.</p>
+                          )}
+                        </div>
+                        <label className={`mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                          newModelGalleryUploadDisabled
+                            ? 'cursor-not-allowed border border-white/10 bg-white/5 text-gray-400'
+                            : 'cursor-pointer bg-gray-cyan text-gray-900 hover:opacity-90'
+                        }`}>
+                          {creatingModel ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Upload className="h-4 w-4" />
+                          )}
+                          <span>
+                            {newModelGalleryUploadDisabled
+                              ? 'Gallery limit reached'
+                              : creatingModel
+                                ? 'Uploading…'
+                                : 'Upload gallery images'}
+                          </span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handleNewModelGalleryChange}
+                            disabled={creatingModel || newModelGalleryUploadDisabled}
+                          />
+                        </label>
+                        <p className="mt-1 text-xs text-gray-400">JPEG or PNG recommended, up to 5MB each.</p>
+                      </div>
                     </div>
                     <div>
                       <label className="mb-2 block text-sm font-medium text-gray-200" htmlFor="notes">
@@ -863,18 +1143,17 @@ const DealerDashboardPage: React.FC = () => {
                 Upload a feature image that appears on your public dealer page. High-resolution landscape photos work best.
               </p>
               <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-gray-900/60">
-                {profileState.imageUrl ? (
-                  <img
-                    src={profileState.imageUrl}
-                    alt={profileState.name}
-                    className="h-48 w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-48 items-center justify-center text-sm text-gray-500">
-                    No image uploaded yet
-                  </div>
-                )}
+                <img
+                  src={profileState.imageUrl || DEALERSHIP_PLACEHOLDER_IMAGE}
+                  alt={profileState.name || 'Dealer image preview'}
+                  className="h-48 w-full object-cover"
+                />
               </div>
+              {!profileState.imageUrl && (
+                <p className="mt-2 text-xs text-gray-400">
+                  We&apos;re showing a placeholder image until you upload your own photo.
+                </p>
+              )}
               <label className="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">
                 {uploadingImage ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -901,6 +1180,63 @@ const DealerDashboardPage: React.FC = () => {
                   Remove image
                 </button>
               )}
+            </section>
+
+            <section className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+              <h2 className="text-xl font-semibold">Gallery</h2>
+              <p className="mt-2 text-sm text-gray-300">
+                Showcase up to three additional photos. They appear beneath your model line-up on the public page.
+              </p>
+              <div className="mt-4 flex flex-col gap-4">
+                {dealerGallery.length > 0 ? (
+                  <div className="flex flex-wrap gap-3">
+                    {dealerGallery.map(imageUrl => (
+                      <div key={imageUrl} className="relative">
+                        <img
+                          src={imageUrl}
+                          alt="Dealer gallery image"
+                          className="h-24 w-32 rounded-lg border border-white/10 object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleGalleryImageRemove(imageUrl)}
+                          className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white transition hover:bg-black/80"
+                          disabled={galleryRemoving === imageUrl || dealerMutations.update.loading}
+                        >
+                          {galleryRemoving === imageUrl ? 'Removing…' : 'Remove'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400">No gallery images yet.</p>
+                )}
+                <label className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  galleryUploading
+                    ? 'cursor-wait border border-white/10 bg-white/5 text-gray-400'
+                    : dealerGallery.length >= 3
+                      ? 'cursor-not-allowed border border-white/10 bg-white/5 text-gray-400'
+                      : 'cursor-pointer bg-gray-cyan text-gray-900 hover:opacity-90'
+                }`}>
+                  {galleryUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  <span>
+                    {galleryUploading
+                      ? 'Uploading…'
+                      : dealerGallery.length >= 3
+                        ? 'Gallery limit reached'
+                        : 'Upload gallery image'}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleGalleryUpload}
+                    disabled={galleryUploading || dealerGallery.length >= 3}
+                  />
+                </label>
+                <p className="text-xs text-gray-400">JPEG or PNG recommended. Maximum of 3 gallery images.</p>
+              </div>
             </section>
 
             <section className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">

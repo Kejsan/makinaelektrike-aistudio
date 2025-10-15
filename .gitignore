@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Prevent accidentally re-adding large favicon binaries
+public/favicon.png
+assets/Makina Elektrike - icon.png

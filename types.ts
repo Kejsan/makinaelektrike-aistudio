@@ -74,6 +74,7 @@ interface ModelCore {
   notes?: string;
   image_url?: string;
   isFeatured?: boolean;
+  imageGallery?: string[];
 }
 
 export interface ModelOwnershipMetadata extends FirestoreTimestamps {
