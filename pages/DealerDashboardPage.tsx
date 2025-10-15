@@ -299,7 +299,8 @@ const DealerDashboardPage: React.FC = () => {
     try {
       const imageUrl = await uploadDealerHeroImage(dealer.id, file);
       setProfileState(prev => ({ ...prev, imageUrl }));
-      const nextGallery = Array.from(new Set([imageUrl, ...(dealer.imageGallery ?? [])])).slice(0, 3);
+      const existingGallery = (dealer.imageGallery ?? []).filter(Boolean);
+      const nextGallery = Array.from(new Set([imageUrl, ...existingGallery])).slice(0, 3);
       await updateDealer(dealer.id, {
         image_url: imageUrl,
         imageGallery: nextGallery,
@@ -320,9 +321,8 @@ const DealerDashboardPage: React.FC = () => {
 
     setProfileState(prev => ({ ...prev, imageUrl: '' }));
     try {
-      const updatedGallery = (dealer.imageGallery ?? []).filter(
-        url => url && url !== (dealer.image_url ?? ''),
-      );
+      const sanitizedGallery = (dealer.imageGallery ?? []).filter(Boolean);
+      const updatedGallery = sanitizedGallery.filter(url => url !== (dealer.image_url ?? ''));
       await updateDealer(dealer.id, { image_url: '', imageGallery: updatedGallery });
     } catch (error) {
       console.error('Failed to remove dealer image', error);
@@ -339,7 +339,8 @@ const DealerDashboardPage: React.FC = () => {
       return;
     }
 
-    const existingCount = dealer.imageGallery?.length ?? 0;
+    const existingGallery = (dealer.imageGallery ?? []).filter(Boolean);
+    const existingCount = existingGallery.length;
     const availableSlots = Math.max(0, 3 - existingCount);
     if (availableSlots <= 0) {
       addToast('Gallery limit reached. Remove an image before uploading a new one.', 'warning');
@@ -353,7 +354,7 @@ const DealerDashboardPage: React.FC = () => {
       const uploaded = await Promise.all(
         selectedFiles.map(file => uploadDealerGalleryImage(dealer.id, file)),
       );
-      const nextGallery = Array.from(new Set([...(dealer.imageGallery ?? []), ...uploaded])).slice(0, 3);
+      const nextGallery = Array.from(new Set([...existingGallery, ...uploaded])).slice(0, 3);
       await updateDealer(dealer.id, { imageGallery: nextGallery });
     } catch (error) {
       console.error('Failed to upload gallery image', error);
@@ -371,7 +372,8 @@ const DealerDashboardPage: React.FC = () => {
 
     setGalleryRemoving(imageUrl);
     try {
-      const nextGallery = (dealer.imageGallery ?? []).filter(url => url !== imageUrl);
+      const existingGallery = (dealer.imageGallery ?? []).filter(Boolean);
+      const nextGallery = existingGallery.filter(url => url !== imageUrl);
       await updateDealer(dealer.id, { imageGallery: nextGallery });
     } catch (error) {
       console.error('Failed to remove gallery image', error);

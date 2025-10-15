@@ -503,6 +503,37 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
         </div>
       </div>
 
+      <div className="space-y-3">
+        <span className="block text-sm font-medium text-gray-300">
+          {t('admin.uploadDealerImageLabel', { defaultValue: 'Upload dealer image' })}
+        </span>
+        <div className="flex flex-wrap items-center gap-4">
+          <img
+            src={imagePreview || DEALERSHIP_PLACEHOLDER_IMAGE}
+            alt={formState.name || t('admin.uploadDealerImagePreviewAlt', { defaultValue: 'Dealer image preview' })}
+            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
+          />
+          <div className="flex flex-col gap-2">
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
+              <span>{t('admin.uploadImage', { defaultValue: 'Upload image' })}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+            </label>
+            {(imageFile || previewFromFile) && (
+              <button
+                type="button"
+                onClick={handleImageClear}
+                className="text-left text-xs text-gray-300 transition hover:text-white"
+              >
+                {t('admin.removeImage', { defaultValue: 'Remove selected image' })}
+              </button>
+            )}
+            <p className="text-xs text-gray-400">
+              {t('admin.imageUploadHint', { defaultValue: 'JPEG or PNG recommended, up to 5MB.' })}
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {renderInput(t('admin.brands'), 'brands', 'text', 'BYD, Tesla')}
         {renderInput(t('dealerDetails.languagesSpoken', { defaultValue: 'Languages' }), 'languages', 'text', 'Albanian, English')}
