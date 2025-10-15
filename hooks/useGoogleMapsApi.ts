@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
-// IMPORTANT: This key should be set in the environment variables as GOOGLE_MAPS_API_KEY.
-const GOOGLE_MAPS_API_KEY = 'AIzaSyB7j8tjYnSW69sG1D4yLpNVdoIKdzht3HY'; 
+const GOOGLE_MAPS_API_KEY =
+    import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? import.meta.env.GOOGLE_MAPS_API_KEY;
 
 // This object holds the script loading status globally to prevent multiple loads.
 const scriptStatus = {
@@ -17,6 +17,12 @@ function loadScripts() {
             if (typeof (window as any).google === 'object' && typeof (window as any).google.maps === 'object' && (window as any).markerClusterer) {
                 scriptStatus.isLoaded = true;
                 resolve();
+                return;
+            }
+
+            if (!GOOGLE_MAPS_API_KEY) {
+                scriptStatus.isErrored = true;
+                reject(new Error('Google Maps API key is not defined.'));
                 return;
             }
 
