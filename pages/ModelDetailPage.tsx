@@ -7,6 +7,8 @@ import { useFavorites } from '../hooks/useFavorites';
 import { DataContext } from '../contexts/DataContext';
 import SEO from '../components/SEO';
 import { BASE_URL } from '../constants/seo';
+import { MODEL_PLACEHOLDER_IMAGE } from '../constants/media';
+import GallerySection from '../components/GallerySection';
 
 const SpecItem: React.FC<{ icon: React.ReactNode, label: string, value?: string | number | null }> = ({ icon, label, value }) => (
     <div className="flex flex-col items-center justify-center p-4 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 text-center transition-all duration-300 hover:bg-white/10 hover:border-gray-cyan/50">
@@ -61,6 +63,8 @@ const ModelDetailPage: React.FC = () => {
     }
 
     const imageScale = 1 + scrollY / 8000;
+    const galleryImages = (model.imageGallery ?? []).filter(Boolean);
+    const heroImage = model.image_url || galleryImages[0] || MODEL_PLACEHOLDER_IMAGE;
     const favorited = isFavorite(model.id);
     const canonical = `${BASE_URL}/models/${model.id}`;
     const description = t('modelDetails.metaDescription', {
@@ -85,7 +89,7 @@ const ModelDetailPage: React.FC = () => {
             brand: model.brand,
             model: model.model_name,
             url: canonical,
-            image: model.image_url,
+            image: heroImage,
             description,
             fuelType: 'Electric',
             bodyType: model.body_type,
@@ -136,12 +140,12 @@ const ModelDetailPage: React.FC = () => {
                     description,
                     url: canonical,
                     type: 'product',
-                    images: [model.image_url],
+                    images: [heroImage],
                 }}
                 twitter={{
                     title: `${model.brand} ${model.model_name} | ${t('modelDetails.metaTitleSuffix')}`,
                     description,
-                    image: model.image_url,
+                    image: heroImage,
                     site: '@makinaelektrike',
                 }}
                 structuredData={structuredData}
@@ -168,9 +172,9 @@ const ModelDetailPage: React.FC = () => {
                             </button>
                         </div>
                         <div className="overflow-hidden mt-6 rounded-xl shadow-2xl">
-                             <img 
-                                src={model.image_url} 
-                                alt={`${model.brand} ${model.model_name}`} 
+                             <img
+                                src={heroImage}
+                                alt={`${model.brand} ${model.model_name}`}
                                 className="w-full h-auto transition-transform duration-100 ease-out"
                                 style={{ transform: `scale(${imageScale})` }}
                              />
@@ -217,6 +221,14 @@ const ModelDetailPage: React.FC = () => {
                          <p className="text-center text-gray-400">Information on availability coming soon.</p>
                     )}
                 </div>
+
+                <GallerySection
+                    title={t('modelDetails.galleryTitle', { defaultValue: 'Model gallery' })}
+                    description={t('modelDetails.gallerySubtitle', {
+                        defaultValue: 'Swipe through additional photos of this EV.',
+                    })}
+                    images={galleryImages}
+                />
 
                 <section className="mt-16 max-w-4xl mx-auto">
                     <h2 className="text-3xl font-bold text-white text-center">{t('modelDetails.faqTitle')}</h2>

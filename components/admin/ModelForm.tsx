@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Model } from '../../types';
+import { MODEL_PLACEHOLDER_IMAGE } from '../../constants/media';
 
 export interface ModelFormValues extends Omit<Model, 'id'> {
   id?: string;
+  imageFile?: File | null;
+  galleryFiles?: File[];
 }
 
 interface ModelFormProps {
@@ -30,6 +33,11 @@ interface ModelFormState {
   notes: string;
   image_url: string;
   isFeatured: boolean;
+}
+
+interface GalleryDraft {
+  file: File;
+  preview: string;
 }
 
 const defaultState: ModelFormState = {
@@ -77,10 +85,26 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
   const { t } = useTranslation();
   const [formState, setFormState] = useState<ModelFormState>(defaultState);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [previewFromFile, setPreviewFromFile] = useState(false);
+  const [existingGallery, setExistingGallery] = useState<string[]>([]);
+  const [galleryDrafts, setGalleryDrafts] = useState<GalleryDraft[]>([]);
+  const galleryDraftsRef = useRef<GalleryDraft[]>([]);
+
+  const galleryLimit = 3;
 
   useEffect(() => {
     if (!initialValues) {
       setFormState(defaultState);
+      setImageFile(null);
+      setImagePreview('');
+      setPreviewFromFile(false);
+      setExistingGallery([]);
+      setGalleryDrafts(previousDrafts => {
+        previousDrafts.forEach(draft => URL.revokeObjectURL(draft.preview));
+        return [];
+      });
       return;
     }
 
@@ -102,7 +126,44 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       image_url: initialValues.image_url ?? '',
       isFeatured: Boolean(initialValues.isFeatured),
     });
+    setImageFile(null);
+    setImagePreview(initialValues.image_url ?? '');
+    setPreviewFromFile(false);
+    const sanitizedGallery = (initialValues.imageGallery ?? []).filter(Boolean);
+    setExistingGallery([...sanitizedGallery]);
+    setGalleryDrafts(previousDrafts => {
+      previousDrafts.forEach(draft => URL.revokeObjectURL(draft.preview));
+      return [];
+    });
   }, [initialValues]);
+
+  useEffect(() => {
+    if (imageFile) {
+      return;
+    }
+    setImagePreview(formState.image_url.trim());
+    setPreviewFromFile(false);
+  }, [formState.image_url, imageFile]);
+
+  useEffect(
+    () => () => {
+      if (previewFromFile && imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    },
+    [imagePreview, previewFromFile],
+  );
+
+  useEffect(() => {
+    galleryDraftsRef.current = galleryDrafts;
+  }, [galleryDrafts]);
+
+  useEffect(
+    () => () => {
+      galleryDraftsRef.current.forEach(draft => URL.revokeObjectURL(draft.preview));
+    },
+    [],
+  );
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = event.target;
@@ -110,6 +171,66 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleImageFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (previewFromFile && imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    const nextPreview = URL.createObjectURL(file);
+    setImageFile(file);
+    setImagePreview(nextPreview);
+    setPreviewFromFile(true);
+  };
+
+  const handleImageClear = () => {
+    if (previewFromFile && imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+
+    setImageFile(null);
+    const trimmedUrl = formState.image_url.trim();
+    setImagePreview(trimmedUrl);
+    setPreviewFromFile(false);
+  };
+
+  const handleGalleryFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (!files.length) {
+      return;
+    }
+
+    const availableSlots = Math.max(0, galleryLimit - (existingGallery.length + galleryDrafts.length));
+    if (availableSlots <= 0) {
+      event.target.value = '';
+      return;
+    }
+
+    const selectedFiles = files.slice(0, availableSlots);
+    const drafts = selectedFiles.map(file => ({ file, preview: URL.createObjectURL(file) }));
+    setGalleryDrafts(prev => [...prev, ...drafts]);
+    event.target.value = '';
+  };
+
+  const handleGalleryDraftRemove = (index: number) => {
+    setGalleryDrafts(prev => {
+      const next = [...prev];
+      const [removed] = next.splice(index, 1);
+      if (removed) {
+        URL.revokeObjectURL(removed.preview);
+      }
+      return next;
+    });
+  };
+
+  const handleExistingGalleryRemove = (url: string) => {
+    setExistingGallery(prev => prev.filter(item => item !== url));
   };
 
   const validate = () => {
@@ -234,6 +355,15 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       payload.image_url = imageUrl;
     }
 
+    if (imageFile) {
+      payload.imageFile = imageFile;
+    }
+
+    payload.imageGallery = existingGallery.filter(Boolean).slice(0, galleryLimit);
+    if (galleryDrafts.length > 0) {
+      payload.galleryFiles = galleryDrafts.map(draft => draft.file);
+    }
+
     await onSubmit(payload);
   };
 
@@ -267,6 +397,10 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     );
   };
 
+  const currentGalleryCount = existingGallery.length + galleryDrafts.length;
+  const availableGallerySlots = Math.max(0, galleryLimit - currentGalleryCount);
+  const galleryUploadDisabled = availableGallerySlots <= 0;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -294,6 +428,113 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       {renderInput(t('modelDetails.notes', { defaultValue: 'Notes' }), 'notes', 'text', undefined, { isTextArea: true, rows: 4 })}
 
       {renderInput('Image URL', 'image_url')}
+
+      <div className="space-y-3">
+        <span className="block text-sm font-medium text-gray-300">
+          {t('admin.uploadModelImageLabel', { defaultValue: 'Upload model image' })}
+        </span>
+        <div className="flex flex-wrap items-center gap-4">
+          <img
+            src={imagePreview || MODEL_PLACEHOLDER_IMAGE}
+            alt={`${formState.brand || 'Model'} preview`}
+            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
+          />
+          <div className="flex flex-col gap-2">
+            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
+              <span>{t('admin.uploadImage', { defaultValue: 'Upload image' })}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+            </label>
+            {(imageFile || previewFromFile) && (
+              <button
+                type="button"
+                onClick={handleImageClear}
+                className="text-left text-xs text-gray-300 transition hover:text-white"
+              >
+                {t('admin.removeImage', { defaultValue: 'Remove selected image' })}
+              </button>
+            )}
+            <p className="text-xs text-gray-400">
+              {t('admin.imageUploadHint', { defaultValue: 'JPEG or PNG recommended, up to 5MB.' })}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <span className="block text-sm font-medium text-gray-300">
+          {t('admin.modelGalleryLabel', { defaultValue: 'Gallery images (up to 3)' })}
+        </span>
+        <p className="text-xs text-gray-400">
+          {t('admin.modelGalleryHelp', {
+            defaultValue: 'Add supporting shots for this EV. They appear below the dealer availability section on the public page.',
+          })}
+        </p>
+        <div className="flex flex-wrap gap-4">
+          {existingGallery.map(url => (
+            <div key={url} className="relative">
+              <img
+                src={url}
+                alt={t('admin.modelGalleryPreviewAlt', { defaultValue: 'Model gallery image' })}
+                className="h-24 w-32 rounded-lg border border-white/10 object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => handleExistingGalleryRemove(url)}
+                className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white transition hover:bg-black/80"
+              >
+                {t('admin.removeImage', { defaultValue: 'Remove' })}
+              </button>
+            </div>
+          ))}
+          {galleryDrafts.map((draft, index) => (
+            <div key={draft.preview} className="relative">
+              <img
+                src={draft.preview}
+                alt={t('admin.modelGalleryPreviewAlt', { defaultValue: 'Model gallery image preview' })}
+                className="h-24 w-32 rounded-lg border border-dashed border-white/20 object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => handleGalleryDraftRemove(index)}
+                className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white transition hover:bg-black/80"
+              >
+                {t('admin.removeImage', { defaultValue: 'Remove' })}
+              </button>
+            </div>
+          ))}
+          {existingGallery.length === 0 && galleryDrafts.length === 0 && (
+            <p className="text-sm text-gray-400">
+              {t('admin.modelGalleryEmpty', { defaultValue: 'No gallery images added yet.' })}
+            </p>
+          )}
+        </div>
+        <label
+          className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
+            galleryUploadDisabled
+              ? 'cursor-not-allowed border border-white/10 bg-white/5 text-gray-400'
+              : 'bg-gray-cyan text-gray-900 hover:opacity-90'
+          }`}
+        >
+          <span>
+            {galleryUploadDisabled
+              ? t('admin.modelGalleryLimitReached', { defaultValue: 'Gallery limit reached' })
+              : t('admin.uploadImage', { defaultValue: 'Upload image' })}
+          </span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleGalleryFileChange}
+            disabled={galleryUploadDisabled}
+          />
+        </label>
+        <p className="text-xs text-gray-400">
+          {t('admin.modelGalleryHint', {
+            defaultValue: 'JPEG or PNG recommended. Maximum of 3 gallery images.',
+          })}
+        </p>
+      </div>
 
       <div className="flex items-center space-x-3">
         <input
