@@ -28,11 +28,11 @@ const DealerDetailPage: React.FC = () => {
                 <SEO
                     title="Dealeri nuk u gjet | Makina Elektrike"
                     description="Dealeri i kërkuar nuk ekziston më ose është zhvendosur."
-                    canonical={`${BASE_URL}/dealers/${id ?? ''}`}
+                    canonical={id ? `${BASE_URL}/dealers/${id}/` : `${BASE_URL}/dealers/`}
                     openGraph={{
                         title: 'Dealeri nuk u gjet | Makina Elektrike',
                         description: 'Dealeri i kërkuar nuk ekziston më ose është zhvendosur.',
-                        url: `${BASE_URL}/dealers/${id ?? ''}`,
+                        url: id ? `${BASE_URL}/dealers/${id}/` : `${BASE_URL}/dealers/`,
                         type: 'business.business',
                     }}
                     twitter={{
@@ -50,7 +50,7 @@ const DealerDetailPage: React.FC = () => {
     const galleryImages = (dealer.imageGallery ?? []).filter(Boolean);
     const heroImage = dealer.image_url || galleryImages[0] || DEALERSHIP_PLACEHOLDER_IMAGE;
     const isApproved = dealer.approved ?? true;
-    const canonical = `${BASE_URL}/dealers/${dealer.id}`;
+    const canonical = `${BASE_URL}/dealers/${dealer.id}/`;
     const description = t('dealerDetails.metaDescription', {
         name: dealer.name,
         city: dealer.city,

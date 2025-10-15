@@ -219,7 +219,7 @@ const DealerDashboardPage: React.FC = () => {
     description: metaDescription,
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'All',
-    url: `${BASE_URL}/dealer/dashboard`,
+    url: `${BASE_URL}/dealer/dashboard/`,
   };
 
   const handleProfileChange = (
@@ -570,12 +570,12 @@ const DealerDashboardPage: React.FC = () => {
           'makina elektrike',
           'Makina Elektrike dashboard',
         ]}
-        canonical={`${BASE_URL}/dealer/dashboard`}
+        canonical={`${BASE_URL}/dealer/dashboard/`}
         robots="noindex, nofollow"
         openGraph={{
           title: metaTitle,
           description: metaDescription,
-          url: `${BASE_URL}/dealer/dashboard`,
+          url: `${BASE_URL}/dealer/dashboard/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}
