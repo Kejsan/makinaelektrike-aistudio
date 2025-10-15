@@ -25,7 +25,12 @@ import OfflineQueuePanel from '../components/admin/OfflineQueuePanel';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 import { listOfflineMutations, OFFLINE_QUEUE_EVENT } from '../services/offlineQueue';
-import { uploadDealerImage, uploadModelImage } from '../services/storage';
+import {
+  uploadDealerGalleryImage,
+  uploadDealerHeroImage,
+  uploadModelGalleryImage,
+  uploadModelHeroImage,
+} from '../services/storage';
 
 interface ModalProps {
   title: string;
@@ -217,29 +222,52 @@ const AdminPage: React.FC = () => {
 
   const handleDealerSubmit = async (values: DealerFormValues) => {
     setDealerSubmitting(true);
+    const mergeGallery = (existing: string[], additions: string[]) =>
+      Array.from(new Set([...existing, ...additions].filter(Boolean))).slice(0, 3);
+
     try {
-      const { imageFile, ...restValues } = values;
+      const { imageFile, galleryFiles = [], imageGallery = [], ...restValues } = values;
+      const baseGallery = Array.isArray(imageGallery)
+        ? imageGallery.filter(Boolean).slice(0, 3)
+        : [];
+      const normalizedRest = { ...restValues, imageGallery: baseGallery };
 
       if (dealerFormState?.mode === 'edit' && dealerFormState.entity) {
-        const { id, ...rest } = restValues;
+        const { id, ...rest } = normalizedRest;
         const dealerId = dealerFormState.entity.id;
         await updateDealer(dealerId, rest);
 
         if (imageFile) {
-          const imageUrl = await uploadDealerImage(dealerId, imageFile);
-          const existingGallery = dealerFormState.entity.imageGallery ?? [];
-          const imageGallery = Array.from(new Set([...existingGallery, imageUrl]));
-          await updateDealer(dealerId, { image_url: imageUrl, imageGallery });
+          const heroUrl = await uploadDealerHeroImage(dealerId, imageFile);
+          await updateDealer(dealerId, { image_url: heroUrl });
+        }
+
+        if (galleryFiles.length > 0) {
+          const uploadedGallery = await Promise.all(
+            galleryFiles.map(file => uploadDealerGalleryImage(dealerId, file)),
+          );
+          const nextGallery = mergeGallery(baseGallery, uploadedGallery);
+          await updateDealer(dealerId, { imageGallery: nextGallery });
         }
       } else {
-        const { id: _omit, ...rest } = restValues;
+        const { id: _omit, ...rest } = normalizedRest;
         const createdDealer = await addDealer(rest);
 
-        if (imageFile && createdDealer?.id) {
-          const imageUrl = await uploadDealerImage(createdDealer.id, imageFile);
-          const gallery = createdDealer.imageGallery ?? [];
-          const imageGallery = Array.from(new Set([...gallery, imageUrl]));
-          await updateDealer(createdDealer.id, { image_url: imageUrl, imageGallery });
+        if (createdDealer?.id) {
+          let nextGallery = baseGallery;
+
+          if (imageFile) {
+            const heroUrl = await uploadDealerHeroImage(createdDealer.id, imageFile);
+            await updateDealer(createdDealer.id, { image_url: heroUrl });
+          }
+
+          if (galleryFiles.length > 0) {
+            const uploadedGallery = await Promise.all(
+              galleryFiles.map(file => uploadDealerGalleryImage(createdDealer.id, file)),
+            );
+            nextGallery = mergeGallery(nextGallery, uploadedGallery);
+            await updateDealer(createdDealer.id, { imageGallery: nextGallery });
+          }
         }
       }
       closeAllModals();
@@ -252,25 +280,52 @@ const AdminPage: React.FC = () => {
 
   const handleModelSubmit = async (values: ModelFormValues) => {
     setModelSubmitting(true);
+    const mergeGallery = (existing: string[], additions: string[]) =>
+      Array.from(new Set([...existing, ...additions].filter(Boolean))).slice(0, 3);
+
     try {
-      const { imageFile, ...restValues } = values;
+      const { imageFile, galleryFiles = [], imageGallery = [], ...restValues } = values;
+      const baseGallery = Array.isArray(imageGallery)
+        ? imageGallery.filter(Boolean).slice(0, 3)
+        : [];
+      const normalizedRest = { ...restValues, imageGallery: baseGallery };
 
       if (modelFormState?.mode === 'edit' && modelFormState.entity) {
-        const { id, ...rest } = restValues;
+        const { id, ...rest } = normalizedRest;
         const modelId = modelFormState.entity.id;
         await updateModel(modelId, rest);
 
         if (imageFile) {
-          const imageUrl = await uploadModelImage(modelId, imageFile);
-          await updateModel(modelId, { image_url: imageUrl });
+          const heroUrl = await uploadModelHeroImage(modelId, imageFile);
+          await updateModel(modelId, { image_url: heroUrl });
+        }
+
+        if (galleryFiles.length > 0) {
+          const uploadedGallery = await Promise.all(
+            galleryFiles.map(file => uploadModelGalleryImage(modelId, file)),
+          );
+          const nextGallery = mergeGallery(baseGallery, uploadedGallery);
+          await updateModel(modelId, { imageGallery: nextGallery });
         }
       } else {
-        const { id: _omit, ...rest } = restValues;
+        const { id: _omit, ...rest } = normalizedRest;
         const createdModel = await addModel(rest);
 
-        if (imageFile && createdModel?.id) {
-          const imageUrl = await uploadModelImage(createdModel.id, imageFile);
-          await updateModel(createdModel.id, { image_url: imageUrl });
+        if (createdModel?.id) {
+          let nextGallery = baseGallery;
+
+          if (imageFile) {
+            const heroUrl = await uploadModelHeroImage(createdModel.id, imageFile);
+            await updateModel(createdModel.id, { image_url: heroUrl });
+          }
+
+          if (galleryFiles.length > 0) {
+            const uploadedGallery = await Promise.all(
+              galleryFiles.map(file => uploadModelGalleryImage(createdModel.id, file)),
+            );
+            nextGallery = mergeGallery(nextGallery, uploadedGallery);
+            await updateModel(createdModel.id, { imageGallery: nextGallery });
+          }
         }
       }
       closeAllModals();

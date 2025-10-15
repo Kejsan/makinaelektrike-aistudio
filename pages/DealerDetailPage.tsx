@@ -10,6 +10,7 @@ import { DataContext } from '../contexts/DataContext';
 import SEO from '../components/SEO';
 import { BASE_URL } from '../constants/seo';
 import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../constants/media';
+import GallerySection from '../components/GallerySection';
 
 const DealerDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -46,7 +47,8 @@ const DealerDetailPage: React.FC = () => {
     }
 
     const favorited = isFavorite(dealer.id);
-    const heroImage = dealer.image_url || DEALERSHIP_PLACEHOLDER_IMAGE;
+    const galleryImages = (dealer.imageGallery ?? []).filter(Boolean);
+    const heroImage = dealer.image_url || galleryImages[0] || DEALERSHIP_PLACEHOLDER_IMAGE;
     const isApproved = dealer.approved ?? true;
     const canonical = `${BASE_URL}/dealers/${dealer.id}/`;
     const description = t('dealerDetails.metaDescription', {
@@ -213,7 +215,7 @@ const DealerDetailPage: React.FC = () => {
                     </p>
                 </div>
 
-                 <div className="mt-16">
+                <div className="mt-16">
                     <h2 className="text-3xl font-bold text-center mb-8 text-white">{t('dealerDetails.modelsAvailable')}</h2>
                     {dealerModels.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -223,6 +225,14 @@ const DealerDetailPage: React.FC = () => {
                          <p className="text-center text-gray-400">No specific models listed for this dealer.</p>
                     )}
                 </div>
+
+                <GallerySection
+                    title={t('dealerDetails.galleryTitle', { defaultValue: 'Showroom gallery' })}
+                    description={t('dealerDetails.gallerySubtitle', {
+                        defaultValue: 'Take a closer look at the dealership environment and recent deliveries.',
+                    })}
+                    images={galleryImages}
+                />
 
                 <section className="mt-16 max-w-4xl mx-auto">
                     <h2 className="text-3xl font-bold text-white text-center">{t('dealerDetails.faqTitle')}</h2>

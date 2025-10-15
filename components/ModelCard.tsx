@@ -10,7 +10,7 @@ const ModelCard: React.FC<{ model: Model }> = ({ model }) => {
     const { t } = useTranslation();
     const { isFavorite, toggleFavorite } = useFavorites();
     const favorited = isFavorite(model.id);
-    const imageUrl = model.image_url || MODEL_PLACEHOLDER_IMAGE;
+    const imageUrl = model.image_url || model.imageGallery?.[0] || MODEL_PLACEHOLDER_IMAGE;
     const battery = model.battery_capacity ? `${model.battery_capacity} kWh` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
     const range = model.range_wltp ? `${model.range_wltp} km` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
 

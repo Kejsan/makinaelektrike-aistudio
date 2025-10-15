@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './i18n/config';
-import { SITE_LOGO } from './constants/media';
+import { SITE_ICON } from './constants/media';
 
 const ensureFavicon = () => {
   if (typeof document === 'undefined') {
@@ -12,14 +12,14 @@ const ensureFavicon = () => {
   const faviconLink = document.querySelector<HTMLLinkElement>("link[rel='icon']");
   if (faviconLink) {
     faviconLink.type = 'image/png';
-    faviconLink.href = SITE_LOGO;
+    faviconLink.href = SITE_ICON;
     return;
   }
 
   const newFavicon = document.createElement('link');
   newFavicon.rel = 'icon';
   newFavicon.type = 'image/png';
-  newFavicon.href = SITE_LOGO;
+  newFavicon.href = SITE_ICON;
   document.head.appendChild(newFavicon);
 };
 

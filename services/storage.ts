@@ -23,14 +23,37 @@ const uploadFile = async (objectPath: string, file: File): Promise<string> => {
   return getDownloadURL(storageRef);
 };
 
-export const uploadDealerImage = async (dealerId: string, file: File): Promise<string> => {
-  const fileName = buildFileName(file, 'dealer-image');
-  const objectPath = `dealers/${dealerId}/${fileName}`;
+const buildObjectPath = (segments: string[]) => segments.filter(Boolean).join('/');
+
+const uploadDealerMedia = async (
+  dealerId: string,
+  file: File,
+  variant: 'hero' | 'gallery',
+): Promise<string> => {
+  const folder = variant === 'hero' ? 'hero' : 'gallery';
+  const fileName = buildFileName(file, `dealer-${folder}`);
+  const objectPath = buildObjectPath(['dealers', dealerId, folder, fileName]);
   return uploadFile(objectPath, file);
 };
 
-export const uploadModelImage = async (modelId: string, file: File): Promise<string> => {
-  const fileName = buildFileName(file, 'model-image');
-  const objectPath = `models/${modelId}/${fileName}`;
+const uploadModelMedia = async (
+  modelId: string,
+  file: File,
+  variant: 'hero' | 'gallery',
+): Promise<string> => {
+  const folder = variant === 'hero' ? 'hero' : 'gallery';
+  const fileName = buildFileName(file, `model-${folder}`);
+  const objectPath = buildObjectPath(['models', modelId, folder, fileName]);
   return uploadFile(objectPath, file);
 };
+
+export const uploadDealerHeroImage = (dealerId: string, file: File) =>
+  uploadDealerMedia(dealerId, file, 'hero');
+
+export const uploadDealerGalleryImage = (dealerId: string, file: File) =>
+  uploadDealerMedia(dealerId, file, 'gallery');
+
+export const uploadModelHeroImage = (modelId: string, file: File) => uploadModelMedia(modelId, file, 'hero');
+
+export const uploadModelGalleryImage = (modelId: string, file: File) =>
+  uploadModelMedia(modelId, file, 'gallery');

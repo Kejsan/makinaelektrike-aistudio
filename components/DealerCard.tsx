@@ -31,7 +31,7 @@ const DealerCard: React.FC<DealerCardProps> = ({ dealer, isLoading = false }) =>
   }
 
   const favorited = isFavorite(dealer.id);
-  const imageUrl = dealer.image_url || DEALERSHIP_PLACEHOLDER_IMAGE;
+  const imageUrl = dealer.image_url || dealer.imageGallery?.[0] || DEALERSHIP_PLACEHOLDER_IMAGE;
   const city = dealer.city || t('common.unknownCity', { defaultValue: 'Unknown location' });
   const approved = dealer.approved ?? true;
 
