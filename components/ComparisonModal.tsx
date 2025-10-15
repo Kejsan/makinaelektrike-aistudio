@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Model } from '../types';
 import { X, Search, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { MODEL_PLACEHOLDER_IMAGE } from '../constants/media';
 
 interface ComparisonModalProps {
     isOpen: boolean;
@@ -106,7 +107,11 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, allM
                                             readOnly
                                             className="w-5 h-5 rounded text-gray-cyan bg-gray-700 border-gray-600 focus:ring-gray-cyan"
                                         />
-                                        <img src={model.image_url} alt={model.model_name} className="w-16 h-10 object-cover rounded-md mx-3" />
+                                        <img
+                                            src={model.image_url || MODEL_PLACEHOLDER_IMAGE}
+                                            alt={model.model_name}
+                                            className="w-16 h-10 object-cover rounded-md mx-3"
+                                        />
                                         <div className="flex-1">
                                             <p className="font-semibold text-white text-sm">{model.brand}</p>
                                             <p className="text-gray-300 text-xs">{model.model_name}</p>
@@ -136,7 +141,11 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, allM
                                             </th>
                                             {selectedModels.map(model => (
                                                 <th key={model.id} className="p-3 text-center border-l border-white/10">
-                                                    <img src={model.image_url} alt={model.model_name} className="w-full h-24 object-cover rounded-lg mb-2" />
+                                                    <img
+                                                        src={model.image_url || MODEL_PLACEHOLDER_IMAGE}
+                                                        alt={model.model_name}
+                                                        className="w-full h-24 object-cover rounded-lg mb-2"
+                                                    />
                                                     <p className="font-bold text-white text-base">{model.brand} {model.model_name}</p>
                                                      <button onClick={() => handleSelectModel(model.id)} className="text-xs text-vivid-red hover:underline mt-1">{t('compare.remove')}</button>
                                                 </th>
