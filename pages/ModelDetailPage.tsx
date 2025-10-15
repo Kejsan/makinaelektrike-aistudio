@@ -43,11 +43,11 @@ const ModelDetailPage: React.FC = () => {
                 <SEO
                     title="Modeli nuk u gjet | Makina Elektrike"
                     description="Modeli i kërkuar nuk ekziston më ose është zhvendosur."
-                    canonical={`${BASE_URL}/models/${id ?? ''}`}
+                    canonical={id ? `${BASE_URL}/models/${id}/` : `${BASE_URL}/models/`}
                     openGraph={{
                         title: 'Modeli nuk u gjet | Makina Elektrike',
                         description: 'Modeli i kërkuar nuk ekziston më ose është zhvendosur.',
-                        url: `${BASE_URL}/models/${id ?? ''}`,
+                        url: id ? `${BASE_URL}/models/${id}/` : `${BASE_URL}/models/`,
                         type: 'product',
                     }}
                     twitter={{
@@ -64,7 +64,7 @@ const ModelDetailPage: React.FC = () => {
     const imageScale = 1 + scrollY / 8000;
     const heroImage = model.image_url || MODEL_PLACEHOLDER_IMAGE;
     const favorited = isFavorite(model.id);
-    const canonical = `${BASE_URL}/models/${model.id}`;
+    const canonical = `${BASE_URL}/models/${model.id}/`;
     const description = t('modelDetails.metaDescription', {
         brand: model.brand,
         model: model.model_name,
@@ -103,7 +103,7 @@ const ModelDetailPage: React.FC = () => {
             offers: dealers.length
                 ? dealers.map(dealer => ({
                       '@type': 'Offer',
-                      url: `${BASE_URL}/dealers/${dealer.id}`,
+                      url: `${BASE_URL}/dealers/${dealer.id}/`,
                       seller: {
                           '@type': 'AutoDealer',
                           name: dealer.name,

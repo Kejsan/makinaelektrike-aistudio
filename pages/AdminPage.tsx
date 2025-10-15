@@ -182,7 +182,7 @@ const AdminPage: React.FC = () => {
     description: t('admin.dashboardMetaDescription'),
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'All',
-    url: `${BASE_URL}/admin`,
+    url: `${BASE_URL}/admin/`,
   };
 
   const handleApproveDealer = async (dealerId: string) => {
@@ -721,12 +721,12 @@ const AdminPage: React.FC = () => {
         title={t('admin.dashboardMetaTitle')}
         description={t('admin.dashboardMetaDescription')}
         keywords={t('admin.dashboardMetaKeywords', { returnObjects: true }) as string[]}
-        canonical={`${BASE_URL}/admin`}
+        canonical={`${BASE_URL}/admin/`}
         robots="noindex, nofollow"
         openGraph={{
           title: t('admin.dashboardMetaTitle'),
           description: t('admin.dashboardMetaDescription'),
-          url: `${BASE_URL}/admin`,
+          url: `${BASE_URL}/admin/`,
           type: 'website',
           images: [DEFAULT_OG_IMAGE],
         }}
