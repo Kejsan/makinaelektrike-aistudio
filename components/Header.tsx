@@ -107,13 +107,13 @@ const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-navy-blue/50 backdrop-blur-md border-b border-gray-cyan/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative flex items-center justify-between h-16">
+        <div className="relative flex items-center justify-between gap-4 py-3 lg:py-4">
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center text-white">
+            <Link to="/" className="flex-shrink-0 flex items-center text-white" aria-label={t('header.home')}>
               <img
                 src={SITE_LOGO}
                 alt={SITE_LOGO_ALT}
-                className="h-10 w-auto rounded"
+                className="h-14 w-auto rounded sm:h-16 lg:h-20"
               />
             </Link>
           </div>

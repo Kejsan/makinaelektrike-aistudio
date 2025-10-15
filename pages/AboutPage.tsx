@@ -68,7 +68,7 @@ const AboutPage: React.FC = () => {
                 <img
                   src={SITE_LOGO}
                   alt={SITE_LOGO_ALT}
-                  className="mx-auto h-16 w-auto rounded"
+                  className="mx-auto h-24 w-auto rounded md:h-28"
                 />
                 <h1 className="text-4xl font-extrabold text-white sm:text-5xl mt-4">
                   {t('aboutPage.title')}
