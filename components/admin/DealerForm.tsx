@@ -428,17 +428,17 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
         {renderInput(t('admin.name'), 'name')}
         {renderInput(t('admin.city'), 'city')}
         {renderInput(t('dealerDetails.address', { defaultValue: 'Address' }), 'address')}
-        {renderInput('Type of Cars', 'typeOfCars')}
-        {renderInput('Price Range', 'priceRange')}
+        {renderInput(t('admin.fields.typeOfCars'), 'typeOfCars')}
+        {renderInput(t('admin.fields.priceRange'), 'priceRange')}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {renderInput('Latitude', 'lat')}
-        {renderInput('Longitude', 'lng')}
+        {renderInput(t('admin.fields.latitude'), 'lat')}
+        {renderInput(t('admin.fields.longitude'), 'lng')}
         {renderInput(t('dealerDetails.phone', { defaultValue: 'Phone' }), 'phone')}
         {renderInput(t('dealerDetails.email', { defaultValue: 'Email' }), 'email')}
         {renderInput(t('dealerDetails.website', { defaultValue: 'Website' }), 'website')}
-      {renderInput('Image URL', 'image_url')}
+      {renderInput(t('admin.fields.imageUrl'), 'image_url')}
 
       <div className="space-y-3">
         <span className="block text-sm font-medium text-gray-300">
@@ -537,16 +537,16 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {renderInput(t('admin.brands'), 'brands', 'text', 'BYD, Tesla')}
         {renderInput(t('dealerDetails.languagesSpoken', { defaultValue: 'Languages' }), 'languages', 'text', 'Albanian, English')}
-        {renderInput('Models Available', 'modelsAvailable', 'text', 'Model A, Model B')}
+        {renderInput(t('admin.fields.modelsAvailable'), 'modelsAvailable', 'text', 'Model A, Model B')}
       </div>
 
       {renderInput(t('dealerDetails.notes', { defaultValue: 'Notes' }), 'notes', 'text', undefined, { isTextArea: true, rows: 4 })}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {renderInput('Facebook URL', 'socialFacebook')}
-        {renderInput('Instagram URL', 'socialInstagram')}
-        {renderInput('Twitter URL', 'socialTwitter')}
-        {renderInput('YouTube URL', 'socialYoutube')}
+        {renderInput(t('admin.fields.facebookUrl'), 'socialFacebook')}
+        {renderInput(t('admin.fields.instagramUrl'), 'socialInstagram')}
+        {renderInput(t('admin.fields.twitterUrl'), 'socialTwitter')}
+        {renderInput(t('admin.fields.youtubeUrl'), 'socialYoutube')}
       </div>
 
       <div className="space-y-3">

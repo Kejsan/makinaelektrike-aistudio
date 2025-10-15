@@ -67,24 +67,32 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialValues, onSubmit, on
     }));
   };
 
+  const fieldLabels = {
+    title: t('admin.fields.title'),
+    excerpt: t('admin.fields.excerpt'),
+    author: t('admin.fields.author'),
+    date: t('admin.fields.publishDate'),
+    imageUrl: t('admin.fields.imageUrl'),
+  } as const;
+
   const validate = () => {
     const nextErrors: Record<string, string> = {};
     const requiredMessage = (label: string) => `${label} ${t('admin.required', { defaultValue: 'is required' })}`;
 
     if (!formState.title.trim()) {
-      nextErrors.title = requiredMessage('Title');
+      nextErrors.title = requiredMessage(fieldLabels.title);
     }
 
     if (!formState.excerpt.trim()) {
-      nextErrors.excerpt = requiredMessage('Excerpt');
+      nextErrors.excerpt = requiredMessage(fieldLabels.excerpt);
     }
 
     if (!formState.author.trim()) {
-      nextErrors.author = requiredMessage('Author');
+      nextErrors.author = requiredMessage(fieldLabels.author);
     }
 
     if (!formState.date.trim()) {
-      nextErrors.date = requiredMessage('Publish Date');
+      nextErrors.date = requiredMessage(fieldLabels.date);
     }
 
     if (!isValidUrl(formState.imageUrl)) {
@@ -185,11 +193,11 @@ const BlogPostForm: React.FC<BlogPostFormProps> = ({ initialValues, onSubmit, on
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {renderInput('Title', 'title')}
-      {renderInput('Excerpt', 'excerpt', 'text', undefined, { isTextArea: true, rows: 4 })}
-      {renderInput('Author', 'author')}
-      {renderInput('Publish Date', 'date', 'date')}
-      {renderInput('Image URL', 'imageUrl')}
+      {renderInput(fieldLabels.title, 'title')}
+      {renderInput(fieldLabels.excerpt, 'excerpt', 'text', undefined, { isTextArea: true, rows: 4 })}
+      {renderInput(fieldLabels.author, 'author')}
+      {renderInput(fieldLabels.date, 'date', 'date')}
+      {renderInput(fieldLabels.imageUrl, 'imageUrl')}
 
       <div className="flex justify-end space-x-3">
         <button

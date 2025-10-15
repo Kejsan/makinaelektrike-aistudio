@@ -407,27 +407,27 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         {renderInput(t('admin.brand'), 'brand')}
         {renderInput(t('admin.name'), 'model_name')}
         {renderInput(t('modelsPage.bodyType', { defaultValue: 'Body Type' }), 'body_type')}
-        {renderInput('Drive Type', 'drive_type')}
+        {renderInput(t('admin.fields.driveType'), 'drive_type')}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {renderInput('Battery (kWh)', 'battery_capacity')}
-        {renderInput('Range (WLTP)', 'range_wltp')}
-        {renderInput('Power (kW)', 'power_kw')}
-        {renderInput('Torque (Nm)', 'torque_nm')}
-        {renderInput('0-100 km/h (s)', 'acceleration_0_100')}
-        {renderInput('Top Speed (km/h)', 'top_speed')}
+        {renderInput(t('admin.fields.batteryCapacity'), 'battery_capacity')}
+        {renderInput(t('admin.fields.rangeWltp'), 'range_wltp')}
+        {renderInput(t('admin.fields.powerKw'), 'power_kw')}
+        {renderInput(t('admin.fields.torqueNm'), 'torque_nm')}
+        {renderInput(t('admin.fields.acceleration'), 'acceleration_0_100')}
+        {renderInput(t('admin.fields.topSpeed'), 'top_speed')}
         {renderInput(t('modelDetails.seats', { defaultValue: 'Seats' }), 'seats')}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {renderInput('AC Charging', 'charging_ac')}
-        {renderInput('DC Charging', 'charging_dc')}
+        {renderInput(t('admin.fields.chargingAc'), 'charging_ac')}
+        {renderInput(t('admin.fields.chargingDc'), 'charging_dc')}
       </div>
 
       {renderInput(t('modelDetails.notes', { defaultValue: 'Notes' }), 'notes', 'text', undefined, { isTextArea: true, rows: 4 })}
 
-      {renderInput('Image URL', 'image_url')}
+      {renderInput(t('admin.fields.imageUrl'), 'image_url')}
 
       <div className="space-y-3">
         <span className="block text-sm font-medium text-gray-300">

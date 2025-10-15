@@ -88,12 +88,10 @@ const ModelsListPage: React.FC = () => {
         setSortBy('model_asc');
     };
 
+    const rangeValues = [300, 400, 500, 600];
     const rangeOptions = [
-        { value: '', label: 'Any Range' },
-        { value: '300', label: '300+ km' },
-        { value: '400', label: '400+ km' },
-        { value: '500', label: '500+ km' },
-        { value: '600', label: '600+ km' },
+        { value: '', label: t('modelsPage.rangeOptions.any') },
+        ...rangeValues.map(value => ({ value: value.toString(), label: t('modelsPage.rangeOptions.min', { value }) })),
     ];
     
     const sortOptions = [
@@ -106,7 +104,7 @@ const ModelsListPage: React.FC = () => {
     ];
 
     if (loading) {
-        return <div className="text-center py-10 text-white">Loading models...</div>;
+        return <div className="py-10 text-center text-white">{t('modelsPage.loading')}</div>;
     }
 
     return (
@@ -143,7 +141,7 @@ const ModelsListPage: React.FC = () => {
                         <p className="mt-4 text-gray-300 leading-relaxed text-center max-w-4xl mx-auto">{t('modelsPage.introSubtitle')}</p>
                     </div>
 
-                    <div className="mb-12 rounded-xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
+                    <div className="relative z-30 mb-12 rounded-xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
                         <h2 className="mb-4 text-xl font-bold text-white">{t('modelsPage.filters')}</h2>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 xl:items-end">
                             <CustomSelect

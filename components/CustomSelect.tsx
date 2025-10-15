@@ -38,11 +38,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, p
   const selectedOption = options.find(option => option.value === value);
 
   return (
-    <div className="relative w-full" ref={selectRef}>
+    <div className="relative z-30 w-full" ref={selectRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative w-full bg-white/10 border border-gray-600 rounded-md shadow-sm pl-10 pr-10 py-2.5 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-gray-cyan focus:border-gray-cyan"
+        className="relative w-full rounded-md border border-gray-600 bg-white/10 py-2.5 pl-10 pr-10 text-left cursor-pointer focus:outline-none focus:ring-1 focus:ring-gray-cyan focus:border-gray-cyan"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -56,7 +56,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, p
       </button>
 
       {isOpen && (
-        <div className="absolute z-30 mt-1 w-full bg-gray-900/90 backdrop-blur-sm shadow-lg rounded-md border border-gray-700 max-h-60 overflow-auto focus:outline-none">
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-700 bg-gray-900/90 shadow-2xl backdrop-blur-sm focus:outline-none">
           <ul className="py-1" role="listbox">
             {options.map(option => (
               <li

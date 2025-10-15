@@ -248,7 +248,7 @@ const convertValue = (rawValue: unknown, field: FieldDefinition) => {
     }
     const num = parseFloat(text);
     if (Number.isNaN(num)) {
-      throw new Error('Expected a numeric value');
+      throw new Error(t('admin.bulkImport.errorExpectedNumber', { defaultValue: 'Expected a numeric value' }));
     }
     return num;
   }
@@ -261,7 +261,7 @@ const convertValue = (rawValue: unknown, field: FieldDefinition) => {
     if (['false', '0', 'no', 'n'].includes(text)) {
       return false;
     }
-    throw new Error('Expected a boolean (true/false, yes/no, 1/0)');
+    throw new Error(t('admin.bulkImport.errorExpectedBoolean', { defaultValue: 'Expected a boolean (true/false, yes/no, 1/0)' }));
   }
 
   if (field.type === 'string[]') {
@@ -284,7 +284,12 @@ const convertValue = (rawValue: unknown, field: FieldDefinition) => {
     try {
       return JSON.parse(text);
     } catch (error) {
-      throw new Error('Invalid JSON: ' + (error as Error).message);
+      throw new Error(
+        t('admin.bulkImport.errorInvalidJson', {
+          defaultValue: 'Invalid JSON: {{message}}',
+          message: (error as Error).message,
+        }),
+      );
     }
   }
 
@@ -649,15 +654,15 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
       } else if (extension === 'xlsx' || extension === 'xls') {
         parsed = await parseSpreadsheetFile(file);
       } else {
-        throw new Error('Unsupported file type. Please upload a CSV or Excel file.');
+        throw new Error(t('admin.bulkImport.errorUnsupportedType', { defaultValue: 'Unsupported file type. Please upload a CSV or Excel file.' }));
       }
 
       if (!parsed.headers.length) {
-        throw new Error('No headers were detected in the file. Please include a header row.');
+        throw new Error(t('admin.bulkImport.errorNoHeaders', { defaultValue: 'No headers were detected in the file. Please include a header row.' }));
       }
 
       if (!parsed.rows.length) {
-        throw new Error('No data rows were found after parsing the file.');
+        throw new Error(t('admin.bulkImport.errorNoRows', { defaultValue: 'No data rows were found after parsing the file.' }));
       }
 
       setHeaders(parsed.headers);

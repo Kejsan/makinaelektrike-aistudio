@@ -91,7 +91,7 @@ const DealersListPage: React.FC = () => {
     );
 
     if (loading) {
-        return <div className="text-center py-10 text-white">Loading dealers...</div>;
+        return <div className="py-10 text-center text-white">{t('dealersPage.loading')}</div>;
     }
 
     return (
@@ -127,7 +127,7 @@ const DealersListPage: React.FC = () => {
                     <p className="mt-4 text-gray-300 leading-relaxed text-center max-w-4xl mx-auto">{t('dealersPage.introSubtitle')}</p>
                 </div>
 
-                <div className="relative z-20 mb-12 rounded-xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
+                <div className="relative z-30 mb-12 rounded-xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-xl">
                     <h2 className="mb-4 text-xl font-bold text-white">{t('dealersPage.filters')}</h2>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:items-end">
                         <CustomSelect
