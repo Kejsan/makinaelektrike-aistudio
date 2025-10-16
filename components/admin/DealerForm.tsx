@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Autocomplete } from '@react-google-maps/api';
 import { useTranslation } from 'react-i18next';
 import { Dealer } from '../../types';
 import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../../constants/media';
+import { useGoogleMapsApi } from '../../hooks/useGoogleMapsApi';
 
 export interface DealerFormValues extends Omit<Dealer, 'id'> {
   id?: string;
@@ -84,6 +86,7 @@ const isValidEmail = (value: string) => {
 
 const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting }) => {
   const { t } = useTranslation();
+  const { isLoaded: isMapsApiLoaded } = useGoogleMapsApi();
   const [formState, setFormState] = useState<DealerFormState>(defaultState);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -92,6 +95,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [galleryDrafts, setGalleryDrafts] = useState<GalleryDraft[]>([]);
   const galleryDraftsRef = useRef<GalleryDraft[]>([]);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   const galleryLimit = 3;
 
@@ -169,6 +173,62 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
     },
     [],
   );
+
+  const clearFieldError = (field: keyof DealerFormState) => {
+    setErrors(prev => {
+      if (!prev[field]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const handleAddressInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    setFormState(prev => ({
+      ...prev,
+      address: value,
+      ...(value.trim() ? {} : { lat: '', lng: '' }),
+    }));
+    clearFieldError('address');
+  };
+
+  const handlePlaceChanged = () => {
+    const autocomplete = autocompleteRef.current;
+    if (!autocomplete) {
+      return;
+    }
+
+    const place = autocomplete.getPlace();
+    if (!place) {
+      return;
+    }
+
+    const pickAddressComponent = (types: string[]) =>
+      place.address_components?.find(component => component.types.some(type => types.includes(type)))?.long_name;
+
+    const formattedAddress = place.formatted_address ?? place.name ?? '';
+    const location = place.geometry?.location;
+    const lat = location?.lat();
+    const lng = location?.lng();
+    const derivedCity =
+      pickAddressComponent(['locality']) ??
+      pickAddressComponent(['postal_town']) ??
+      pickAddressComponent(['administrative_area_level_2']) ??
+      pickAddressComponent(['administrative_area_level_1']);
+
+    setFormState(prev => ({
+      ...prev,
+      address: formattedAddress || prev.address,
+      city: derivedCity ?? prev.city,
+      lat: lat !== undefined ? lat.toString() : prev.lat,
+      lng: lng !== undefined ? lng.toString() : prev.lng,
+    }));
+
+    clearFieldError('address');
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = event.target;
@@ -253,14 +313,6 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       nextErrors.city = `${t('admin.city')} ${t('admin.required', { defaultValue: 'is required' })}`;
     }
 
-    if (formState.lat.trim() && Number.isNaN(Number(formState.lat))) {
-      nextErrors.lat = t('admin.invalidNumber', { defaultValue: 'Please enter a valid number' });
-    }
-
-    if (formState.lng.trim() && Number.isNaN(Number(formState.lng))) {
-      nextErrors.lng = t('admin.invalidNumber', { defaultValue: 'Please enter a valid number' });
-    }
-
     if (!isValidUrl(formState.website)) {
       nextErrors.website = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
     }
@@ -307,12 +359,14 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
 
     const latValue = formState.lat.trim();
     const lngValue = formState.lng.trim();
+    const latNumber = Number(latValue);
+    const lngNumber = Number(lngValue);
     const payload: DealerFormValues = {
       name: formState.name.trim(),
       address: formState.address.trim(),
       city: formState.city.trim(),
-      lat: latValue ? Number(latValue) : 0,
-      lng: lngValue ? Number(lngValue) : 0,
+      lat: Number.isFinite(latNumber) ? latNumber : 0,
+      lng: Number.isFinite(lngNumber) ? lngNumber : 0,
       brands: parseList(formState.brands),
       languages: parseList(formState.languages),
       typeOfCars: formState.typeOfCars.trim() || 'Unknown',
@@ -427,18 +481,62 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {renderInput(t('admin.name'), 'name')}
         {renderInput(t('admin.city'), 'city')}
-        {renderInput(t('dealerDetails.address', { defaultValue: 'Address' }), 'address')}
+        <div className="md:col-span-2">
+          <label className="block text-sm text-gray-300">
+            <span className="mb-1 inline-block font-medium">
+              {t('dealerDetails.address', { defaultValue: 'Address' })}
+            </span>
+            {isMapsApiLoaded ? (
+              <Autocomplete
+                onLoad={instance => {
+                  autocompleteRef.current = instance;
+                }}
+                onUnmount={() => {
+                  autocompleteRef.current = null;
+                }}
+                onPlaceChanged={handlePlaceChanged}
+                fields={['geometry.location', 'formatted_address', 'address_components', 'name']}
+                className="block"
+              >
+                <input
+                  type="text"
+                  value={formState.address}
+                  onChange={handleAddressInputChange}
+                  placeholder={t('admin.searchAddressPlaceholder', { defaultValue: 'Search for an address' })}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                />
+              </Autocomplete>
+            ) : (
+              <input
+                type="text"
+                value={formState.address}
+                onChange={handleAddressInputChange}
+                placeholder={t('admin.searchAddressPlaceholder', { defaultValue: 'Search for an address' })}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+              />
+            )}
+            {errors.address && <span className="mt-1 block text-xs text-red-400">{errors.address}</span>}
+            {formState.lat && formState.lng && (
+              <span className="mt-2 block text-xs text-gray-400">
+                {t('admin.locationCoordinates', {
+                  defaultValue: 'Coordinates: {{lat}}, {{lng}}',
+                  lat: formState.lat,
+                  lng: formState.lng,
+                })}
+              </span>
+            )}
+          </label>
+        </div>
         {renderInput(t('admin.fields.typeOfCars'), 'typeOfCars')}
         {renderInput(t('admin.fields.priceRange'), 'priceRange')}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {renderInput(t('admin.fields.latitude'), 'lat')}
-        {renderInput(t('admin.fields.longitude'), 'lng')}
         {renderInput(t('dealerDetails.phone', { defaultValue: 'Phone' }), 'phone')}
         {renderInput(t('dealerDetails.email', { defaultValue: 'Email' }), 'email')}
         {renderInput(t('dealerDetails.website', { defaultValue: 'Website' }), 'website')}
-      {renderInput(t('admin.fields.imageUrl'), 'image_url')}
+        {renderInput(t('admin.fields.imageUrl'), 'image_url')}
+      </div>
 
       <div className="space-y-3">
         <span className="block text-sm font-medium text-gray-300">
