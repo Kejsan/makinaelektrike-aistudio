@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Autocomplete } from '@react-google-maps/api';
 import { useTranslation } from 'react-i18next';
 import { Dealer } from '../../types';
 import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../../constants/media';
+import { useGoogleMapsApi } from '../../hooks/useGoogleMapsApi';
 
 export interface DealerFormValues extends Omit<Dealer, 'id'> {
   id?: string;
@@ -84,6 +86,7 @@ const isValidEmail = (value: string) => {
 
 const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting }) => {
   const { t } = useTranslation();
+  const { isLoaded: isMapsApiLoaded } = useGoogleMapsApi();
   const [formState, setFormState] = useState<DealerFormState>(defaultState);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -92,6 +95,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [galleryDrafts, setGalleryDrafts] = useState<GalleryDraft[]>([]);
   const galleryDraftsRef = useRef<GalleryDraft[]>([]);
+  const autocompleteRef = useRef<any>(null);
 
   const galleryLimit = 3;
 
@@ -169,6 +173,62 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
     },
     [],
   );
+
+  const clearFieldError = (field: keyof DealerFormState) => {
+    setErrors(prev => {
+      if (!prev[field]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const handleAddressInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+    setFormState(prev => ({
+      ...prev,
+      address: value,
+      ...(value.trim() ? {} : { lat: '', lng: '' }),
+    }));
+    clearFieldError('address');
+  };
+
+  const handlePlaceChanged = () => {
+    const autocomplete = autocompleteRef.current;
+    if (!autocomplete) {
+      return;
+    }
+
+    const place = autocomplete.getPlace();
+    if (!place) {
+      return;
+    }
+
+    const pickAddressComponent = (types: string[]) =>
+      place.address_components?.find(component => component.types.some(type => types.includes(type)))?.long_name;
+
+    const formattedAddress = place.formatted_address ?? place.name ?? '';
+    const location = place.geometry?.location;
+    const lat = location?.lat();
+    const lng = location?.lng();
+    const derivedCity =
+      pickAddressComponent(['locality']) ??
+      pickAddressComponent(['postal_town']) ??
+      pickAddressComponent(['administrative_area_level_2']) ??
+      pickAddressComponent(['administrative_area_level_1']);
+
+    setFormState(prev => ({
+      ...prev,
+      address: formattedAddress || prev.address,
+      city: derivedCity ?? prev.city,
+      lat: lat !== undefined ? lat.toString() : prev.lat,
+      lng: lng !== undefined ? lng.toString() : prev.lng,
+    }));
+
+    clearFieldError('address');
+  };
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = event.target;
@@ -253,14 +313,6 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       nextErrors.city = `${t('admin.city')} ${t('admin.required', { defaultValue: 'is required' })}`;
     }
 
-    if (formState.lat.trim() && Number.isNaN(Number(formState.lat))) {
-      nextErrors.lat = t('admin.invalidNumber', { defaultValue: 'Please enter a valid number' });
-    }
-
-    if (formState.lng.trim() && Number.isNaN(Number(formState.lng))) {
-      nextErrors.lng = t('admin.invalidNumber', { defaultValue: 'Please enter a valid number' });
-    }
-
     if (!isValidUrl(formState.website)) {
       nextErrors.website = t('admin.invalidUrl', { defaultValue: 'Enter a valid URL' });
     }
@@ -307,12 +359,14 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
 
     const latValue = formState.lat.trim();
     const lngValue = formState.lng.trim();
+    const latNumber = Number(latValue);
+    const lngNumber = Number(lngValue);
     const payload: DealerFormValues = {
       name: formState.name.trim(),
       address: formState.address.trim(),
       city: formState.city.trim(),
-      lat: latValue ? Number(latValue) : 0,
-      lng: lngValue ? Number(lngValue) : 0,
+      lat: Number.isFinite(latNumber) ? latNumber : 0,
+      lng: Number.isFinite(lngNumber) ? lngNumber : 0,
       brands: parseList(formState.brands),
       languages: parseList(formState.languages),
       typeOfCars: formState.typeOfCars.trim() || 'Unknown',
@@ -427,111 +481,61 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {renderInput(t('admin.name'), 'name')}
         {renderInput(t('admin.city'), 'city')}
-        {renderInput(t('dealerDetails.address', { defaultValue: 'Address' }), 'address')}
+        <div className="md:col-span-2">
+          <label className="block text-sm text-gray-300">
+            <span className="mb-1 inline-block font-medium">
+              {t('dealerDetails.address', { defaultValue: 'Address' })}
+            </span>
+            {isMapsApiLoaded ? (
+              <Autocomplete
+                onLoad={instance => {
+                  autocompleteRef.current = instance;
+                }}
+                onUnmount={() => {
+                  autocompleteRef.current = null;
+                }}
+                onPlaceChanged={handlePlaceChanged}
+                fields={['geometry.location', 'formatted_address', 'address_components', 'name']}
+                className="block"
+              >
+                <input
+                  type="text"
+                  value={formState.address}
+                  onChange={handleAddressInputChange}
+                  placeholder={t('admin.searchAddressPlaceholder', { defaultValue: 'Search for an address' })}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                />
+              </Autocomplete>
+            ) : (
+              <input
+                type="text"
+                value={formState.address}
+                onChange={handleAddressInputChange}
+                placeholder={t('admin.searchAddressPlaceholder', { defaultValue: 'Search for an address' })}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+              />
+            )}
+            {errors.address && <span className="mt-1 block text-xs text-red-400">{errors.address}</span>}
+            {formState.lat && formState.lng && (
+              <span className="mt-2 block text-xs text-gray-400">
+                {t('admin.locationCoordinates', {
+                  defaultValue: 'Coordinates: {{lat}}, {{lng}}',
+                  lat: formState.lat,
+                  lng: formState.lng,
+                })}
+              </span>
+            )}
+          </label>
+        </div>
         {renderInput(t('admin.fields.typeOfCars'), 'typeOfCars')}
         {renderInput(t('admin.fields.priceRange'), 'priceRange')}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {renderInput(t('admin.fields.latitude'), 'lat')}
-        {renderInput(t('admin.fields.longitude'), 'lng')}
         {renderInput(t('dealerDetails.phone', { defaultValue: 'Phone' }), 'phone')}
         {renderInput(t('dealerDetails.email', { defaultValue: 'Email' }), 'email')}
         {renderInput(t('dealerDetails.website', { defaultValue: 'Website' }), 'website')}
-      {renderInput(t('admin.fields.imageUrl'), 'image_url')}
-
-      <div className="space-y-3">
-        <span className="block text-sm font-medium text-gray-300">
-          {t('admin.uploadDealerImageLabel', { defaultValue: 'Upload dealer image' })}
-        </span>
-        <div className="flex flex-wrap items-center gap-4">
-          <img
-            src={imagePreview || DEALERSHIP_PLACEHOLDER_IMAGE}
-            alt={formState.name || t('admin.uploadDealerImagePreviewAlt', { defaultValue: 'Dealer image preview' })}
-            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
-          />
-          <div className="flex flex-col gap-2">
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
-              <span>{t('admin.uploadImage', { defaultValue: 'Upload image' })}</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
-            </label>
-            {(imageFile || previewFromFile) && (
-              <button
-                type="button"
-                onClick={handleImageClear}
-                className="text-left text-xs text-gray-300 transition hover:text-white"
-              >
-                {t('admin.removeImage', { defaultValue: 'Remove selected image' })}
-              </button>
-            )}
-            <p className="text-xs text-gray-400">
-              {t('admin.imageUploadHint', { defaultValue: 'JPEG or PNG recommended, up to 5MB.' })}
-            </p>
-          </div>
-        </div>
-      </div>
-      </div>
-
-      <div className="space-y-3">
-        <span className="block text-sm font-medium text-gray-300">
-          {t('admin.uploadDealerImageLabel', { defaultValue: 'Upload dealer image' })}
-        </span>
-        <div className="flex flex-wrap items-center gap-4">
-          <img
-            src={imagePreview || DEALERSHIP_PLACEHOLDER_IMAGE}
-            alt={formState.name || t('admin.uploadDealerImagePreviewAlt', { defaultValue: 'Dealer image preview' })}
-            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
-          />
-          <div className="flex flex-col gap-2">
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
-              <span>{t('admin.uploadImage', { defaultValue: 'Upload image' })}</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
-            </label>
-            {(imageFile || previewFromFile) && (
-              <button
-                type="button"
-                onClick={handleImageClear}
-                className="text-left text-xs text-gray-300 transition hover:text-white"
-              >
-                {t('admin.removeImage', { defaultValue: 'Remove selected image' })}
-              </button>
-            )}
-            <p className="text-xs text-gray-400">
-              {t('admin.imageUploadHint', { defaultValue: 'JPEG or PNG recommended, up to 5MB.' })}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <span className="block text-sm font-medium text-gray-300">
-          {t('admin.uploadDealerImageLabel', { defaultValue: 'Upload dealer image' })}
-        </span>
-        <div className="flex flex-wrap items-center gap-4">
-          <img
-            src={imagePreview || DEALERSHIP_PLACEHOLDER_IMAGE}
-            alt={formState.name || t('admin.uploadDealerImagePreviewAlt', { defaultValue: 'Dealer image preview' })}
-            className="h-24 w-32 rounded-lg border border-white/10 object-cover bg-gray-900/60"
-          />
-          <div className="flex flex-col gap-2">
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:opacity-90">
-              <span>{t('admin.uploadImage', { defaultValue: 'Upload image' })}</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
-            </label>
-            {(imageFile || previewFromFile) && (
-              <button
-                type="button"
-                onClick={handleImageClear}
-                className="text-left text-xs text-gray-300 transition hover:text-white"
-              >
-                {t('admin.removeImage', { defaultValue: 'Remove selected image' })}
-              </button>
-            )}
-            <p className="text-xs text-gray-400">
-              {t('admin.imageUploadHint', { defaultValue: 'JPEG or PNG recommended, up to 5MB.' })}
-            </p>
-          </div>
-        </div>
+        {renderInput(t('admin.fields.imageUrl'), 'image_url')}
       </div>
 
       <div className="space-y-3">
@@ -578,86 +582,6 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
         {renderInput(t('admin.fields.instagramUrl'), 'socialInstagram')}
         {renderInput(t('admin.fields.twitterUrl'), 'socialTwitter')}
         {renderInput(t('admin.fields.youtubeUrl'), 'socialYoutube')}
-      </div>
-
-      <div className="space-y-3">
-        <span className="block text-sm font-medium text-gray-300">
-          {t('admin.dealerGalleryLabel', { defaultValue: 'Gallery images (up to 3)' })}
-        </span>
-        <p className="text-xs text-gray-400">
-          {t('admin.dealerGalleryHelp', {
-            defaultValue: 'Add extra photos to highlight your showroom. These appear below the available models section.',
-          })}
-        </p>
-        <div className="flex flex-wrap gap-4">
-          {existingGallery.map(url => (
-            <div key={url} className="relative">
-              <img
-                src={url}
-                alt={t('admin.dealerGalleryPreviewAlt', {
-                  defaultValue: 'Dealer gallery image',
-                })}
-                className="h-24 w-32 rounded-lg border border-white/10 object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => handleExistingGalleryRemove(url)}
-                className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white transition hover:bg-black/80"
-              >
-                {t('admin.removeImage', { defaultValue: 'Remove' })}
-              </button>
-            </div>
-          ))}
-          {galleryDrafts.map((draft, index) => (
-            <div key={draft.preview} className="relative">
-              <img
-                src={draft.preview}
-                alt={t('admin.dealerGalleryPreviewAlt', {
-                  defaultValue: 'Dealer gallery image preview',
-                })}
-                className="h-24 w-32 rounded-lg border border-dashed border-white/20 object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => handleGalleryDraftRemove(index)}
-                className="absolute right-1 top-1 rounded-full bg-black/60 px-2 py-1 text-xs text-white transition hover:bg-black/80"
-              >
-                {t('admin.removeImage', { defaultValue: 'Remove' })}
-              </button>
-            </div>
-          ))}
-          {existingGallery.length === 0 && galleryDrafts.length === 0 && (
-            <p className="text-sm text-gray-400">
-              {t('admin.dealerGalleryEmpty', { defaultValue: 'No gallery images added yet.' })}
-            </p>
-          )}
-        </div>
-        <label
-          className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${
-            galleryUploadDisabled
-              ? 'cursor-not-allowed border border-white/10 bg-white/5 text-gray-400'
-              : 'bg-gray-cyan text-gray-900 hover:opacity-90'
-          }`}
-        >
-          <span>
-            {galleryUploadDisabled
-              ? t('admin.dealerGalleryLimitReached', { defaultValue: 'Gallery limit reached' })
-              : t('admin.uploadImage', { defaultValue: 'Upload image' })}
-          </span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleGalleryFileChange}
-            disabled={galleryUploadDisabled}
-          />
-        </label>
-        <p className="text-xs text-gray-400">
-          {t('admin.dealerGalleryHint', {
-            defaultValue: 'JPEG or PNG recommended. Maximum of 3 gallery images.',
-          })}
-        </p>
       </div>
 
       <div className="space-y-3">
