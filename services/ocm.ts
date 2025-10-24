@@ -106,9 +106,9 @@ export interface StationProperties {
 const BASE_URL = 'https://api.openchargemap.io/v3';
 const CLIENT_NAME = 'MakinaElektrike';
 
-const { VITE_OCM_API_KEY } = import.meta.env;
+const { VITE_OCM_API_KEY, OCM_API_KEY } = import.meta.env;
 
-const apiKey = VITE_OCM_API_KEY?.trim() ?? '';
+const apiKey = (VITE_OCM_API_KEY ?? OCM_API_KEY ?? '').trim();
 
 export const OCM_CONFIG = {
   BASE_URL,
@@ -140,11 +140,18 @@ const buildHeaders = () => {
 };
 
 const appendAuthToUrl = (url: string) => {
-  if (apiKey) {
+  if (!apiKey) {
     return url;
   }
   const joiner = url.includes('?') ? '&' : '?';
-  return `${url}${joiner}key=YOUR_OCM_API_KEY`;
+  return `${url}${joiner}key=${encodeURIComponent(apiKey)}`;
+};
+
+const buildErrorMessage = (status: number, context: string) => {
+  if (status === 401 || status === 403) {
+    return `${context}: Open Charge Map rejected the request. Please confirm that the OCM API key is configured correctly.`;
+  }
+  return `${context}: ${status}`;
 };
 
 export async function fetchReferenceData(signal?: AbortSignal): Promise<OCMReferenceData> {
@@ -152,7 +159,7 @@ export async function fetchReferenceData(signal?: AbortSignal): Promise<OCMRefer
   const url = appendAuthToUrl(`${BASE_URL}/referencedata?${query}`);
   const response = await fetch(url, { headers: buildHeaders(), signal });
   if (!response.ok) {
-    throw new Error(`Failed to load reference data: ${response.status}`);
+    throw new Error(buildErrorMessage(response.status, 'Failed to load reference data'));
   }
   return response.json();
 }
@@ -210,7 +217,7 @@ export async function fetchStations({
   const url = appendAuthToUrl(`${BASE_URL}/poi?${query}`);
   const response = await fetch(url, { headers: buildHeaders(), signal });
   if (!response.ok) {
-    throw new Error(`Failed to load charging locations: ${response.status}`);
+    throw new Error(buildErrorMessage(response.status, 'Failed to load charging locations'));
   }
   return response.json();
 }
