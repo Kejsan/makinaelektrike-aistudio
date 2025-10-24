@@ -99,6 +99,7 @@ const Header: React.FC = () => {
     { to: '/', label: t('header.home') },
     { to: '/dealers', label: t('header.dealers') },
     { to: '/models', label: t('header.models') },
+    { to: '/albania-charging-stations', label: t('header.chargingStations') },
     { to: '/favorites', label: t('header.favorites') },
     { to: '/blog', label: t('header.blog') },
     { to: '/about', label: t('header.about') },
