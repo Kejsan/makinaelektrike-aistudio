@@ -31,29 +31,16 @@ Fetching logic lives in `services/ocm.ts` and `pages/ChargingStationsAlbaniaPage
 
 - `maxresults` is currently capped at 200 to balance coverage and performance.
 - Auto-update re-queries OCM when the user pans/zooms with a 450 ms debounce.
-- Manual searches reuse the latest bounds when filters change.
+- Manual searches reuse the latest bounds when you press “Search this area”.
 
 Adjust the options in `fetchStations` or the debounce timing inside `handleMapMove` if you need different performance characteristics.
 
-## Filters and reference data
+## Search and export controls
 
-`fetchReferenceData` (in `services/ocm.ts`) populates operators, connection types, levels, usage types, and status types. The page caches this response in component state.
-
-To tweak available filters:
-
-1. Update the mapping logic in `pages/ChargingStationsAlbaniaPage.tsx` when building the `operatorOptions`, `connectionOptions`, etc.
-2. Modify the UI in the same file (look for the `MultiSelectFilter` component usages).
-
-## Export controls
+The search input filters the in-memory station list by title, operator, and address. Adjust the predicate in `visibleStations` inside `pages/ChargingStationsAlbaniaPage.tsx` if you need additional matching rules.
 
 The CSV/JSON exports are generated client-side from the currently visible stations. Adjust the columns inside `exportData` if you need additional attributes.
 
 ## Shareable URLs
 
-The page syncs filters, map position, auto-update state, and the selected POI to the query string. When adding new filters remember to read/write their values in both:
-
-- The `filtersRef` initialisation block.
-- The `setSearchParams` effect.
-- The `shareStation` helper.
-
-Keeping these in sync ensures deep links continue to work correctly.
+The page syncs the search term, map position, auto-update state, and the selected POI to the query string. When adding new URL parameters update both the effect that calls `setSearchParams` and the `shareStation` helper so deep links stay aligned.
