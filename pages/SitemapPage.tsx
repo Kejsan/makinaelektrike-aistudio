@@ -17,6 +17,7 @@ const SitemapPage: React.FC = () => {
           { to: '/', label: t('header.home') },
           { to: '/dealers', label: t('header.dealers') },
           { to: '/models', label: t('header.models') },
+          { to: '/albania-charging-stations', label: t('header.chargingStations') },
           { to: '/blog', label: t('header.blog') },
         ],
       },
