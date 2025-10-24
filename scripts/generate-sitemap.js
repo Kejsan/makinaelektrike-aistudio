@@ -9,6 +9,7 @@ const urls = [
   { loc: "/", changefreq: "weekly", priority: "1.0" },
   { loc: "/dealers/", changefreq: "weekly", priority: "0.8" },
   { loc: "/models/", changefreq: "weekly", priority: "0.8" },
+  { loc: "/albania-charging-stations/", changefreq: "weekly", priority: "0.8" },
   { loc: "/blog/", changefreq: "weekly", priority: "0.7" },
   { loc: "/about/", changefreq: "monthly", priority: "0.6" },
   { loc: "/contact/", changefreq: "monthly", priority: "0.6" },
