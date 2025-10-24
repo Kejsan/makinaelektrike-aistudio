@@ -44,7 +44,7 @@ const DEFAULT_ZOOM = 8;
 
 type StationFeature = StationFeatureCollection['features'][number];
 
-type BoundsTuple = [south: number, north: number, east: number, west: number];
+type BoundsTuple = [south: number, west: number, north: number, east: number];
 
 const formatAddress = (properties: StationProperties) => {
   const { addressInfo } = properties;
@@ -82,14 +82,14 @@ const getBoundingBoxFromBounds = (bounds: L.LatLngBounds) => {
   const north = bounds.getNorth();
   const east = bounds.getEast();
   const west = bounds.getWest();
-  return `${south},${north},${east},${west}`;
+  return `${south},${west},${north},${east}`;
 };
 
 const boundsFromTuple = (tuple?: BoundsTuple | null) => {
   if (!tuple) {
     return null;
   }
-  const [south, north, east, west] = tuple;
+  const [south, west, north, east] = tuple;
   return L.latLngBounds([south, west], [north, east]);
 };
 
@@ -360,9 +360,9 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
             mode: 'bounds',
             bounds: [
               Number(sourceBounds.getSouth().toFixed(6)),
+              Number(sourceBounds.getWest().toFixed(6)),
               Number(sourceBounds.getNorth().toFixed(6)),
               Number(sourceBounds.getEast().toFixed(6)),
-              Number(sourceBounds.getWest().toFixed(6)),
             ],
           }
         : { mode: 'country', bounds: null };
