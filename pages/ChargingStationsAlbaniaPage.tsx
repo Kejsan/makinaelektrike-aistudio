@@ -155,7 +155,10 @@ const downloadBlob = (blob: Blob, filename: string) => {
   URL.revokeObjectURL(url);
 };
 
-function createPopupMarkup(feature: StationFeature) {
+const createPopupContent = (
+  feature: StationFeature,
+  actions: { onCopy: () => void; onShare: () => void },
+) => {
   const { properties } = feature;
   const latLng = getStationLatLng(feature);
   const address = formatAddress(properties) || 'Address unavailable';
@@ -168,105 +171,161 @@ function createPopupMarkup(feature: StationFeature) {
   const operator = properties.operatorInfo?.title ?? 'Unknown operator';
   const thumbnail = properties.mediaItems?.find(item => item.isEnabled);
 
-  return `
-    <div class="space-y-3">
-      <div>
-        <h3 class="text-base font-semibold text-gray-900">${properties.title ?? 'Charging location'}</h3>
-        <p class="mt-1 text-xs text-gray-600">${address}</p>
-      </div>
-      ${
-        thumbnail
-          ? `<img src="${thumbnail.itemURL}" alt="Station thumbnail" class="h-28 w-full rounded-lg object-cover" />`
-          : ''
+  const container = document.createElement('div');
+  container.className = 'space-y-3 text-sm text-gray-900';
+
+  const header = document.createElement('div');
+  const title = document.createElement('h3');
+  title.className = 'text-base font-semibold text-gray-900';
+  title.textContent = properties.title ?? 'Charging location';
+  header.appendChild(title);
+
+  const addressParagraph = document.createElement('p');
+  addressParagraph.className = 'mt-1 text-xs text-gray-600';
+  addressParagraph.textContent = address;
+  header.appendChild(addressParagraph);
+  container.appendChild(header);
+
+  if (thumbnail?.itemURL) {
+    try {
+      const mediaUrl = new URL(thumbnail.itemURL);
+      if (mediaUrl.protocol === 'http:' || mediaUrl.protocol === 'https:') {
+        const image = document.createElement('img');
+        image.src = mediaUrl.toString();
+        image.alt = 'Station thumbnail';
+        image.className = 'h-28 w-full rounded-lg object-cover';
+        container.appendChild(image);
       }
-      <dl class="grid grid-cols-2 gap-2 text-xs text-gray-700">
-        <div>
-          <dt class="font-semibold text-gray-800">Operator</dt>
-          <dd>${operator}</dd>
-        </div>
-        <div>
-          <dt class="font-semibold text-gray-800">Status</dt>
-          <dd>${status}</dd>
-        </div>
-        <div>
-          <dt class="font-semibold text-gray-800">Usage</dt>
-          <dd>${usage}</dd>
-        </div>
-        <div>
-          <dt class="font-semibold text-gray-800">Power</dt>
-          <dd>${power}</dd>
-        </div>
-        <div>
-          <dt class="font-semibold text-gray-800">Last verified</dt>
-          <dd>${lastVerified}</dd>
-        </div>
-        ${properties.usageCost ? `<div><dt class="font-semibold text-gray-800">Cost</dt><dd>${properties.usageCost}</dd></div>` : ''}
-      </dl>
-      ${
-        properties.connections && properties.connections.length
-          ? `<div class="max-h-32 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-2">
-              <table class="min-w-full text-[11px] text-gray-700">
-                <thead>
-                  <tr>
-                    <th class="px-1 py-1 text-left font-semibold">Connector</th>
-                    <th class="px-1 py-1 text-left font-semibold">Level</th>
-                    <th class="px-1 py-1 text-left font-semibold">kW</th>
-                    <th class="px-1 py-1 text-left font-semibold">Qty</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${properties.connections
-                    .map(
-                      connection => `
-                        <tr>
-                          <td class="px-1 py-1">${connection.connectionType?.title ?? '—'}</td>
-                          <td class="px-1 py-1">${connection.level?.title ?? '—'}</td>
-                          <td class="px-1 py-1">${connection.powerKW ?? '—'}</td>
-                          <td class="px-1 py-1">${connection.quantity ?? '—'}</td>
-                        </tr>
-                      `,
-                    )
-                    .join('')}
-                </tbody>
-              </table>
-            </div>`
-          : ''
-      }
-      <div class="flex flex-wrap gap-2 text-xs">
-        <a
-          href="https://www.google.com/maps/dir/?api=1&destination=${latLng.lat},${latLng.lng}"
-          target="_blank"
-          rel="noreferrer"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-3 py-1 font-semibold text-gray-800"
-        >
-          Directions
-        </a>
-        <a
-          href="http://maps.apple.com/?daddr=${latLng.lat},${latLng.lng}"
-          target="_blank"
-          rel="noreferrer"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-3 py-1 font-semibold text-gray-800"
-        >
-          Apple Maps
-        </a>
-        <button
-          type="button"
-          data-popup-action="copy"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-3 py-1 font-semibold text-gray-800"
-        >
-          Copy address
-        </button>
-        <button
-          type="button"
-          data-popup-action="share"
-          class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-3 py-1 font-semibold text-gray-800"
-        >
-          Share
-        </button>
-      </div>
-    </div>
-  `;
-}
+    } catch (error) {
+      console.warn('Skipping invalid thumbnail URL', error);
+    }
+  }
+
+  const details = document.createElement('dl');
+  details.className = 'grid grid-cols-2 gap-2 text-xs text-gray-700';
+
+  const addDetail = (label: string, value: string) => {
+    const wrapper = document.createElement('div');
+    const dt = document.createElement('dt');
+    dt.className = 'font-semibold text-gray-800';
+    dt.textContent = label;
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+    wrapper.appendChild(dt);
+    wrapper.appendChild(dd);
+    details.appendChild(wrapper);
+  };
+
+  addDetail('Operator', operator);
+  addDetail('Status', status);
+  addDetail('Usage', usage);
+  addDetail('Power', power);
+  addDetail('Last verified', lastVerified);
+
+  if (properties.usageCost) {
+    addDetail('Cost', properties.usageCost);
+  }
+
+  container.appendChild(details);
+
+  if (properties.connections && properties.connections.length) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'max-h-32 overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-2';
+
+    const table = document.createElement('table');
+    table.className = 'min-w-full text-[11px] text-gray-700';
+
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+    const headers = ['Connector', 'Level', 'kW', 'Qty'];
+    headers.forEach(text => {
+      const th = document.createElement('th');
+      th.className = 'px-1 py-1 text-left font-semibold';
+      th.textContent = text;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+    properties.connections.forEach(connection => {
+      const row = document.createElement('tr');
+
+      const connectorCell = document.createElement('td');
+      connectorCell.className = 'px-1 py-1';
+      connectorCell.textContent = connection.connectionType?.title ?? '—';
+      row.appendChild(connectorCell);
+
+      const levelCell = document.createElement('td');
+      levelCell.className = 'px-1 py-1';
+      levelCell.textContent = connection.level?.title ?? '—';
+      row.appendChild(levelCell);
+
+      const powerCell = document.createElement('td');
+      powerCell.className = 'px-1 py-1';
+      powerCell.textContent =
+        connection.powerKW !== undefined && connection.powerKW !== null
+          ? String(connection.powerKW)
+          : '—';
+      row.appendChild(powerCell);
+
+      const qtyCell = document.createElement('td');
+      qtyCell.className = 'px-1 py-1';
+      qtyCell.textContent =
+        connection.quantity !== undefined && connection.quantity !== null
+          ? String(connection.quantity)
+          : '—';
+      row.appendChild(qtyCell);
+
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+    container.appendChild(wrapper);
+  }
+
+  const actionsRow = document.createElement('div');
+  actionsRow.className = 'flex flex-wrap gap-2 text-xs';
+
+  const createLinkButton = (label: string, href: string) => {
+    const link = document.createElement('a');
+    link.href = href;
+    link.target = '_blank';
+    link.rel = 'noreferrer';
+    link.className =
+      'inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-3 py-1 font-semibold text-gray-800';
+    link.textContent = label;
+    actionsRow.appendChild(link);
+  };
+
+  createLinkButton('Directions', `https://www.google.com/maps/dir/?api=1&destination=${latLng.lat},${latLng.lng}`);
+  createLinkButton('Apple Maps', `http://maps.apple.com/?daddr=${latLng.lat},${latLng.lng}`);
+
+  const createActionButton = (label: string, onClick: () => void, action: 'copy' | 'share') => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.popupAction = action;
+    button.className =
+      'inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-3 py-1 font-semibold text-gray-800';
+    button.textContent = label;
+    button.addEventListener('click', onClick);
+    actionsRow.appendChild(button);
+  };
+
+  createActionButton('Copy address', actions.onCopy, 'copy');
+  createActionButton('Share', actions.onShare, 'share');
+
+  container.appendChild(actionsRow);
+
+  const attribution = document.createElement('p');
+  attribution.className = 'text-[11px] text-gray-500';
+  attribution.textContent = 'Data © Open Charge Map contributors – OpenChargeMap.org';
+  container.appendChild(attribution);
+
+  return container;
+};
+
 
 const MultiSelectFilter: React.FC<{
   label: string;
@@ -397,6 +456,7 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
     center: [Number.isFinite(latParam) ? latParam : DEFAULT_CENTER[0], Number.isFinite(lngParam) ? lngParam : DEFAULT_CENTER[1]] as [number, number],
     zoom: Number.isFinite(zoomParam) ? zoomParam : DEFAULT_ZOOM,
   });
+  const initialMapStateRef = useRef(mapState);
   const [selectedStationId, setSelectedStationId] = useState<number | null>(() => {
     const poiParam = searchParams.get('poi');
     if (!poiParam) {
@@ -591,9 +651,10 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
       return;
     }
 
+    const { center, zoom } = initialMapStateRef.current;
     const map = L.map(mapContainerRef.current, {
-      center: mapState.center,
-      zoom: mapState.zoom,
+      center,
+      zoom,
       minZoom: 5,
       maxZoom: 18,
       zoomControl: false,
@@ -617,15 +678,28 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
     clusterRef.current = clusterGroup;
     map.addLayer(clusterGroup);
 
+    return () => {
+      clusterGroup.clearLayers();
+      map.remove();
+      clusterRef.current = null;
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+
     map.on('moveend', handleMapMove);
     map.on('zoomend', handleMapMove);
 
     return () => {
       map.off('moveend', handleMapMove);
       map.off('zoomend', handleMapMove);
-      map.remove();
     };
-  }, [handleMapMove, mapState.center, mapState.zoom]);
+  }, [handleMapMove]);
 
   const operatorOptions = useMemo<OptionItem[]>(
     () =>
@@ -795,10 +869,6 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
         title: feature.properties.title ?? 'Charging station',
       });
 
-      const popupContent = document.createElement('div');
-      popupContent.className = 'space-y-3 text-sm text-gray-900';
-      popupContent.innerHTML = createPopupMarkup(feature);
-
       const handleCopy = () => {
         const address = formatAddress(feature.properties);
         navigator.clipboard
@@ -811,29 +881,12 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
         shareStation(feature);
       };
 
+      const popupContent = createPopupContent(feature, {
+        onCopy: handleCopy,
+        onShare: handleShare,
+      });
+
       marker.bindPopup(popupContent, { maxWidth: 360, className: 'charging-popup' });
-
-      marker.on('popupopen', event => {
-        const popupElement = event.popup.getElement();
-        if (!popupElement) {
-          return;
-        }
-        const copyButton = popupElement.querySelector<HTMLButtonElement>('button[data-popup-action="copy"]');
-        const shareButton = popupElement.querySelector<HTMLButtonElement>('button[data-popup-action="share"]');
-        copyButton?.addEventListener('click', handleCopy);
-        shareButton?.addEventListener('click', handleShare);
-      });
-
-      marker.on('popupclose', event => {
-        const popupElement = event.popup.getElement();
-        if (!popupElement) {
-          return;
-        }
-        const copyButton = popupElement.querySelector<HTMLButtonElement>('button[data-popup-action="copy"]');
-        const shareButton = popupElement.querySelector<HTMLButtonElement>('button[data-popup-action="share"]');
-        copyButton?.removeEventListener('click', handleCopy);
-        shareButton?.removeEventListener('click', handleShare);
-      });
 
       marker.on('click', () => {
         setSelectedStationId(feature.properties.id);
