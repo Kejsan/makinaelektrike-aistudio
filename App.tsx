@@ -12,6 +12,7 @@ import BlogPostPage from './pages/BlogPostPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import FavoritesPage from './pages/FavoritesPage';
+import ChargingStationsAlbaniaPage from './pages/ChargingStationsAlbaniaPage';
 import RegisterUserPage from './pages/RegisterUserPage';
 import RegisterDealerPage from './pages/RegisterDealerPage';
 import ScrollToTopButton from './components/ScrollToTopButton';
@@ -106,6 +107,7 @@ const App: React.FC = () => {
                   <Route path="/dealers" element={<DealersListPage />} />
                   <Route path="/dealers/:id" element={<DealerDetailPage />} />
                   <Route path="/models" element={<ModelsListPage />} />
+                  <Route path="/albania-charging-stations" element={<ChargingStationsAlbaniaPage />} />
                   <Route path="/models/:id" element={<ModelDetailPage />} />
                   <Route path="/blog" element={<BlogPage />} />
                   <Route path="/blog/:slug" element={<BlogPostPage />} />
