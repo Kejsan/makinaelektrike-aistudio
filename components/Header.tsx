@@ -99,13 +99,14 @@ const Header: React.FC = () => {
     { to: '/', label: t('header.home') },
     { to: '/dealers', label: t('header.dealers') },
     { to: '/models', label: t('header.models') },
+    { to: '/albania-charging-stations', label: t('header.chargingStations') },
     { to: '/favorites', label: t('header.favorites') },
     { to: '/blog', label: t('header.blog') },
     { to: '/about', label: t('header.about') },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-navy-blue/50 backdrop-blur-md border-b border-gray-cyan/20">
+    <header className="sticky top-0 z-[1200] bg-navy-blue/50 backdrop-blur-md border-b border-gray-cyan/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative flex items-center justify-between gap-4 py-3 lg:py-4">
           <div className="flex items-center">
