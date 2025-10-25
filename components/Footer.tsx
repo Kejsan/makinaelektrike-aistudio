@@ -63,6 +63,11 @@ const Footer: React.FC = () => {
                 <ul className="mt-4 space-y-4">
                   <li><Link to="/dealers" className="text-base text-gray-300 hover:text-white">{t('header.dealers')}</Link></li>
                   <li><Link to="/models" className="text-base text-gray-300 hover:text-white">{t('header.models')}</Link></li>
+                  <li>
+                    <Link to="/albania-charging-stations" className="text-base text-gray-300 hover:text-white">
+                      {t('header.chargingStations')}
+                    </Link>
+                  </li>
                   <li><Link to="/blog" className="text-base text-gray-300 hover:text-white">{t('header.blog')}</Link></li>
                 </ul>
               </div>
