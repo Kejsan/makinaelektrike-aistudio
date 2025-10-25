@@ -44,7 +44,7 @@ const DEFAULT_ZOOM = 8;
 
 type StationFeature = StationFeatureCollection['features'][number];
 
-type BoundsTuple = [south: number, west: number, north: number, east: number];
+type BoundsTuple = [topLat: number, leftLng: number, bottomLat: number, rightLng: number];
 
 const formatAddress = (properties: StationProperties) => {
   const { addressInfo } = properties;
@@ -78,19 +78,21 @@ const formatPowerRange = (properties: StationProperties) => {
 };
 
 const getBoundingBoxFromBounds = (bounds: L.LatLngBounds) => {
-  const south = bounds.getSouth();
-  const north = bounds.getNorth();
-  const east = bounds.getEast();
-  const west = bounds.getWest();
-  return `${south},${west},${north},${east}`;
+  const northEast = bounds.getNorthEast();
+  const southWest = bounds.getSouthWest();
+  const topLat = northEast.lat;
+  const leftLng = southWest.lng;
+  const bottomLat = southWest.lat;
+  const rightLng = northEast.lng;
+  return `${topLat},${leftLng},${bottomLat},${rightLng}`;
 };
 
 const boundsFromTuple = (tuple?: BoundsTuple | null) => {
   if (!tuple) {
     return null;
   }
-  const [south, west, north, east] = tuple;
-  return L.latLngBounds([south, west], [north, east]);
+  const [topLat, leftLng, bottomLat, rightLng] = tuple;
+  return L.latLngBounds([bottomLat, leftLng], [topLat, rightLng]);
 };
 
 const getStationLatLng = (feature: StationFeature) => {
@@ -359,9 +361,9 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
         ? {
             mode: 'bounds',
             bounds: [
-              Number(sourceBounds.getSouth().toFixed(6)),
-              Number(sourceBounds.getWest().toFixed(6)),
               Number(sourceBounds.getNorth().toFixed(6)),
+              Number(sourceBounds.getWest().toFixed(6)),
+              Number(sourceBounds.getSouth().toFixed(6)),
               Number(sourceBounds.getEast().toFixed(6)),
             ],
           }
