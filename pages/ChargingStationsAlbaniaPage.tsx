@@ -78,9 +78,14 @@ const formatPowerRange = (properties: StationProperties) => {
 };
 
 const getBoundingBoxFromBounds = (bounds: L.LatLngBounds) => {
-  const northWest = bounds.getNorthWest();
-  const southEast = bounds.getSouthEast();
-  return `${northWest.lat},${northWest.lng},${southEast.lat},${southEast.lng}`;
+  const northEast = bounds.getNorthEast();
+  const southWest = bounds.getSouthWest();
+  const topLeftLat = northEast.lat;
+  const topLeftLng = southWest.lng;
+  const bottomRightLat = southWest.lat;
+  const bottomRightLng = northEast.lng;
+
+  return `${topLeftLat},${topLeftLng},${bottomRightLat},${bottomRightLng}`;
 };
 
 const boundsFromTuple = (tuple?: BoundsTuple | null) => {
@@ -360,12 +365,16 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
       const nextContext: { mode: 'country' | 'bounds'; bounds: BoundsTuple | null } = sourceBounds
         ? {
             mode: 'bounds',
-            bounds: [
-              Number(sourceBounds.getNorth().toFixed(6)),
-              Number(sourceBounds.getWest().toFixed(6)),
-              Number(sourceBounds.getSouth().toFixed(6)),
-              Number(sourceBounds.getEast().toFixed(6)),
-            ],
+            bounds: (() => {
+              const ne = sourceBounds.getNorthEast();
+              const sw = sourceBounds.getSouthWest();
+              return [
+                Number(ne.lat.toFixed(6)),
+                Number(sw.lng.toFixed(6)),
+                Number(sw.lat.toFixed(6)),
+                Number(ne.lng.toFixed(6)),
+              ];
+            })(),
           }
         : { mode: 'country', bounds: null };
 
@@ -391,8 +400,9 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
         } else if (!hasLoadedOnceRef.current) {
           setStations([]);
           lastNonEmptyStationsRef.current = null;
-        } else if (lastNonEmptyStationsRef.current) {
+        } else if (lastNonEmptyStationsRef.current?.length) {
           console.warn('Open Charge Map returned 0 stations for the current bounds; keeping previous markers.');
+          setStations(prev => (prev.length ? prev : [...lastNonEmptyStationsRef.current!]));
         } else {
           setStations([]);
         }
