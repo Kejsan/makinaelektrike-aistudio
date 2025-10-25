@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Globe, Settings, LogOut, Menu, X, UserRound, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { SITE_LOGO, SITE_LOGO_ALT } from '../constants/media';
 
@@ -55,6 +55,22 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const { user, role, logout, loading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (typeof window === 'undefined') {
+        return;
+      }
+      setIsScrolled(window.scrollY > 8);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -67,6 +83,7 @@ const Header: React.FC = () => {
   
   useEffect(() => {
     setMobileMenuOpen(false);
+    setAccountMenuOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
@@ -81,16 +98,34 @@ const Header: React.FC = () => {
     };
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const isActivePath = (path: string) => {
+    if (path === '/') {
+      return location.pathname === '/';
+    }
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
   const navLinkClasses = (path: string) =>
-    `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-      location.pathname === path
+    `relative px-3 py-2 text-sm font-medium transition-colors ${
+      isActivePath(path)
         ? 'text-gray-cyan'
         : 'text-white hover:text-gray-cyan'
     }`;
 
   const mobileNavLinkClasses = (path: string) =>
     `block rounded-md px-3 py-2 text-base font-medium transition-colors ${
-      location.pathname === path
+      isActivePath(path)
         ? 'text-gray-cyan bg-white/5'
         : 'text-white hover:text-gray-cyan hover:bg-white/5'
     }`;
@@ -106,7 +141,11 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-[1200] bg-navy-blue/50 backdrop-blur-md border-b border-gray-cyan/20">
+    <header
+      className={`sticky top-0 z-[1200] border-b border-gray-cyan/20 backdrop-blur-lg transition-all duration-300 ${
+        isScrolled ? 'bg-navy-blue/80 shadow-lg shadow-black/20' : 'bg-navy-blue/40'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative flex items-center justify-between gap-4 py-3 lg:py-4">
           <div className="flex items-center">
@@ -120,8 +159,16 @@ const Header: React.FC = () => {
           </div>
           <nav className="hidden lg:flex items-center gap-2">
             {navigationItems.map((item) => (
-              <Link key={item.to} to={item.to} className={navLinkClasses(item.to)}>
+              <Link
+                key={item.to}
+                to={item.to}
+                className={navLinkClasses(item.to)}
+                aria-current={isActivePath(item.to) ? 'page' : undefined}
+              >
                 {item.label}
+                {isActivePath(item.to) && (
+                  <span className="absolute inset-x-2 -bottom-[6px] h-1 rounded-full bg-gradient-to-r from-gray-cyan via-white/70 to-gray-cyan" aria-hidden="true" />
+                )}
               </Link>
             ))}
           </nav>
@@ -140,27 +187,63 @@ const Header: React.FC = () => {
                   </Link>
                 </>
               ) : (
-                <>
-                  {role === 'admin' && (
-                    <Link
-                      to="/admin"
-                      className="inline-flex items-center text-white hover:text-gray-cyan transition-colors"
-                      aria-label={t('header.admin') as string}
-                    >
-                      <Settings size={20} />
-                    </Link>
-                  )}
+                <div className="relative" ref={accountMenuRef}>
                   <button
-                    onClick={handleLogout}
                     type="button"
-                    className="inline-flex items-center space-x-1 text-white hover:text-gray-cyan transition-colors disabled:opacity-60"
-                    disabled={loading}
-                    aria-label={t('header.logout') as string}
+                    onClick={() => setAccountMenuOpen(open => !open)}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-white transition hover:border-gray-cyan/70 hover:text-gray-cyan"
+                    aria-haspopup="true"
+                    aria-expanded={accountMenuOpen}
                   >
-                    <LogOut size={18} />
-                    <span className="hidden md:inline text-sm font-medium">{t('header.logout')}</span>
+                    <UserRound size={18} className="text-gray-cyan" />
+                    <span className="max-w-[10rem] truncate text-left">
+                      {user.displayName || user.email || t('header.account')}
+                    </span>
                   </button>
-                </>
+                  {accountMenuOpen && (
+                    <div className="absolute right-0 mt-3 w-56 origin-top-right rounded-xl border border-white/10 bg-navy-blue/95 p-2 shadow-2xl backdrop-blur-xl">
+                      <div className="px-3 py-2 text-xs uppercase tracking-wide text-gray-400">
+                        {t('header.accountMenuTitle')}
+                      </div>
+                      <div className="flex flex-col gap-1 text-sm">
+                        {role === 'admin' && (
+                          <Link
+                            to="/admin"
+                            className="flex items-center justify-between rounded-lg px-3 py-2 text-gray-200 transition hover:bg-white/10"
+                          >
+                            <span>{t('header.admin')}</span>
+                            <Settings size={16} />
+                          </Link>
+                        )}
+                        {role === 'dealer' && (
+                          <Link
+                            to="/dealer/dashboard"
+                            className="rounded-lg px-3 py-2 text-gray-200 transition hover:bg-white/10"
+                          >
+                            {t('header.dealerDashboard')}
+                          </Link>
+                        )}
+                        {role === 'pending' && (
+                          <Link
+                            to="/awaiting-approval"
+                            className="rounded-lg px-3 py-2 text-gray-200 transition hover:bg-white/10"
+                          >
+                            {t('header.awaitingApproval')}
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="flex items-center justify-between rounded-lg px-3 py-2 text-left text-gray-200 transition hover:bg-white/10 disabled:opacity-60"
+                          disabled={loading}
+                        >
+                          <span>{t('header.logout')}</span>
+                          {loading ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
             <div className="hidden lg:block">
@@ -205,12 +288,23 @@ const Header: React.FC = () => {
                         {t('header.admin')}
                       </Link>
                     )}
+                    {role === 'dealer' && (
+                      <Link to="/dealer/dashboard" className="btn btn-outline w-full justify-center">
+                        {t('header.dealerDashboard')}
+                      </Link>
+                    )}
+                    {role === 'pending' && (
+                      <Link to="/awaiting-approval" className="btn btn-outline w-full justify-center">
+                        {t('header.awaitingApproval')}
+                      </Link>
+                    )}
                     <button
                       onClick={handleLogout}
                       type="button"
                       className="btn btn-outline w-full justify-center disabled:opacity-60"
                       disabled={loading}
                     >
+                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                       {t('header.logout')}
                     </button>
                   </div>

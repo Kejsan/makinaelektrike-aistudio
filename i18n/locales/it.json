@@ -14,7 +14,11 @@
     "language": "Lingua",
     "openMenu": "Apri il menu di navigazione",
     "closeMenu": "Chiudi il menu di navigazione",
-    "logout": "Esci"
+    "logout": "Esci",
+    "account": "Account",
+    "accountMenuTitle": "Azioni rapide",
+    "dealerDashboard": "Dashboard concessionario",
+    "awaitingApproval": "In attesa di approvazione"
   },
   "footer": {
     "description": "La tua guida ai veicoli elettrici e ibridi in Albania. Trova concessionari, confronta modelli e unisciti alla rivoluzione elettrica.",
@@ -30,12 +34,17 @@
     "sitemap": "Mappa del sito",
     "cookies": "Informativa sui cookie",
     "credits": "Realizzato da",
-    "rightsReserved": "Tutti i diritti riservati."
+    "rightsReserved": "Tutti i diritti riservati.",
+    "socialTitle": "Rimani connesso",
+    "moreInfo": "Altre informazioni legali",
+    "legalSummary": "Avviso importante"
   },
   "common": {
     "unknownCity": "Località sconosciuta",
     "loading": "Caricamento...",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "anyCity": "Qualsiasi città",
+    "anyBrand": "Qualsiasi marca"
   },
   "home": {
     "heroTitle": "Guida il futuro.",
@@ -111,7 +120,18 @@
         "question": "Posso prenotare un test drive?",
         "answer": "Certo. Ogni profilo di concessionario include i contatti per prenotare prove su strada a Tirana, Durazzo, Scutari e altre città."
       }
-    ]
+    ],
+    "heroPrimaryCta": "Trova la tua EV",
+    "heroSecondaryCta": "Esplora i concessionari",
+    "heroTaglines": [
+      "Confronta. Connettiti. Ricarica.",
+      "Concessionari verificati in tutta l’Albania.",
+      "Scelte più intelligenti per la mobilità elettrica."
+    ],
+    "searchLiveResultsDefault": "Usa i filtri per scoprire concessionari elettrici selezionati in tutta l’Albania.",
+    "searchLiveResults": "{{count}} concessionari vicino a {{city}} • {{brand}}",
+    "searchLiveResultsEmpty": "Nessun concessionario corrisponde ancora — prova un’altra città o marca.",
+    "searchSuggestionCta": "Vedi concessionario"
   },
   "dealersPage": {
     "title": "Concessionari in Albania",
@@ -212,7 +232,8 @@
         "question": "Potete aiutare con l'installazione del caricatore?",
         "answer": "Sì, molti concessionari collaborano con elettricisti certificati e possono coordinare l'installazione domestica o aziendale."
       }
-    ]
+    ],
+    "officialBadge": "Concessionario ufficiale"
   },
   "modelsPage": {
     "title": "Modelli elettrici e ibridi",
@@ -500,7 +521,20 @@
         "question": "Quanti elementi posso salvare?",
         "answer": "Non c'è un limite: salva tutti i concessionari e modelli necessari durante la tua valutazione."
       }
-    ]
+    ],
+    "shareList": "Condividi preferiti",
+    "exportList": "Esporta in TXT",
+    "copyList": "Copia riepilogo",
+    "shareTitle": "I miei preferiti Makina Elektrike",
+    "shareMessage": "Ecco {{count}} proposte elettriche che sto valutando su Makina Elektrike.",
+    "shareSuccess": "Preferiti condivisi con successo.",
+    "copySuccess": "Preferiti copiati negli appunti.",
+    "shareError": "Impossibile condividere i preferiti ora.",
+    "exportHeading": "Preferiti Makina Elektrike",
+    "exportDealersHeading": "Concessionari",
+    "exportModelsHeading": "Modelli",
+    "noItemsToExport": "Aggiungi concessionari o modelli ai preferiti per esportarli.",
+    "exportSuccess": "Preferiti esportati con successo."
   },
   "sitemap": {
     "title": "Mappa del sito",
@@ -509,10 +543,18 @@
     "xmlDescription": "Apri il file per i motori di ricerca oppure copia il link per Google Search Console.",
     "xmlCta": "Apri sitemap.xml",
     "sections": {
-      "explore": { "title": "Esplora" },
-      "services": { "title": "Servizi" },
-      "company": { "title": "Chi siamo" },
-      "legal": { "title": "Legale" }
+      "explore": {
+        "title": "Esplora"
+      },
+      "services": {
+        "title": "Servizi"
+      },
+      "company": {
+        "title": "Chi siamo"
+      },
+      "legal": {
+        "title": "Legale"
+      }
     },
     "dynamic": {
       "dealers": "Concessionari in evidenza",

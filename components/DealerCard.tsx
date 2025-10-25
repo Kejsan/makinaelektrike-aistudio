@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { Dealer } from '../types';
-import { MapPin, Heart, ArrowRight, ShieldAlert } from 'lucide-react';
+import { MapPin, Heart, ArrowRight, ShieldAlert, BadgeCheck } from 'lucide-react';
 import { useFavorites } from '../hooks/useFavorites';
 import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../constants/media';
 
@@ -44,13 +44,19 @@ const DealerCard: React.FC<DealerCardProps> = ({ dealer, isLoading = false }) =>
       >
         <Heart size={20} className={`${favorited ? 'fill-vivid-red text-vivid-red' : 'fill-transparent'}`} />
       </button>
-      <Link to={`/dealers/${dealer.id}`} className="flex h-full flex-col">
+      <Link to={`/dealers/${dealer.id}`} className="group flex h-full flex-col">
         <div className="relative h-48 overflow-hidden">
           <img
             src={imageUrl}
             alt={dealer.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
+          {dealer.isFeatured && (
+            <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-emerald-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-950 shadow-lg">
+              <BadgeCheck size={14} />
+              {t('dealerDetails.officialBadge', { defaultValue: 'Official Dealer' })}
+            </div>
+          )}
           {!approved && (
             <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-black">
               <ShieldAlert size={14} />
