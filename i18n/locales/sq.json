@@ -14,7 +14,11 @@
     "language": "Gjuha",
     "openMenu": "Hap menunë e navigimit",
     "closeMenu": "Mbyll menunë e navigimit",
-    "logout": "Dil"
+    "logout": "Dil",
+    "account": "Llogaria",
+    "accountMenuTitle": "Veprime të shpejta",
+    "dealerDashboard": "Paneli i shitësit",
+    "awaitingApproval": "Në pritje të miratimit"
   },
   "footer": {
     "description": "Udhëzuesi juaj për automjetet elektrike dhe hibride në Shqipëri. Gjeni shitës, krahasoni modele dhe bashkohuni me revolucionin elektrik.",
@@ -30,12 +34,17 @@
     "sitemap": "Harta e faqes",
     "cookies": "Politika e cookie-ve",
     "credits": "Bërë nga",
-    "rightsReserved": "Të gjitha të drejtat e rezervuara."
+    "rightsReserved": "Të gjitha të drejtat e rezervuara.",
+    "socialTitle": "Qëndro i lidhur",
+    "moreInfo": "Më shumë informacione ligjore",
+    "legalSummary": "Njoftim i rëndësishëm"
   },
   "common": {
     "unknownCity": "Lokacion i panjohur",
     "loading": "Duke u ngarkuar...",
-    "cancel": "Anulo"
+    "cancel": "Anulo",
+    "anyCity": "Çdo qytet",
+    "anyBrand": "Çdo markë"
   },
   "home": {
     "heroTitle": "Ngisni të ardhmen.",
@@ -111,7 +120,18 @@
         "question": "A mund të bëj test drive para blerjes?",
         "answer": "Po. Çdo faqe shitësi përfshin kontaktet për të rezervuar provat e makinave elektrike në Tiranë, Durrës, Shkodër dhe qytete të tjera."
       }
-    ]
+    ],
+    "heroPrimaryCta": "Gjej makinën tënde elektrike",
+    "heroSecondaryCta": "Eksploro shitësit",
+    "heroTaglines": [
+      "Krahasoni. Lidhuni. Karikoni.",
+      "Shitës të verifikuar në gjithë Shqipërinë.",
+      "Zgjedhje më të zgjuara për mobilitet elektrik."
+    ],
+    "searchLiveResultsDefault": "Përdorni filtrat për të zbuluar shitës elektrikë të përzgjedhur në të gjithë Shqipërinë.",
+    "searchLiveResults": "{{count}} shitës pranë {{city}} • {{brand}}",
+    "searchLiveResultsEmpty": "Asnjë shitës nuk përputhet ende — provoni një qytet ose markë tjetër.",
+    "searchSuggestionCta": "Shiko shitësin"
   },
   "dealersPage": {
     "title": "Konçesionaret në Shqipëri",
@@ -185,10 +205,18 @@
     "xmlDescription": "Hapni sitemap-in teknik që përdorin motorët e kërkimit ose kopjoni lidhjen për Google Search Console.",
     "xmlCta": "Hap sitemap.xml",
     "sections": {
-      "explore": { "title": "Eksploro" },
-      "services": { "title": "Shërbimet" },
-      "company": { "title": "Rreth nesh" },
-      "legal": { "title": "Ligjore" }
+      "explore": {
+        "title": "Eksploro"
+      },
+      "services": {
+        "title": "Shërbimet"
+      },
+      "company": {
+        "title": "Rreth nesh"
+      },
+      "legal": {
+        "title": "Ligjore"
+      }
     },
     "dynamic": {
       "dealers": "Shitës të veçuar",
@@ -401,7 +429,8 @@
         "question": "A ofroni instalim të karikuesit?",
         "answer": "Po, shumë shitës bashkëpunojnë me elektrikistë të licencuar dhe mund të koordinojnë instalimin e një karikuesi në shtëpi ose biznes."
       }
-    ]
+    ],
+    "officialBadge": "Shitës zyrtar"
   },
   "modelsPage": {
     "title": "Modelet elektrike dhe hibride",
@@ -689,7 +718,20 @@
         "question": "Sa elementë mund të ruaj?",
         "answer": "Nuk ka kufi – ruani aq shitës dhe modele sa ju nevojiten gjatë kërkimit."
       }
-    ]
+    ],
+    "shareList": "Ndaj të preferuarat",
+    "exportList": "Eksporto TXT",
+    "copyList": "Kopjo përmbledhjen",
+    "shareTitle": "Të preferuarat e mia Makina Elektrike",
+    "shareMessage": "Këtu janë {{count}} përzgjedhje elektrike që po shqyrtoj nga Makina Elektrike.",
+    "shareSuccess": "Lista u nda me sukses.",
+    "copySuccess": "Të preferuarat u kopjuan në kujtesë.",
+    "shareError": "Nuk mund të ndajmë të preferuarat tani.",
+    "exportHeading": "Të preferuarat Makina Elektrike",
+    "exportDealersHeading": "Shitës",
+    "exportModelsHeading": "Modele",
+    "noItemsToExport": "Shtoni shitës ose modele në të preferuarat për t’i eksportuar.",
+    "exportSuccess": "Të preferuarat u eksportuan me sukses."
   },
   "auth": {
     "awaitingApprovalTitle": "Në pritje të aprovimit",

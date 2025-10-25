@@ -14,7 +14,11 @@
     "language": "Language",
     "openMenu": "Open navigation menu",
     "closeMenu": "Close navigation menu",
-    "logout": "Log out"
+    "logout": "Log out",
+    "account": "Account",
+    "accountMenuTitle": "Quick actions",
+    "dealerDashboard": "Dealer dashboard",
+    "awaitingApproval": "Awaiting approval"
   },
   "footer": {
     "description": "Your guide to electric and hybrid vehicles in Albania. Find dealerships, compare models, and join the electric revolution.",
@@ -30,12 +34,17 @@
     "sitemap": "Sitemap",
     "cookies": "Cookie Policy",
     "credits": "Made by",
-    "rightsReserved": "All rights reserved."
+    "rightsReserved": "All rights reserved.",
+    "socialTitle": "Stay connected",
+    "moreInfo": "More legal information",
+    "legalSummary": "Important notice"
   },
   "common": {
     "unknownCity": "Unknown location",
     "loading": "Loading...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "anyCity": "Any city",
+    "anyBrand": "Any brand"
   },
   "home": {
     "heroTitle": "Drive the Future.",
@@ -111,7 +120,18 @@
         "question": "Can I test drive before committing?",
         "answer": "Yes. Each verified dealer page includes contact details to book EV test drives across Tirana, Durrës, Shkodër and beyond."
       }
-    ]
+    ],
+    "heroPrimaryCta": "Find your EV",
+    "heroSecondaryCta": "Explore dealers",
+    "heroTaglines": [
+      "Compare. Connect. Charge.",
+      "Verified dealers across Albania.",
+      "Smarter choices for electric mobility."
+    ],
+    "searchLiveResultsDefault": "Use filters to discover featured electric dealers across Albania.",
+    "searchLiveResults": "{{count}} dealer(s) near {{city}} • {{brand}}",
+    "searchLiveResultsEmpty": "No dealers match your filters yet — try a different city or brand.",
+    "searchSuggestionCta": "View dealer"
   },
   "dealersPage": {
     "title": "Dealerships in Albania",
@@ -185,10 +205,18 @@
     "xmlDescription": "Open the machine-readable sitemap used by search engines or copy the link for Google Search Console.",
     "xmlCta": "Open sitemap.xml",
     "sections": {
-      "explore": { "title": "Explore" },
-      "services": { "title": "Services" },
-      "company": { "title": "Company" },
-      "legal": { "title": "Legal" }
+      "explore": {
+        "title": "Explore"
+      },
+      "services": {
+        "title": "Services"
+      },
+      "company": {
+        "title": "Company"
+      },
+      "legal": {
+        "title": "Legal"
+      }
     },
     "dynamic": {
       "dealers": "Highlighted dealers",
@@ -401,7 +429,8 @@
         "question": "Can the dealer help with charging installation?",
         "answer": "Yes, many dealers collaborate with certified electricians and can coordinate a home or workplace charger installation for you."
       }
-    ]
+    ],
+    "officialBadge": "Official Dealer"
   },
   "modelsPage": {
     "title": "Electric & Hybrid Models",
@@ -689,7 +718,20 @@
         "question": "How many items can I save?",
         "answer": "There is no hard limit—save as many dealers and models as you need while researching."
       }
-    ]
+    ],
+    "shareList": "Share favorites",
+    "exportList": "Export as TXT",
+    "copyList": "Copy summary",
+    "shareTitle": "My Makina Elektrike favorites",
+    "shareMessage": "Here are {{count}} electric picks I am considering from Makina Elektrike.",
+    "shareSuccess": "Favorites shared successfully.",
+    "copySuccess": "Favorites copied to your clipboard.",
+    "shareError": "Unable to share favorites right now.",
+    "exportHeading": "Makina Elektrike favorites",
+    "exportDealersHeading": "Dealers",
+    "exportModelsHeading": "Models",
+    "noItemsToExport": "Add dealers or models to your favorites to export them.",
+    "exportSuccess": "Favorites exported successfully."
   },
   "auth": {
     "awaitingApprovalTitle": "Awaiting Approval",

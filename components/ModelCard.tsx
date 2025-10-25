@@ -13,6 +13,8 @@ const ModelCard: React.FC<{ model: Model }> = ({ model }) => {
     const imageUrl = model.image_url || model.imageGallery?.[0] || MODEL_PLACEHOLDER_IMAGE;
     const battery = model.battery_capacity ? `${model.battery_capacity} kWh` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
     const range = model.range_wltp ? `${model.range_wltp} km` : t('modelsPage.rangeUnknown', { defaultValue: 'Unknown' });
+    const batteryPercent = model.battery_capacity ? Math.min(100, Math.round((model.battery_capacity / 120) * 100)) : null;
+    const rangePercent = model.range_wltp ? Math.min(100, Math.round((model.range_wltp / 700) * 100)) : null;
 
     return (
         <div className="relative bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-lg overflow-hidden group transition-all duration-300 transform hover:-translate-y-1 hover:shadow-neon-cyan h-full flex flex-col">
@@ -41,13 +43,29 @@ const ModelCard: React.FC<{ model: Model }> = ({ model }) => {
                         <p className="text-sm font-semibold text-gray-400">{model.brand}</p>
                         <h3 className="text-xl font-bold text-white mt-1">{model.model_name}</h3>
                         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                            <div className="text-center p-3 bg-white/5 rounded-lg">
+                            <div className="rounded-lg bg-white/5 p-4 text-center">
                                 <Battery className="mx-auto text-gray-cyan mb-1" size={20}/>
                                 <p className="font-bold text-white">{battery}</p>
+                                {batteryPercent !== null && (
+                                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-gray-cyan via-emerald-400 to-gray-cyan transition-all"
+                                            style={{ width: `${batteryPercent}%` }}
+                                        />
+                                    </div>
+                                )}
                             </div>
-                            <div className="text-center p-3 bg-white/5 rounded-lg">
+                            <div className="rounded-lg bg-white/5 p-4 text-center">
                                 <Gauge className="mx-auto text-gray-cyan mb-1" size={20}/>
                                 <p className="font-bold text-white">{range}</p>
+                                {rangePercent !== null && (
+                                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-indigo-400 via-gray-cyan to-indigo-500 transition-all"
+                                            style={{ width: `${rangePercent}%` }}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

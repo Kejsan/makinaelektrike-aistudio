@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '../types';
-import { Car, Building } from 'lucide-react';
+import { Car, Building, Search, Loader2 } from 'lucide-react';
 import DealerCard from '../components/DealerCard';
 import ModelCard from '../components/ModelCard';
 import BlogCard from '../components/BlogCard';
@@ -21,6 +21,18 @@ const HomePage: React.FC = () => {
   const [searchCity, setSearchCity] = useState('');
   const [searchBrand, setSearchBrand] = useState('');
   const [filteredDealersForSearch, setFilteredDealersForSearch] = useState(dealers.filter(d => d.isFeatured));
+  const [isSearching, setIsSearching] = useState(false);
+  const heroTaglinesRaw = t('home.heroTaglines', { returnObjects: true }) as unknown;
+  const heroTaglines = useMemo(() => {
+    if (Array.isArray(heroTaglinesRaw) && heroTaglinesRaw.length > 0) {
+      return heroTaglinesRaw as string[];
+    }
+    const fallback = typeof heroTaglinesRaw === 'string' && heroTaglinesRaw.trim().length
+      ? heroTaglinesRaw
+      : t('home.heroSubtitle');
+    return [fallback];
+  }, [heroTaglinesRaw, t]);
+  const [taglineIndex, setTaglineIndex] = useState(0);
   const valueHighlights = t('home.valueHighlights', { returnObjects: true }) as Array<{ title: string; description: string }>;
   const insightItems = t('home.insights', { returnObjects: true }) as Array<{ title: string; description: string }>;
   const faqItems = t('home.faqItems', { returnObjects: true }) as Array<{ question: string; answer: string }>;
@@ -82,6 +94,18 @@ const HomePage: React.FC = () => {
   }, [blogPosts]);
 
   useEffect(() => {
+    if (!heroTaglines.length) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setTaglineIndex(prev => (prev + 1) % heroTaglines.length);
+    }, 4000);
+
+    return () => window.clearInterval(intervalId);
+  }, [heroTaglines.length]);
+
+  useEffect(() => {
     let results = dealers;
 
     const city = searchCity.trim().toLowerCase();
@@ -107,7 +131,38 @@ const HomePage: React.FC = () => {
     setFilteredDealersForSearch(results.slice(0, 4));
   }, [searchCity, searchBrand, dealers, featuredDealers]);
 
+  const cityOptions = useMemo(() => Array.from(new Set(dealers.map(dealer => dealer.city))).filter(Boolean).sort((a, b) => a.localeCompare(b)), [dealers]);
 
+  const brandOptions = useMemo(() => {
+    const brands = new Set<string>();
+    dealers.forEach(dealer => {
+      dealer.brands.forEach(brand => brands.add(brand));
+    });
+    return Array.from(brands).sort((a, b) => a.localeCompare(b));
+  }, [dealers]);
+
+  const handleSearch = () => {
+    setIsSearching(true);
+    window.setTimeout(() => {
+      setIsSearching(false);
+    }, 600);
+  };
+
+  const searchSummary = useMemo(() => {
+    if (!searchCity && !searchBrand) {
+      return t('home.searchLiveResultsDefault');
+    }
+    if (!filteredDealersForSearch.length) {
+      return t('home.searchLiveResultsEmpty');
+    }
+    return t('home.searchLiveResults', {
+      count: filteredDealersForSearch.length,
+      city: searchCity || t('common.anyCity'),
+      brand: searchBrand || t('common.anyBrand'),
+    });
+  }, [filteredDealersForSearch.length, searchBrand, searchCity, t]);
+
+  
   return (
     <div>
       <SEO
@@ -131,67 +186,134 @@ const HomePage: React.FC = () => {
         structuredData={structuredData}
       />
       {/* Hero Section */}
-      <section className="relative flex min-h-[60vh] items-center justify-center overflow-hidden bg-[#00001a] text-center text-white">
+      <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden bg-[#00001a] text-center text-white">
         <div
           className="absolute inset-0 bg-cover bg-center scale-110"
           style={{ backgroundImage: `url(${heroDashboard})` }}
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-[#00001a]/70" aria-hidden="true" />
-        <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center px-4 py-20 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#00001a]/70 via-[#000025]/60 to-[#000033]/95" aria-hidden="true" />
+        <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-4 py-24 sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.5em] text-gray-300">
+            <span key={`${heroTaglines[taglineIndex]}-${taglineIndex}`} className="tagline-rotate inline-flex items-center gap-3">
+              <span className="h-1 w-1 rounded-full bg-gray-cyan" aria-hidden="true" />
+              {heroTaglines[taglineIndex] || ''}
+              <span className="h-1 w-1 rounded-full bg-gray-cyan" aria-hidden="true" />
+            </span>
+          </p>
           <h1
-            className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl md:text-6xl"
+            className="mt-6 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl md:text-6xl"
             style={{ textShadow: '0 0 20px rgba(84, 160, 155, 0.5)' }}
           >
             {t('home.heroTitle')}
           </h1>
-          <p className="mt-4 text-base text-gray-300 sm:text-lg md:text-xl">{t('home.heroSubtitle')}</p>
+          <p className="mt-6 max-w-3xl text-base text-gray-300 sm:text-lg md:text-xl">{t('home.heroSubtitle')}</p>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to="/models"
+              className="inline-flex items-center justify-center rounded-full bg-gray-cyan px-8 py-3 text-base font-semibold text-navy-blue shadow-lg shadow-gray-cyan/40 transition-transform duration-200 hover:-translate-y-1 hover:bg-opacity-90"
+            >
+              {t('home.heroPrimaryCta')}
+            </Link>
+            <Link
+              to="/dealers"
+              className="inline-flex items-center justify-center rounded-full border border-white/20 px-8 py-3 text-base font-semibold text-white transition-all duration-200 hover:-translate-y-1 hover:border-gray-cyan/70 hover:bg-white/10"
+            >
+              {t('home.heroSecondaryCta')}
+            </Link>
+          </div>
           <a
             href="#search-section"
-            className="mt-8 inline-flex items-center justify-center rounded-full bg-vivid-red px-8 py-3 text-base font-semibold text-white transition-transform duration-200 hover:scale-105 hover:bg-opacity-90 hover:shadow-lg hover:shadow-vivid-red/50"
+            className="mt-8 inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-gray-300 transition-colors hover:text-white"
           >
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-white/10 text-xs">⌄</span>
             {t('home.heroCta')}
           </a>
         </div>
       </section>
 
       {/* Search Section */}
-      <section id="search-section" className="-mt-16 py-16">
+      <section id="search-section" className="-mt-16 pb-4 pt-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-8 text-center text-3xl font-bold text-white">{t('home.searchTitle')}</h2>
-          <div className="grid grid-cols-1 gap-6 rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg sm:p-8 md:grid-cols-2 xl:grid-cols-3 xl:items-end">
-            <div className="w-full">
-              <label htmlFor="city" className="mb-2 block text-sm font-medium text-gray-300">{t('home.cityPlaceholder')}</label>
-              <div className="relative">
-                <Building className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  id="city"
-                  placeholder={t('home.cityPlaceholder')}
-                  className="block w-full rounded-md border border-gray-600 bg-white/10 py-2.5 pl-10 text-white shadow-sm focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
-                  value={searchCity}
-                  onChange={(e) => setSearchCity(e.target.value)}
-                />
+          <div className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur-lg sm:p-8">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 xl:items-end">
+              <div className="w-full">
+                <label htmlFor="city" className="mb-2 block text-sm font-medium text-gray-300">{t('home.cityPlaceholder')}</label>
+                <div className="relative">
+                  <Building className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    id="city"
+                    list="city-options"
+                    placeholder={t('home.cityPlaceholder')}
+                    className="block w-full rounded-md border border-gray-600 bg-white/10 py-2.5 pl-10 text-white shadow-sm focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                    value={searchCity}
+                    onChange={(e) => setSearchCity(e.target.value)}
+                  />
+                  <datalist id="city-options">
+                    {cityOptions.map(city => (
+                      <option key={city} value={city} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              <div className="w-full">
+                <label htmlFor="brand" className="mb-2 block text-sm font-medium text-gray-300">{t('home.brandPlaceholder')}</label>
+                <div className="relative">
+                  <Car className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    id="brand"
+                    list="brand-options"
+                    placeholder={t('home.brandPlaceholder')}
+                    className="block w-full rounded-md border border-gray-600 bg-white/10 py-2.5 pl-10 text-white shadow-sm focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                    value={searchBrand}
+                    onChange={(e) => setSearchBrand(e.target.value)}
+                  />
+                  <datalist id="brand-options">
+                    {brandOptions.map(brand => (
+                      <option key={brand} value={brand} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              <div className="md:col-span-2 xl:col-span-1">
+                <button
+                  type="button"
+                  onClick={handleSearch}
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-gray-cyan px-6 py-3 text-base font-semibold text-navy-blue transition-all hover:bg-opacity-90 disabled:opacity-70"
+                  disabled={isSearching}
+                >
+                  {isSearching ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />}
+                  {isSearching ? t('common.loading') : t('home.searchButton')}
+                </button>
               </div>
             </div>
-            <div className="w-full">
-              <label htmlFor="brand" className="mb-2 block text-sm font-medium text-gray-300">{t('home.brandPlaceholder')}</label>
-              <div className="relative">
-                <Car className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  id="brand"
-                  placeholder={t('home.brandPlaceholder')}
-                  className="block w-full rounded-md border border-gray-600 bg-white/10 py-2.5 pl-10 text-white shadow-sm focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
-                  value={searchBrand}
-                  onChange={(e) => setSearchBrand(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="md:col-span-2 xl:col-span-1">
-              <button className="flex w-full items-center justify-center rounded-md bg-gray-cyan px-6 py-3 text-base font-semibold text-white transition-colors hover:bg-opacity-90">
-                {t('home.searchButton')}
-              </button>
+            <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-gray-300">
+              <p className="font-semibold text-white">{searchSummary}</p>
+              {filteredDealersForSearch.length > 0 && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {filteredDealersForSearch.slice(0, 4).map(dealer => (
+                    <Link
+                      key={dealer.id}
+                      to={`/dealers/${dealer.id}`}
+                      className="group flex items-center justify-between rounded-lg border border-white/5 bg-white/5 px-4 py-3 text-white transition-all hover:border-gray-cyan/60 hover:bg-white/10"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold">{dealer.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {dealer.city} • {dealer.brands.slice(0, 2).join(', ')}
+                          {dealer.brands.length > 2 ? '…' : ''}
+                        </p>
+                      </div>
+                      <span className="text-xs font-semibold text-gray-cyan transition-colors group-hover:text-white">
+                        {t('home.searchSuggestionCta')}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

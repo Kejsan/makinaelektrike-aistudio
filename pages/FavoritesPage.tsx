@@ -4,15 +4,18 @@ import { useFavorites } from '../hooks/useFavorites';
 import { Dealer, Model } from '../types';
 import DealerCard from '../components/DealerCard';
 import ModelCard from '../components/ModelCard';
-import { Heart } from 'lucide-react';
+import { Heart, Share2, Download, Copy } from 'lucide-react';
 import { DataContext } from '../contexts/DataContext';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
+import { useToast } from '../contexts/ToastContext';
 
 const FavoritesPage: React.FC = () => {
     const { t } = useTranslation();
     const { favorites, loading: favoritesLoading } = useFavorites();
     const { dealers, models, loading: dataLoading } = useContext(DataContext);
+    const { addToast } = useToast();
+    const canUseClipboard = typeof navigator !== 'undefined' && typeof navigator.clipboard !== 'undefined';
     const insights = t('favoritesPage.insights', { returnObjects: true }) as Array<{ title: string; description: string }>;
     const faqItems = t('favoritesPage.faqItems', { returnObjects: true }) as Array<{ question: string; answer: string }>;
 
@@ -78,6 +81,64 @@ const FavoritesPage: React.FC = () => {
         },
     ];
 
+    const handleShareList = async () => {
+        try {
+            const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/favorites` : `${BASE_URL}/favorites`;
+            const shareText = t('favoritesPage.shareMessage', { count: favorites.length });
+
+            if (typeof navigator !== 'undefined' && navigator.share) {
+                await navigator.share({ title: t('favoritesPage.shareTitle'), text: shareText, url: shareUrl });
+                addToast(t('favoritesPage.shareSuccess'), 'success');
+                return;
+            }
+
+            if (canUseClipboard && navigator.clipboard) {
+                await navigator.clipboard.writeText(`${shareText} ${shareUrl}`.trim());
+                addToast(t('favoritesPage.copySuccess'), 'success');
+                return;
+            }
+
+            addToast(t('favoritesPage.shareError'), 'info');
+        } catch (error) {
+            console.error('Unable to share favorites', error);
+            addToast(t('favoritesPage.shareError'), 'error');
+        }
+    };
+
+    const handleExportList = () => {
+        const timestamp = new Date().toISOString().split('T')[0];
+        const lines: string[] = [t('favoritesPage.exportHeading'), ''];
+
+        if (favoriteDealers.length) {
+            lines.push(t('favoritesPage.exportDealersHeading'));
+            favoriteDealers.forEach(dealer => {
+                lines.push(`- ${dealer.name} (${dealer.city})`);
+            });
+            lines.push('');
+        }
+
+        if (favoriteModels.length) {
+            lines.push(t('favoritesPage.exportModelsHeading'));
+            favoriteModels.forEach(model => {
+                lines.push(`- ${model.brand} ${model.model_name}`);
+            });
+            lines.push('');
+        }
+
+        if (!favoriteDealers.length && !favoriteModels.length) {
+            lines.push(t('favoritesPage.noItemsToExport'));
+        }
+
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `makina-elektrike-favorites-${timestamp}.txt`;
+        link.click();
+        URL.revokeObjectURL(url);
+        addToast(t('favoritesPage.exportSuccess'), 'success');
+    };
+
     return (
         <div className="min-h-screen py-12">
             <SEO
@@ -109,6 +170,49 @@ const FavoritesPage: React.FC = () => {
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl mb-12">
                     <h2 className="text-2xl font-bold text-white text-center">{t('favoritesPage.introTitle')}</h2>
                     <p className="mt-4 text-gray-300 text-center max-w-3xl mx-auto">{t('favoritesPage.introSubtitle')}</p>
+                    <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                        <button
+                            type="button"
+                            onClick={handleShareList}
+                            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:border-gray-cyan/70 hover:bg-white/10"
+                        >
+                            <Share2 size={16} />
+                            {t('favoritesPage.shareList')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleExportList}
+                            className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:border-gray-cyan/70 hover:bg-white/10"
+                        >
+                            <Download size={16} />
+                            {t('favoritesPage.exportList')}
+                        </button>
+                        {canUseClipboard && (
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        const totalItems = favoriteModels.length + favoriteDealers.length;
+                                        const summary = totalItems
+                                            ? `${t('favoritesPage.exportHeading')} (${totalItems})\n\n${favoriteDealers
+                                                  .map(dealer => `- ${dealer.name} (${dealer.city})`)
+                                                  .concat(favoriteModels.map(model => `- ${model.brand} ${model.model_name}`))
+                                                  .join('\n')}`
+                                            : t('favoritesPage.noItemsToExport');
+                                        await navigator.clipboard?.writeText(summary);
+                                        addToast(t('favoritesPage.copySuccess'), 'success');
+                                    } catch (error) {
+                                        console.error('Unable to copy favorites overview', error);
+                                        addToast(t('favoritesPage.shareError'), 'error');
+                                    }
+                                }}
+                                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:border-gray-cyan/70 hover:bg-white/10"
+                            >
+                                <Copy size={16} />
+                                {t('favoritesPage.copyList')}
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <section>
