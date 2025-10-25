@@ -80,11 +80,12 @@ const formatPowerRange = (properties: StationProperties) => {
 const getBoundingBoxFromBounds = (bounds: L.LatLngBounds) => {
   const northEast = bounds.getNorthEast();
   const southWest = bounds.getSouthWest();
-  const topLat = northEast.lat;
-  const leftLng = southWest.lng;
-  const bottomLat = southWest.lat;
-  const rightLng = northEast.lng;
-  return `${topLat},${leftLng},${bottomLat},${rightLng}`;
+  const topLeftLat = northEast.lat;
+  const topLeftLng = southWest.lng;
+  const bottomRightLat = southWest.lat;
+  const bottomRightLng = northEast.lng;
+
+  return `${topLeftLat},${topLeftLng},${bottomRightLat},${bottomRightLng}`;
 };
 
 const boundsFromTuple = (tuple?: BoundsTuple | null) => {
@@ -335,6 +336,8 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const markersRef = useRef<Map<number, L.Marker>>(new Map());
   const fetchControllerRef = useRef<AbortController | null>(null);
+  const requestTokenRef = useRef(0);
+  const lastNonEmptyStationsRef = useRef<StationFeature[] | null>(null);
   const lastContextRef = useRef<{ mode: 'country' | 'bounds'; bounds: BoundsTuple | null }>({
     mode: 'country',
     bounds: null,
@@ -350,6 +353,8 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
       }
       const controller = new AbortController();
       fetchControllerRef.current = controller;
+      requestTokenRef.current += 1;
+      const requestToken = requestTokenRef.current;
       setLoadingStations(true);
       setError(null);
 
@@ -360,12 +365,16 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
       const nextContext: { mode: 'country' | 'bounds'; bounds: BoundsTuple | null } = sourceBounds
         ? {
             mode: 'bounds',
-            bounds: [
-              Number(sourceBounds.getNorth().toFixed(6)),
-              Number(sourceBounds.getWest().toFixed(6)),
-              Number(sourceBounds.getSouth().toFixed(6)),
-              Number(sourceBounds.getEast().toFixed(6)),
-            ],
+            bounds: (() => {
+              const ne = sourceBounds.getNorthEast();
+              const sw = sourceBounds.getSouthWest();
+              return [
+                Number(ne.lat.toFixed(6)),
+                Number(sw.lng.toFixed(6)),
+                Number(sw.lat.toFixed(6)),
+                Number(ne.lng.toFixed(6)),
+              ];
+            })(),
           }
         : { mode: 'country', bounds: null };
 
@@ -376,13 +385,29 @@ const ChargingStationsAlbaniaPage: React.FC = () => {
           signal: controller.signal,
         });
 
-        if (controller.signal.aborted) {
+        if (controller.signal.aborted || requestToken !== requestTokenRef.current) {
           return;
         }
 
-        setStations(data.features ?? []);
-        setLastUpdated(new Date());
+        const features = Array.isArray(data.features) ? data.features : [];
+        const hasFeatures = features.length > 0;
+
         lastContextRef.current = nextContext;
+
+        if (hasFeatures) {
+          setStations(features);
+          lastNonEmptyStationsRef.current = features;
+        } else if (!hasLoadedOnceRef.current) {
+          setStations([]);
+          lastNonEmptyStationsRef.current = null;
+        } else if (lastNonEmptyStationsRef.current?.length) {
+          console.warn('Open Charge Map returned 0 stations for the current bounds; keeping previous markers.');
+          setStations(prev => (prev.length ? prev : [...lastNonEmptyStationsRef.current!]));
+        } else {
+          setStations([]);
+        }
+
+        setLastUpdated(new Date());
         hasLoadedOnceRef.current = true;
         if (sourceBounds) {
           pendingBoundsRef.current = sourceBounds;
