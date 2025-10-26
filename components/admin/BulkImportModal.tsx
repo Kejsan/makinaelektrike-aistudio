@@ -453,7 +453,8 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         isFeatured: input.isFeatured ?? false,
         imageGallery: (input.imageGallery as string[]) ?? [],
         location:
-          input.location ?? [input.address, input.city].filter(Boolean).join(', ') || null,
+          (input.location ??
+            [input.address, input.city].filter(Boolean).join(', ')) || null,
         approved: status === 'approved',
         status,
         is_active: input.is_active ?? status === 'approved',
