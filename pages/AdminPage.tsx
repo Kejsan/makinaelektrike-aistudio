@@ -87,8 +87,6 @@ const AdminPage: React.FC = () => {
   const { logout, user, role } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const dataContext = useContext(DataContext);
-
   const {
     dealers,
     models,
@@ -98,9 +96,6 @@ const AdminPage: React.FC = () => {
     dealerMutations,
     modelMutations,
     blogPostMutations,
-  } = dataContext;
-
-  const {
     addDealer,
     updateDealer,
     deleteDealer,
@@ -116,7 +111,7 @@ const AdminPage: React.FC = () => {
     addBlogPost,
     updateBlogPost,
     deleteBlogPost,
-  } = dataContext;
+  } = useContext(DataContext);
 
   const [activeTab, setActiveTab] = useState<TabKey>('dealers');
   const [dealerFormState, setDealerFormState] = useState<FormState<Dealer>>(null);
