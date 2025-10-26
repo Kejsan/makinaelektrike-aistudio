@@ -76,8 +76,6 @@ export interface Dealer extends DealerDocument {
 interface ModelCore {
   brand: string;
   model_name: string;
-  year?: number;
-  release_year?: number;
   body_type?: string;
   battery_capacity?: number; // in kWh
   range_wltp?: number; // in km
@@ -109,18 +107,6 @@ export interface Model extends ModelCore, ModelOwnershipMetadata {
 export interface DealerModel {
   dealer_id: string;
   model_id: string;
-  price?: number;
-  currency?: string;
-  guarantee_value?: number;
-  guarantee_unit?: 'years' | 'km' | string;
-  guarantee_text?: string;
-  payment_methods?: string[] | string;
-  preorder_available?: boolean;
-  status?: 'active' | 'inactive' | string;
-  active?: boolean;
-  thumbnail_url?: string;
-  specs_summary?: string;
-  last_updated?: string;
 }
 
 export interface FavouriteEntry extends FirestoreTimestamps {
