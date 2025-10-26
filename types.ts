@@ -20,6 +20,8 @@ interface FirestoreTimestamps {
   updatedAt?: Timestamp | null;
 }
 
+export type DealerStatus = 'pending' | 'approved' | 'rejected';
+
 interface DealerCore {
   name: string;
   companyName?: string;
@@ -39,6 +41,15 @@ interface DealerCore {
   priceRange?: string;
   modelsAvailable: string[];
   image_url?: string;
+  logo_url?: string | null;
+  description?: string | null;
+  location?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  isActive?: boolean;
+  status?: DealerStatus;
+  isDeleted?: boolean;
+  deletedAt?: Timestamp | null;
   isFeatured?: boolean;
   imageGallery?: string[];
 }
