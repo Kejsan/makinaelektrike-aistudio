@@ -453,7 +453,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         imageGallery: (input.imageGallery as string[]) ?? [],
         location:
           (input.location as string | null | undefined) ??
-          [input.address, input.city].filter(Boolean).join(', ') || null,
+          ([input.address, input.city].filter(Boolean).join(', ') || null),
         approved: (input.approved as boolean | undefined) ?? false,
         approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
         rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
