@@ -94,6 +94,10 @@ const dealerFields: FieldDefinition[] = [
   { key: 'createdBy', label: 'Created by UID', type: 'string' },
   { key: 'updatedBy', label: 'Updated by UID', type: 'string' },
   { key: 'approved', label: 'Approved', type: 'boolean', description: 'true/false' },
+  { key: 'status', label: 'Status', type: 'string', description: "pending, approved, rejected, deleted" },
+  { key: 'is_active', label: 'Is active', type: 'boolean', description: 'true/false' },
+  { key: 'deletedAt', label: 'Deleted at (timestamp)', type: 'string', description: 'ISO timestamp' },
+  { key: 'isDeleted', label: 'Is deleted', type: 'boolean' },
   { key: 'approvedAt', label: 'Approved at (timestamp)', type: 'string', description: 'ISO timestamp' },
   { key: 'rejectedAt', label: 'Rejected at (timestamp)', type: 'string', description: 'ISO timestamp' },
   { key: 'rejectionReason', label: 'Rejection reason', type: 'string' },
@@ -426,6 +430,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
     const buildDealerPayload: EntityConfig['buildPayload'] = values => {
       const input = values as Partial<DealerDocument>;
 
+      const status = (input.status as DealerDocument['status']) ?? (input.approved ? 'approved' : 'pending');
       const payload: DealerDocument = {
         name: input.name ?? '',
         companyName: input.companyName ?? null,

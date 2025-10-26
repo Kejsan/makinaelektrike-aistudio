@@ -92,6 +92,7 @@ const DealerDetailPage: React.FC = () => {
         name: dealer.name,
         city: dealer.location || dealer.city,
         brands: dealer.brands.join(', '),
+        description: dealer.description ?? '',
     });
     const keywords = [
         dealer.name,
@@ -227,7 +228,14 @@ const DealerDetailPage: React.FC = () => {
                                 )}
                                 {dealer.website && <p className="flex items-center text-gray-300"><Globe className="text-gray-cyan mr-3" size={20} /><a href={dealer.website} target="_blank" rel="noopener noreferrer" className="hover:underline">Visit Website</a></p>}
                             </div>
-                            
+
+                            {dealer.description && (
+                                <div>
+                                    <h3 className="font-semibold text-white">{t('dealerDetails.aboutDealer')}</h3>
+                                    <p className="text-gray-300">{dealer.description}</p>
+                                </div>
+                            )}
+
                             <div>
                                 <h3 className="font-semibold text-white">{t('dealerDetails.brandsSold')}</h3>
                                 <div className="flex flex-wrap gap-2 mt-2">

@@ -417,6 +417,7 @@
     "metaTitleSuffix": "Shitës automjetesh elektrike | Makina Elektrike",
     "metaDescription": "Zbuloni {{name}} në {{city}} — shitës i autorizuar për {{brands}} dhe mbështetje speciale për drejtuesit elektrikë në Shqipëri.",
     "aboutTitle": "Rreth {{name}}",
+    "aboutDealer": "Rreth këtij shitësi",
     "aboutDescription": "{{name}} shërben drejtuesit në {{city}} me këshilltarë të dedikuar dhe servis të certifikuar për markat {{brands}}.",
     "faqTitle": "FAQ për shitësin",
     "faqSubtitle": "Detaje praktike para se të vizitoni sallonin.",
@@ -775,6 +776,22 @@
       "menaxhim përmbajtjeje"
     ],
     "manageDealers": "Menaxho shitësit",
+    "dealersOverview": "Përmbledhje e statusit të shitësve",
+    "dealersOverviewDescription": "Filtroni dhe kontrolloni shitësit sipas statusit të aktivizimit ose aprovimit. Veprimet përditësohen menjëherë.",
+    "dealerFilters": {
+      "active": "Aktivë",
+      "inactive": "Jo aktivë",
+      "pending": "Në pritje",
+      "deleted": "Të fshirë"
+    },
+    "dealerStatus": {
+      "active": "Aktiv",
+      "inactive": "Jo aktiv",
+      "pending": "Në pritje",
+      "rejected": "I refuzuar",
+      "deleted": "I fshirë"
+    },
+    "noDealersForFilter": "Asnjë shitës nuk përputhet me këtë filtër.",
     "manageModels": "Menaxho modelet",
     "manageBlog": "Menaxho blogun",
     "bulkUploadDealers": "Ngarko shumë shitës",
@@ -788,8 +805,12 @@
     "noPendingDealers": "Asnjë shitës nuk pret aprovimin.",
     "noBrands": "Nuk ka marka",
     "ownerUid": "UID i pronarit: {{uid}}",
+    "ownerUidShort": "UID {{uid}}",
     "createdOn": "Krijuar më {{date}}",
     "updatedOn": "Përditësuar më {{date}}",
+    "createdOnShort": "Krijuar më {{date}}",
+    "updatedOnShort": "Përditësuar më {{date}}",
+    "phoneLabel": "Tel: {{phone}}",
     "editDealer": "Redakto shitësin",
     "edit": "Redakto",
     "approve": "Aprovo",

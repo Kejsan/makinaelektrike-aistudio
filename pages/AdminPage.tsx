@@ -61,6 +61,7 @@ const AdminModal: React.FC<ModalProps> = ({ title, onClose, children }) => (
 type FormState<T> = { mode: 'create' | 'edit'; entity?: T } | null;
 
 type TabKey = 'dealers' | 'models' | 'blog';
+type DealerFilter = 'active' | 'inactive' | 'pending' | 'deleted';
 
 const formatDate = (value: Dealer['createdAt']) => {
   if (!value) {
@@ -98,6 +99,8 @@ const AdminPage: React.FC = () => {
     addDealer,
     updateDealer,
     deleteDealer,
+    deactivateDealer,
+    reactivateDealer,
     approveDealer,
     rejectDealer,
     deactivateDealer,
@@ -257,6 +260,8 @@ const AdminPage: React.FC = () => {
       })
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [dealerFilter, dealers, deriveStatus]);
+
+  const filteredDealers = useMemo(() => dealerStatusBuckets[dealerFilter], [dealerFilter, dealerStatusBuckets]);
 
   const isAdmin = role === 'admin';
 
