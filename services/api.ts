@@ -19,7 +19,7 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { firestore } from './firebase';
-import type { Dealer, DealerDocument, Model, DealerModel, BlogPost } from '../types';
+import type { Dealer, DealerDocument, Model, DealerModel, BlogPost, DealerStatus } from '../types';
 import { omitUndefined } from '../utils/object';
 
 type WithId<T> = T & { id: string };
@@ -82,7 +82,33 @@ const sortBlogPostsByDateDesc = (posts: BlogPost[]) =>
     return secondTime - firstTime;
   });
 
-const mapDealers = createCollectionMapper<Dealer>();
+const mapDealersRaw = createCollectionMapper<Dealer>();
+const normalizeDealerStatus = (dealer: Dealer): Dealer => {
+  const explicitStatus = dealer.status as DealerStatus | undefined;
+  let status: DealerStatus;
+
+  if (explicitStatus) {
+    status = explicitStatus;
+  } else if (dealer.approved === false) {
+    status = 'pending';
+  } else if (dealer.isDeleted || dealer.status === 'deleted') {
+    status = 'deleted';
+  } else {
+    status = 'approved';
+  }
+
+  const isActive = dealer.is_active ?? (status === 'approved');
+
+  return {
+    ...dealer,
+    status,
+    is_active: isActive,
+    approved: status === 'approved',
+  };
+};
+
+const mapDealers = (snapshot: QuerySnapshot<DocumentData>): Dealer[] =>
+  mapDealersRaw(snapshot).map(normalizeDealerStatus);
 const mapModels = createCollectionMapper<Model>();
 const mapBlogPosts = createCollectionMapper<BlogPost>();
 const mapDealerModels = createCollectionMapper<WithId<DealerModel>>();
@@ -120,12 +146,15 @@ export const createDealer = async (payload: DealerDocument): Promise<Dealer> => 
   const sanitizedPayload = omitUndefined(payload as Record<string, unknown>);
   const docRef = await addDoc(dealersCollection, {
     ...sanitizedPayload,
+    status: (sanitizedPayload.status as DealerStatus | undefined) ?? 'pending',
+    is_active: sanitizedPayload.is_active ?? true,
+    approved: sanitizedPayload.approved ?? false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
 
   const snapshot = await getDoc(docRef);
-  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+  return normalizeDealerStatus({ id: snapshot.id, ...(snapshot.data() as DealerDocument) });
 };
 
 export const updateDealer = async (id: string, updates: Partial<DealerDocument>): Promise<Dealer> => {
@@ -133,7 +162,7 @@ export const updateDealer = async (id: string, updates: Partial<DealerDocument>)
   const sanitizedUpdates = omitUndefined(updates as Record<string, unknown>);
   await updateDoc(dealerRef, { ...sanitizedUpdates, updatedAt: serverTimestamp() });
   const snapshot = await getDoc(dealerRef);
-  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+  return normalizeDealerStatus({ id: snapshot.id, ...(snapshot.data() as DealerDocument) });
 };
 
 export const deleteDealer = async (id: string): Promise<void> => {
@@ -142,6 +171,72 @@ export const deleteDealer = async (id: string): Promise<void> => {
   const linksSnapshot = await getDocs(query(dealerModelsCollection, where('dealer_id', '==', id)));
   const deletions = linksSnapshot.docs.map(link => deleteDoc(link.ref));
   await Promise.all(deletions);
+};
+
+export const approveDealerRecord = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    status: 'approved',
+    approved: true,
+    is_active: true,
+    approvedAt: serverTimestamp(),
+    rejectedAt: null,
+    rejectionReason: null,
+    isDeleted: false,
+    deletedAt: null,
+    updatedAt: serverTimestamp(),
+  });
+  const snapshot = await getDoc(dealerRef);
+  return normalizeDealerStatus({ id: snapshot.id, ...(snapshot.data() as DealerDocument) });
+};
+
+export const rejectDealerRecord = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    status: 'rejected',
+    approved: false,
+    is_active: false,
+    rejectedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  const snapshot = await getDoc(dealerRef);
+  return normalizeDealerStatus({ id: snapshot.id, ...(snapshot.data() as DealerDocument) });
+};
+
+export const deactivateDealerRecord = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    is_active: false,
+    updatedAt: serverTimestamp(),
+  });
+  const snapshot = await getDoc(dealerRef);
+  return normalizeDealerStatus({ id: snapshot.id, ...(snapshot.data() as DealerDocument) });
+};
+
+export const reactivateDealerRecord = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    status: 'approved',
+    approved: true,
+    is_active: true,
+    updatedAt: serverTimestamp(),
+  });
+  const snapshot = await getDoc(dealerRef);
+  return normalizeDealerStatus({ id: snapshot.id, ...(snapshot.data() as DealerDocument) });
+};
+
+export const softDeleteDealerRecord = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    status: 'deleted',
+    approved: false,
+    is_active: false,
+    isDeleted: true,
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  const snapshot = await getDoc(dealerRef);
+  return normalizeDealerStatus({ id: snapshot.id, ...(snapshot.data() as DealerDocument) });
 };
 
 export const subscribeToDealers = (
@@ -155,11 +250,10 @@ export const subscribeToApprovedDealers = (
   options: SubscriptionOptions<Dealer>,
 ): Unsubscribe => {
   const dealersQuery = query(dealersCollection, where('approved', '==', true));
-  return subscribeToCollection(
-    dealersQuery,
-    snapshot => sortDealersByName(mapDealers(snapshot)),
-    options,
-  );
+  return subscribeToCollection(dealersQuery, snapshot => {
+    const normalized = mapDealers(snapshot);
+    return sortDealersByName(normalized.filter(dealer => dealer.is_active !== false && dealer.status === 'approved'));
+  }, options);
 };
 
 export const subscribeToDealersByOwner = (

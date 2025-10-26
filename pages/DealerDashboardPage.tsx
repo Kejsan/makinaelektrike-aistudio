@@ -23,6 +23,7 @@ interface ProfileFormState {
   address: string;
   city: string;
   notes: string;
+  description: string;
   brands: string;
   languages: string;
   typeOfCars: string;
@@ -58,6 +59,7 @@ const defaultProfileState: ProfileFormState = {
   address: '',
   city: '',
   notes: '',
+  description: '',
   brands: '',
   languages: '',
   typeOfCars: '',
@@ -164,6 +166,7 @@ const DealerDashboardPage: React.FC = () => {
       address: dealer.address ?? '',
       city: dealer.city ?? '',
       notes: dealer.notes ?? '',
+      description: dealer.description ?? '',
       brands: formatList(dealer.brands),
       languages: formatList(dealer.languages),
       typeOfCars: dealer.typeOfCars ?? '',
@@ -172,7 +175,7 @@ const DealerDashboardPage: React.FC = () => {
       instagram: dealer.social_links?.instagram ?? '',
       twitter: dealer.social_links?.twitter ?? '',
       youtube: dealer.social_links?.youtube ?? '',
-      imageUrl: dealer.image_url ?? '',
+      imageUrl: dealer.logo_url ?? dealer.image_url ?? '',
     });
   }, [dealer]);
 
@@ -266,13 +269,19 @@ const DealerDashboardPage: React.FC = () => {
         city: profileState.city.trim(),
         phone: profileState.phone.trim() || undefined,
         email: profileState.email.trim() || undefined,
+        contact_phone: profileState.phone.trim() || undefined,
+        contact_email: profileState.email.trim() || undefined,
         website: profileState.website.trim() || undefined,
         notes: profileState.notes.trim() || undefined,
+        description: profileState.description.trim() || undefined,
         brands: parseList(profileState.brands),
         languages: parseList(profileState.languages),
         typeOfCars: profileState.typeOfCars.trim() || dealer.typeOfCars || 'Electric Vehicles',
         priceRange: profileState.priceRange.trim() || undefined,
         image_url: profileState.imageUrl.trim() || undefined,
+        logo_url: profileState.imageUrl.trim() || undefined,
+        location:
+          [profileState.address.trim(), profileState.city.trim()].filter(Boolean).join(', ') || dealer.city || undefined,
         social_links: Object.keys(sanitizedSocialLinks).length
           ? sanitizedSocialLinks
           : undefined,
@@ -303,6 +312,7 @@ const DealerDashboardPage: React.FC = () => {
       const nextGallery = Array.from(new Set([imageUrl, ...existingGallery])).slice(0, 3);
       await updateDealer(dealer.id, {
         image_url: imageUrl,
+        logo_url: imageUrl,
         imageGallery: nextGallery,
       });
     } catch (error) {
@@ -323,7 +333,7 @@ const DealerDashboardPage: React.FC = () => {
     try {
       const sanitizedGallery = (dealer.imageGallery ?? []).filter(Boolean);
       const updatedGallery = sanitizedGallery.filter(url => url !== (dealer.image_url ?? ''));
-      await updateDealer(dealer.id, { image_url: '', imageGallery: updatedGallery });
+      await updateDealer(dealer.id, { image_url: '', logo_url: undefined, imageGallery: updatedGallery });
     } catch (error) {
       console.error('Failed to remove dealer image', error);
     }
@@ -554,7 +564,7 @@ const DealerDashboardPage: React.FC = () => {
     );
   }
 
-  const isApprovedDealer = dealer.approved ?? false;
+  const isApprovedDealer = dealer.status === 'approved' && dealer.is_active !== false;
   const isUpdatingDealer = savingProfile || dealerMutations.update.loading || uploadingImage;
   const isCreatingModel = creatingModel || modelMutations.create.loading;
   const newModelGalleryLimit = 3;
@@ -782,6 +792,21 @@ const DealerDashboardPage: React.FC = () => {
                       placeholder="€20,000 - €60,000"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-200" htmlFor="description">
+                    Business description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={profileState.description}
+                    onChange={handleProfileChange}
+                    rows={4}
+                    className="w-full rounded-lg border border-white/10 bg-gray-900/60 px-4 py-2 text-white focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                    placeholder="Tell customers about your dealership, services, and specialties."
+                  />
                 </div>
 
                 <div>

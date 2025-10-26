@@ -46,15 +46,46 @@ const DealerDetailPage: React.FC = () => {
         );
     }
 
+    const status = (dealer.status ?? (dealer.approved === false ? 'pending' : 'approved')) as Dealer['status'];
+    const isActiveDealer = status === 'approved' && dealer.is_active !== false && !dealer.isDeleted;
+
+    if (!isActiveDealer) {
+        return (
+            <div className="text-center py-10 text-white">
+                <SEO
+                    title="Dealeri është i çaktivizuar | Makina Elektrike"
+                    description="Ky dealer është aktualisht i çaktivizuar ose i fshirë."
+                    canonical={id ? `${BASE_URL}/dealers/${id}/` : `${BASE_URL}/dealers/`}
+                    openGraph={{
+                        title: 'Dealeri është i çaktivizuar | Makina Elektrike',
+                        description: 'Ky dealer është aktualisht i çaktivizuar ose i fshirë.',
+                        url: id ? `${BASE_URL}/dealers/${id}/` : `${BASE_URL}/dealers/`,
+                        type: 'business.business',
+                    }}
+                    twitter={{
+                        title: 'Dealeri është i çaktivizuar | Makina Elektrike',
+                        description: 'Ky dealer është aktualisht i çaktivizuar ose i fshirë.',
+                        site: '@makinaelektrike',
+                    }}
+                />
+                {t('dealerDetails.inactiveDealerMessage', 'This dealer is not available right now.')}
+            </div>
+        );
+    }
+
     const favorited = isFavorite(dealer.id);
     const galleryImages = (dealer.imageGallery ?? []).filter(Boolean);
-    const heroImage = dealer.image_url || galleryImages[0] || DEALERSHIP_PLACEHOLDER_IMAGE;
-    const isApproved = dealer.approved ?? true;
+    const heroImage = dealer.image_url || dealer.logo_url || galleryImages[0] || DEALERSHIP_PLACEHOLDER_IMAGE;
+    const isApproved = status === 'approved';
+    const contactPhone = dealer.contact_phone ?? dealer.phone;
+    const contactEmail = dealer.contact_email ?? dealer.email;
+    const location = dealer.location ?? dealer.address ?? dealer.city;
     const canonical = `${BASE_URL}/dealers/${dealer.id}/`;
     const description = t('dealerDetails.metaDescription', {
         name: dealer.name,
         city: dealer.city,
         brands: dealer.brands.join(', '),
+        description: dealer.description ?? '',
     });
     const keywords = [
         dealer.name,
@@ -70,8 +101,8 @@ const DealerDetailPage: React.FC = () => {
             name: dealer.name,
             url: canonical,
             image: heroImage,
-            telephone: dealer.phone ?? undefined,
-            email: dealer.email ?? undefined,
+            telephone: contactPhone ?? undefined,
+            email: contactEmail ?? undefined,
             address: {
                 '@type': 'PostalAddress',
                 streetAddress: dealer.address ?? dealer.city,
@@ -169,12 +200,29 @@ const DealerDetailPage: React.FC = () => {
                             </div>
                             <div className="space-y-4">
                                 <h2 className="text-xl font-bold text-white">{t('dealerDetails.contactInfo')}</h2>
-                                <p className="flex items-start text-gray-300"><MapPin className="text-gray-cyan mt-1 mr-3 flex-shrink-0" size={20} /><span>{dealer.address}</span></p>
-                                {dealer.phone && <p className="flex items-center text-gray-300"><Phone className="text-gray-cyan mr-3" size={20} /><a href={`tel:${dealer.phone}`} className="hover:underline">{dealer.phone}</a></p>}
-                                {dealer.email && <p className="flex items-center text-gray-300"><Mail className="text-gray-cyan mr-3" size={20} /><a href={`mailto:${dealer.email}`} className="hover:underline">{dealer.email}</a></p>}
+                                <p className="flex items-start text-gray-300"><MapPin className="text-gray-cyan mt-1 mr-3 flex-shrink-0" size={20} /><span>{location}</span></p>
+                                {contactPhone && (
+                                    <p className="flex items-center text-gray-300">
+                                        <Phone className="text-gray-cyan mr-3" size={20} />
+                                        <a href={`tel:${contactPhone}`} className="hover:underline">{contactPhone}</a>
+                                    </p>
+                                )}
+                                {contactEmail && (
+                                    <p className="flex items-center text-gray-300">
+                                        <Mail className="text-gray-cyan mr-3" size={20} />
+                                        <a href={`mailto:${contactEmail}`} className="hover:underline">{contactEmail}</a>
+                                    </p>
+                                )}
                                 {dealer.website && <p className="flex items-center text-gray-300"><Globe className="text-gray-cyan mr-3" size={20} /><a href={dealer.website} target="_blank" rel="noopener noreferrer" className="hover:underline">Visit Website</a></p>}
                             </div>
-                            
+
+                            {dealer.description && (
+                                <div>
+                                    <h3 className="font-semibold text-white">{t('dealerDetails.aboutDealer')}</h3>
+                                    <p className="text-gray-300">{dealer.description}</p>
+                                </div>
+                            )}
+
                             <div>
                                 <h3 className="font-semibold text-white">{t('dealerDetails.brandsSold')}</h3>
                                 <div className="flex flex-wrap gap-2 mt-2">

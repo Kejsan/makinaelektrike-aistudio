@@ -6,7 +6,14 @@ import React, {
   useCallback,
   useMemo,
 } from 'react';
-import type { Dealer, DealerDocument, Model, BlogPost, DealerModel } from '../types';
+import type {
+  Dealer,
+  DealerDocument,
+  Model,
+  BlogPost,
+  DealerModel,
+  DealerStatus,
+} from '../types';
 import {
   subscribeToDealers,
   subscribeToApprovedDealers,
@@ -28,6 +35,11 @@ import {
   deleteBlogPost as apiDeleteBlogPost,
   createDealerModel as apiCreateDealerModel,
   deleteDealerModel as apiDeleteDealerModel,
+  approveDealerRecord,
+  rejectDealerRecord,
+  deactivateDealerRecord,
+  reactivateDealerRecord,
+  softDeleteDealerRecord,
 } from '../services/api';
 import { useAuth } from './AuthContext';
 import type { UserRole } from '../types';
@@ -86,6 +98,8 @@ interface DataContextType {
   addDealer: (dealer: DealerInput) => Promise<Dealer>;
   updateDealer: (id: string, updates: DealerUpdate) => Promise<Dealer>;
   deleteDealer: (id: string) => Promise<void>;
+  deactivateDealer: (id: string) => Promise<Dealer>;
+  reactivateDealer: (id: string) => Promise<Dealer>;
   approveDealer: (id: string) => Promise<Dealer>;
   rejectDealer: (id: string) => Promise<Dealer>;
   addModel: (model: ModelInput) => Promise<Model>;
@@ -273,6 +287,8 @@ export const DataContext = createContext<DataContextType>({
   addDealer: rejectUsage as DataContextType['addDealer'],
   updateDealer: rejectUsage as DataContextType['updateDealer'],
   deleteDealer: rejectUsage as DataContextType['deleteDealer'],
+  deactivateDealer: rejectUsage as DataContextType['deactivateDealer'],
+  reactivateDealer: rejectUsage as DataContextType['reactivateDealer'],
   approveDealer: rejectUsage as DataContextType['approveDealer'],
   rejectDealer: rejectUsage as DataContextType['rejectDealer'],
   addModel: rejectUsage as DataContextType['addModel'],
@@ -553,8 +569,22 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const enhanceDealerInput = useCallback(
     (input: DealerInput): DealerInput => {
       const actorUid = normalizeOptionalString(userUid);
+      const status = (input.status as DealerStatus | undefined) ?? 'pending';
+      const isActive =
+        input.is_active === undefined ? (status === 'approved' ? true : input.is_active ?? true) : input.is_active;
 
-      return enhanceOwnershipMetadata(input, actorUid, {
+      const hydrated: DealerInput = {
+        ...input,
+        status,
+        is_active: isActive,
+        approved: status === 'approved',
+        contact_email: input.contact_email ?? input.email,
+        contact_phone: input.contact_phone ?? input.phone,
+        logo_url: input.logo_url ?? input.image_url,
+        location: input.location ?? [input.address, input.city].filter(Boolean).join(', '),
+      };
+
+      return enhanceOwnershipMetadata(hydrated, actorUid, {
         ownerUid: 'ownerUid',
         createdBy: 'createdBy',
         updatedBy: 'updatedBy',
@@ -566,20 +596,35 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const enhanceDealerUpdate = useCallback(
     (updates: DealerUpdate): DealerUpdate => {
       const actorUid = normalizeOptionalString(userUid);
-      const { updatedBy, ...rest } = updates;
+      const { updatedBy, status: rawStatus, is_active: rawIsActive, ...rest } = updates;
+      const sanitized: DealerUpdate = { ...rest };
+
+      if (role === 'admin') {
+        if (rawStatus !== undefined) {
+          const status = (rawStatus as DealerStatus) ?? undefined;
+          if (status) {
+            sanitized.status = status;
+            sanitized.approved = status === 'approved';
+          }
+        }
+        if (rawIsActive !== undefined) {
+          sanitized.is_active = rawIsActive;
+        }
+      }
+
       const normalizedUpdatedBy = normalizeOptionalString(updatedBy);
 
       if (normalizedUpdatedBy) {
-        return { ...rest, updatedBy: normalizedUpdatedBy };
+        return { ...sanitized, updatedBy: normalizedUpdatedBy };
       }
 
       if (actorUid) {
-        return { ...rest, updatedBy: actorUid };
+        return { ...sanitized, updatedBy: actorUid };
       }
 
-      return { ...rest };
+      return { ...sanitized };
     },
-    [userUid],
+    [role, userUid],
   );
 
   const enhanceModelInput = useCallback(
@@ -726,9 +771,33 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'delete',
-        action: () => apiDeleteDealer(id),
+        action: () => softDeleteDealerRecord(id),
         successMessage: 'Dealer deleted successfully.',
         errorMessage: 'Failed to delete dealer.',
+      }).then(() => undefined),
+    [runMutation],
+  );
+
+  const deactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => deactivateDealerRecord(id),
+        successMessage: 'Dealer deactivated successfully.',
+        errorMessage: 'Failed to deactivate dealer.',
+      }),
+    [runMutation],
+  );
+
+  const reactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => reactivateDealerRecord(id),
+        successMessage: 'Dealer reactivated successfully.',
+        errorMessage: 'Failed to reactivate dealer.',
       }),
     [runMutation],
   );
@@ -738,7 +807,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiUpdateDealer(id, { approved: true }),
+        action: () => approveDealerRecord(id),
         successMessage: 'Dealer approved successfully.',
         errorMessage: 'Failed to approve dealer.',
       }),
@@ -750,7 +819,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiUpdateDealer(id, { approved: false }),
+        action: () => rejectDealerRecord(id),
         successMessage: 'Dealer rejected successfully.',
         errorMessage: 'Failed to reject dealer.',
       }),
@@ -928,6 +997,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       addDealer,
       updateDealer,
       deleteDealer,
+      deactivateDealer,
+      reactivateDealer,
       approveDealer,
       rejectDealer,
       addModel,
@@ -954,6 +1025,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       addDealer,
       updateDealer,
       deleteDealer,
+      deactivateDealer,
+      reactivateDealer,
       approveDealer,
       rejectDealer,
       addModel,
