@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   Shield,
   LogOut,
@@ -11,12 +11,14 @@ import {
   Loader2,
   Upload,
   ClipboardList,
+  Power,
+  RefreshCcw,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { DataContext } from '../contexts/DataContext';
-import { Dealer, Model, BlogPost } from '../types';
+import { Dealer, DealerStatus, Model, BlogPost } from '../types';
 import DealerForm, { DealerFormValues } from '../components/admin/DealerForm';
 import ModelForm, { ModelFormValues } from '../components/admin/ModelForm';
 import BlogPostForm, { BlogPostFormValues } from '../components/admin/BlogPostForm';
@@ -98,6 +100,8 @@ const AdminPage: React.FC = () => {
     deleteDealer,
     approveDealer,
     rejectDealer,
+    deactivateDealer,
+    reactivateDealer,
     addModel,
     updateModel,
     deleteModel,
@@ -114,7 +118,12 @@ const AdminPage: React.FC = () => {
   const [dealerSubmitting, setDealerSubmitting] = useState(false);
   const [modelSubmitting, setModelSubmitting] = useState(false);
   const [blogSubmitting, setBlogSubmitting] = useState(false);
-  const [dealerAction, setDealerAction] = useState<{ id: string; type: 'approve' | 'reject' } | null>(null);
+  const [dealerAction, setDealerAction] = useState<
+    { id: string; type: 'approve' | 'reject' | 'deactivate' | 'reactivate' } | null
+  >(null);
+  const [dealerFilter, setDealerFilter] = useState<'active' | 'inactive' | 'pending' | 'deleted'>(
+    'pending',
+  );
   const [offlineQueueOpen, setOfflineQueueOpen] = useState(false);
   const [offlineQueueCount, setOfflineQueueCount] = useState(() =>
     typeof window !== 'undefined' ? listOfflineMutations().length : 0,
@@ -168,15 +177,86 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const pendingDealers = useMemo(
-    () => dealers.filter(dealer => dealer.approved === false),
-    [dealers],
+  const deriveStatus = useCallback(
+    (dealer: Dealer): DealerStatus => {
+      if (dealer.status) {
+        return dealer.status;
+      }
+      if (dealer.approved === false) {
+        return dealer.rejectedAt ? 'rejected' : 'pending';
+      }
+      return 'approved';
+    },
+    [],
   );
 
-  const approvedDealers = useMemo(
-    () => dealers.filter(dealer => dealer.approved !== false),
-    [dealers],
-  );
+  const dealerCounts = useMemo(() => {
+    return dealers.reduce(
+      (acc, dealer) => {
+        const status = deriveStatus(dealer);
+        const isDeleted = dealer.isDeleted === true;
+        const isActive = dealer.isActive !== false;
+
+        if (isDeleted) {
+          acc.deleted += 1;
+          return acc;
+        }
+
+        if (status === 'pending') {
+          acc.pending += 1;
+          return acc;
+        }
+
+        if (status === 'approved') {
+          if (isActive) {
+            acc.active += 1;
+          } else {
+            acc.inactive += 1;
+          }
+          return acc;
+        }
+
+        acc.inactive += 1;
+        return acc;
+      },
+      { active: 0, inactive: 0, pending: 0, deleted: 0 },
+    );
+  }, [dealers, deriveStatus]);
+
+  const filteredDealers = useMemo(() => {
+    return dealers
+      .filter(dealer => {
+        const status = deriveStatus(dealer);
+        const isDeleted = dealer.isDeleted === true;
+        const isActive = dealer.isActive !== false;
+
+        if (dealerFilter === 'deleted') {
+          return isDeleted;
+        }
+
+        if (isDeleted) {
+          return false;
+        }
+
+        if (dealerFilter === 'pending') {
+          return status === 'pending';
+        }
+
+        if (dealerFilter === 'active') {
+          return status === 'approved' && isActive;
+        }
+
+        if (dealerFilter === 'inactive') {
+          if (status === 'approved') {
+            return !isActive;
+          }
+          return status === 'rejected';
+        }
+
+        return false;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [dealerFilter, dealers, deriveStatus]);
 
   const isAdmin = role === 'admin';
 
@@ -215,6 +295,36 @@ const AdminPage: React.FC = () => {
       await rejectDealer(dealerId);
     } catch (error) {
       console.error('Failed to reject dealer', error);
+    } finally {
+      setDealerAction(null);
+    }
+  };
+
+  const handleDeactivateDealer = async (dealerId: string) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setDealerAction({ id: dealerId, type: 'deactivate' });
+    try {
+      await deactivateDealer(dealerId);
+    } catch (error) {
+      console.error('Failed to deactivate dealer', error);
+    } finally {
+      setDealerAction(null);
+    }
+  };
+
+  const handleReactivateDealer = async (dealerId: string) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setDealerAction({ id: dealerId, type: 'reactivate' });
+    try {
+      await reactivateDealer(dealerId);
+    } catch (error) {
+      console.error('Failed to reactivate dealer', error);
     } finally {
       setDealerAction(null);
     }
@@ -395,6 +505,47 @@ const AdminPage: React.FC = () => {
     const dealerUpdateLoading = dealerMutations.update.loading;
     const dealerDeleteLoading = dealerMutations.delete.loading;
 
+    const filterOptions: Array<{
+      key: 'active' | 'inactive' | 'pending' | 'deleted';
+      label: string;
+      count: number;
+    }> = [
+      {
+        key: 'active',
+        label: t('admin.dealerFilters.active', { defaultValue: 'Active' }),
+        count: dealerCounts.active,
+      },
+      {
+        key: 'inactive',
+        label: t('admin.dealerFilters.inactive', { defaultValue: 'Inactive' }),
+        count: dealerCounts.inactive,
+      },
+      {
+        key: 'pending',
+        label: t('admin.dealerFilters.pending', { defaultValue: 'Pending' }),
+        count: dealerCounts.pending,
+      },
+      {
+        key: 'deleted',
+        label: t('admin.dealerFilters.deleted', { defaultValue: 'Deleted' }),
+        count: dealerCounts.deleted,
+      },
+    ];
+
+    const emptyMessage = (() => {
+      switch (dealerFilter) {
+        case 'active':
+          return t('admin.noActiveDealers', { defaultValue: 'No active dealers found.' });
+        case 'inactive':
+          return t('admin.noInactiveDealers', { defaultValue: 'No inactive dealers found.' });
+        case 'pending':
+          return t('admin.noPendingDealers', { defaultValue: 'No dealers awaiting approval.' });
+        case 'deleted':
+        default:
+          return t('admin.noDeletedDealers', { defaultValue: 'No deleted dealers.' });
+      }
+    })();
+
     let content: React.ReactNode;
     if (loadError) {
       content = renderErrorState();
@@ -402,159 +553,250 @@ const AdminPage: React.FC = () => {
       content = renderLoadingState();
     } else {
       content = (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
-            <header className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold text-white">{t('admin.pendingDealers')}</h3>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">
-                {pendingDealers.length}
-              </span>
-            </header>
-
-            {pendingDealers.length === 0 ? (
-              renderEmptyState(t('admin.noPendingDealers'))
-            ) : (
-              <ul className="divide-y divide-white/5">
-                {pendingDealers.map(dealer => {
-                  const isProcessing =
-                    dealerUpdateLoading && dealerAction?.id === dealer.id;
-                  const createdAt = formatDate(dealer.createdAt);
-                  const updatedAt = formatDate(dealer.updatedAt);
-
-                  return (
-                    <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
-                      <div>
-                        <p className="font-semibold text-white">{dealer.name}</p>
-                        <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
-                        <p className="mt-2 text-xs text-gray-400">
-                          {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
-                        </p>
-                        {dealer.ownerUid && (
-                          <p className="mt-2 text-xs text-gray-500">
-                            {t('admin.ownerUid', { defaultValue: 'Owner UID: {{uid}}', uid: dealer.ownerUid })}
-                          </p>
-                        )}
-                        {createdAt && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            {t('admin.createdOn', { defaultValue: 'Created on {{date}}', date: createdAt })}
-                          </p>
-                        )}
-                        {updatedAt && (
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            {t('admin.updatedOn', { defaultValue: 'Updated on {{date}}', date: updatedAt })}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        <button
-                          onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
-                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
-                          aria-label={t('admin.editDealer')}
-                        >
-                          <Pencil size={14} />
-                          <span>{t('admin.edit')}</span>
-                        </button>
-                        <button
-                          onClick={() => handleApproveDealer(dealer.id)}
-                          disabled={!isAdmin || dealerUpdateLoading}
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.approve')}
-                        >
-                          {isProcessing && dealerAction?.type === 'approve' ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Check size={14} />
-                          )}
-                          <span>{t('admin.approve')}</span>
-                        </button>
-                        <button
-                          onClick={() => handleRejectDealer(dealer.id)}
-                          disabled={!isAdmin || dealerUpdateLoading}
-                          className="inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.reject')}
-                        >
-                          {isProcessing && dealerAction?.type === 'reject' ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <XCircle size={14} />
-                          )}
-                          <span>{t('admin.reject')}</span>
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
+        <div className="space-y-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {filterOptions.map(option => {
+              const isSelected = dealerFilter === option.key;
+              return (
+                <button
+                  key={option.key}
+                  onClick={() => setDealerFilter(option.key)}
+                  className={`rounded-2xl border px-4 py-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-cyan/60 ${
+                    isSelected
+                      ? 'border-gray-cyan/60 bg-gray-cyan/30 text-white shadow-lg'
+                      : 'border-white/10 bg-white/5 text-gray-200 hover:bg-white/10'
+                  }`}
+                  aria-pressed={isSelected}
+                >
+                  <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
+                    {option.label}
+                  </p>
+                  <p className="mt-2 text-3xl font-extrabold text-white">{option.count}</p>
+                </button>
+              );
+            })}
+          </div>
 
           <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
             <header className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold text-white">{t('admin.approvedDealers')}</h3>
+              <h3 className="text-lg font-semibold text-white">
+                {t('admin.filteredDealers', { defaultValue: 'Dealers' })}
+              </h3>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">
-                {approvedDealers.length}
+                {filteredDealers.length}
               </span>
             </header>
 
-            {approvedDealers.length === 0 ? (
-              renderEmptyState(t('admin.noApprovedDealers'))
+            {filteredDealers.length === 0 ? (
+              renderEmptyState(emptyMessage)
             ) : (
               <ul className="divide-y divide-white/5">
-                {approvedDealers.map(dealer => {
+                {filteredDealers.map(dealer => {
+                  const status = deriveStatus(dealer);
+                  const isDeleted = dealer.isDeleted === true;
+                  const isActiveDealer =
+                    status === 'approved' && dealer.isActive !== false && !isDeleted;
+                  const isPendingDealer = status === 'pending' && !isDeleted;
+                  const isRejectedDealer = status === 'rejected' && !isDeleted;
                   const createdAt = formatDate(dealer.createdAt);
                   const updatedAt = formatDate(dealer.updatedAt);
+                  const location =
+                    dealer.location || [dealer.address, dealer.city].filter(Boolean).join(', ');
+                  const contactEmail = dealer.contact_email || dealer.email;
+                  const contactPhone = dealer.contact_phone || dealer.phone;
 
-                  return (
-                    <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
-                      <div>
-                        <p className="font-semibold text-white">{dealer.name}</p>
-                        <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
-                        <p className="mt-2 text-xs text-gray-400">
-                          {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
-                        </p>
-                        {dealer.ownerUid && (
-                          <p className="mt-2 text-xs text-gray-500">
-                            {t('admin.ownerUid', { defaultValue: 'Owner UID: {{uid}}', uid: dealer.ownerUid })}
-                          </p>
-                        )}
-                        {createdAt && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            {t('admin.createdOn', { defaultValue: 'Created on {{date}}', date: createdAt })}
-                          </p>
-                        )}
-                        {updatedAt && (
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            {t('admin.updatedOn', { defaultValue: 'Updated on {{date}}', date: updatedAt })}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center justify-end gap-2">
+                  const statusLabel = isDeleted
+                    ? t('admin.statusDeleted', { defaultValue: 'Deleted' })
+                    : isPendingDealer
+                    ? t('admin.statusPending', { defaultValue: 'Pending' })
+                    : isRejectedDealer
+                    ? t('admin.statusRejected', { defaultValue: 'Rejected' })
+                    : isActiveDealer
+                    ? t('admin.statusActive', { defaultValue: 'Active' })
+                    : t('admin.statusInactive', { defaultValue: 'Inactive' });
+
+                  const statusClasses = isDeleted
+                    ? 'border-rose-500/40 bg-rose-500/20 text-rose-100'
+                    : isPendingDealer
+                    ? 'border-amber-500/40 bg-amber-500/20 text-amber-100'
+                    : isRejectedDealer
+                    ? 'border-red-500/40 bg-red-500/20 text-red-100'
+                    : isActiveDealer
+                    ? 'border-emerald-500/40 bg-emerald-500/20 text-emerald-100'
+                    : 'border-slate-500/40 bg-slate-500/20 text-slate-100';
+
+                  const isProcessing = dealerUpdateLoading && dealerAction?.id === dealer.id;
+
+                  const showEditButton = dealerFilter !== 'deleted';
+                  const showDeleteButton = dealerFilter !== 'deleted';
+
+                  const renderPrimaryAction = () => {
+                    if (dealerFilter === 'pending') {
+                      return (
+                        <>
+                          <button
+                            onClick={() => handleApproveDealer(dealer.id)}
+                            disabled={!isAdmin || dealerUpdateLoading}
+                            className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label={t('admin.approve')}
+                          >
+                            {isProcessing && dealerAction?.type === 'approve' ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check size={14} />
+                            )}
+                            <span>{t('admin.approve')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleRejectDealer(dealer.id)}
+                            disabled={!isAdmin || dealerUpdateLoading}
+                            className="inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label={t('admin.reject')}
+                          >
+                            {isProcessing && dealerAction?.type === 'reject' ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <XCircle size={14} />
+                            )}
+                            <span>{t('admin.reject')}</span>
+                          </button>
+                        </>
+                      );
+                    }
+
+                    if (dealerFilter === 'active') {
+                      return (
                         <button
-                          onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
-                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
-                          aria-label={t('admin.editDealer')}
-                        >
-                          <Pencil size={14} />
-                          <span>{t('admin.edit')}</span>
-                        </button>
-                        <button
-                          onClick={() => handleRejectDealer(dealer.id)}
+                          onClick={() => handleDeactivateDealer(dealer.id)}
                           disabled={!isAdmin || dealerUpdateLoading}
                           className="inline-flex items-center gap-1 rounded-lg bg-amber-500/20 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/30 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.reject')}
+                          aria-label={t('admin.deactivate')}
                         >
-                          <XCircle size={14} />
-                          <span>{t('admin.reject')}</span>
+                          {isProcessing && dealerAction?.type === 'deactivate' ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Power size={14} />
+                          )}
+                          <span>{t('admin.deactivate')}</span>
                         </button>
+                      );
+                    }
+
+                    if (dealerFilter === 'inactive') {
+                      if (status === 'rejected') {
+                        return (
+                          <button
+                            onClick={() => handleApproveDealer(dealer.id)}
+                            disabled={!isAdmin || dealerUpdateLoading}
+                            className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label={t('admin.approve')}
+                          >
+                            {isProcessing && dealerAction?.type === 'approve' ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check size={14} />
+                            )}
+                            <span>{t('admin.approve')}</span>
+                          </button>
+                        );
+                      }
+
+                      return (
                         <button
-                          onClick={() => confirmAndDelete(() => deleteDealer(dealer.id))}
-                          disabled={!isAdmin || dealerDeleteLoading}
-                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.delete')}
+                          onClick={() => handleReactivateDealer(dealer.id)}
+                          disabled={!isAdmin || dealerUpdateLoading}
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label={t('admin.reactivate')}
                         >
-                          {dealerDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
-                          <span>{t('admin.delete')}</span>
+                          {isProcessing && dealerAction?.type === 'reactivate' ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCcw size={14} />
+                          )}
+                          <span>{t('admin.reactivate')}</span>
                         </button>
+                      );
+                    }
+
+                    if (dealerFilter === 'deleted') {
+                      return (
+                        <button
+                          onClick={() => handleReactivateDealer(dealer.id)}
+                          disabled={!isAdmin || dealerUpdateLoading}
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          aria-label={t('admin.restoreDealer', { defaultValue: 'Restore dealer' })}
+                        >
+                          {isProcessing && dealerAction?.type === 'reactivate' ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCcw size={14} />
+                          )}
+                          <span>{t('admin.reactivate')}</span>
+                        </button>
+                      );
+                    }
+
+                    return null;
+                  };
+
+                  return (
+                    <li key={dealer.id} className="flex flex-col gap-4 py-4 first:pt-0 last:pb-0 md:flex-row md:items-start md:justify-between">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-base font-semibold text-white">{dealer.name}</p>
+                          <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${statusClasses}`}>
+                            {statusLabel}
+                          </span>
+                        </div>
+                        {location && <p className="text-sm text-gray-300">{location}</p>}
+                        {dealer.description && (
+                          <p className="text-xs text-gray-400 line-clamp-2">{dealer.description}</p>
+                        )}
+                        <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-gray-400">
+                          {contactEmail && <span>{contactEmail}</span>}
+                          {contactPhone && <span>{contactPhone}</span>}
+                        </div>
+                        {dealer.brands?.length > 0 && (
+                          <p className="text-xs text-gray-500">
+                            {dealer.brands.join(', ')}
+                          </p>
+                        )}
+                        {createdAt && (
+                          <p className="text-xs text-gray-500">
+                            {t('admin.createdOn', { defaultValue: 'Created on {{date}}', date: createdAt })}
+                          </p>
+                        )}
+                        {updatedAt && (
+                          <p className="text-xs text-gray-500">
+                            {t('admin.updatedOn', { defaultValue: 'Updated on {{date}}', date: updatedAt })}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {showEditButton && (
+                          <button
+                            onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
+                            className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
+                            aria-label={t('admin.editDealer')}
+                          >
+                            <Pencil size={14} />
+                            <span>{t('admin.edit')}</span>
+                          </button>
+                        )}
+
+                        {renderPrimaryAction()}
+
+                        {showDeleteButton && (
+                          <button
+                            onClick={() => confirmAndDelete(() => deleteDealer(dealer.id))}
+                            disabled={!isAdmin || dealerDeleteLoading}
+                            className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label={t('admin.delete')}
+                          >
+                            {dealerDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
+                            <span>{t('admin.delete')}</span>
+                          </button>
+                        )}
                       </div>
                     </li>
                   );

@@ -88,6 +88,8 @@ interface DataContextType {
   deleteDealer: (id: string) => Promise<void>;
   approveDealer: (id: string) => Promise<Dealer>;
   rejectDealer: (id: string) => Promise<Dealer>;
+  deactivateDealer: (id: string) => Promise<Dealer>;
+  reactivateDealer: (id: string) => Promise<Dealer>;
   addModel: (model: ModelInput) => Promise<Model>;
   updateModel: (id: string, updates: ModelUpdate) => Promise<Model>;
   deleteModel: (id: string) => Promise<void>;
@@ -729,6 +731,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         action: () => apiDeleteDealer(id),
         successMessage: 'Dealer deleted successfully.',
         errorMessage: 'Failed to delete dealer.',
+        allowedRoles: ['admin'],
       }),
     [runMutation],
   );
@@ -738,9 +741,16 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiUpdateDealer(id, { approved: true }),
+        action: () =>
+          apiUpdateDealer(id, {
+            approved: true,
+            status: 'approved',
+            isActive: true,
+            rejectedAt: null,
+          }),
         successMessage: 'Dealer approved successfully.',
         errorMessage: 'Failed to approve dealer.',
+        allowedRoles: ['admin'],
       }),
     [runMutation],
   );
@@ -750,9 +760,47 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiUpdateDealer(id, { approved: false }),
+        action: () =>
+          apiUpdateDealer(id, {
+            approved: false,
+            status: 'rejected',
+            isActive: false,
+          }),
         successMessage: 'Dealer rejected successfully.',
         errorMessage: 'Failed to reject dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
+  const deactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiUpdateDealer(id, { isActive: false }),
+        successMessage: 'Dealer deactivated successfully.',
+        errorMessage: 'Failed to deactivate dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
+  const reactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () =>
+          apiUpdateDealer(id, {
+            isActive: true,
+            status: 'approved',
+            isDeleted: false,
+            deletedAt: null,
+          }),
+        successMessage: 'Dealer reactivated successfully.',
+        errorMessage: 'Failed to reactivate dealer.',
+        allowedRoles: ['admin'],
       }),
     [runMutation],
   );
@@ -930,6 +978,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       deleteDealer,
       approveDealer,
       rejectDealer,
+      deactivateDealer,
+      reactivateDealer,
       addModel,
       updateModel,
       deleteModel,
@@ -956,6 +1006,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       deleteDealer,
       approveDealer,
       rejectDealer,
+      deactivateDealer,
+      reactivateDealer,
       addModel,
       updateModel,
       deleteModel,

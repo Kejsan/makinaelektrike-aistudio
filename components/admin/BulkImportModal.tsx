@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { DataContext } from '../../contexts/DataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import type { DealerDocument, Model, BlogPost } from '../../types';
+import type { DealerDocument, DealerStatus, Model, BlogPost } from '../../types';
 
 export type BulkImportEntity = 'dealers' | 'models' | 'blog';
 
@@ -74,17 +74,22 @@ const dealerFields: FieldDefinition[] = [
   { key: 'lng', label: 'Longitude', required: true, type: 'number', description: 'Decimal degrees (e.g. 19.8189)' },
   { key: 'phone', label: 'Phone', type: 'string' },
   { key: 'email', label: 'Email', type: 'string' },
+  { key: 'contact_phone', label: 'Contact phone', type: 'string' },
+  { key: 'contact_email', label: 'Contact email', type: 'string' },
   { key: 'website', label: 'Website', type: 'string' },
   { key: 'social_links', label: 'Social links (JSON)', type: 'json', description: 'JSON object with facebook/instagram/twitter/youtube keys' },
   { key: 'brands', label: 'Brands', required: true, type: 'string[]', description: 'Comma separated list' },
   { key: 'languages', label: 'Languages', required: true, type: 'string[]', description: 'Comma separated list' },
   { key: 'notes', label: 'Notes', type: 'string' },
+  { key: 'description', label: 'Description', type: 'string' },
   { key: 'typeOfCars', label: 'Type of cars', required: true, type: 'string' },
   { key: 'priceRange', label: 'Price range', type: 'string' },
   { key: 'modelsAvailable', label: 'Models available', required: true, type: 'string[]', description: 'Comma separated list' },
   { key: 'image_url', label: 'Image URL', type: 'string' },
+  { key: 'logo_url', label: 'Logo URL', type: 'string' },
   { key: 'isFeatured', label: 'Is featured', type: 'boolean', description: 'Accepted values: true/false, yes/no, 1/0' },
   { key: 'imageGallery', label: 'Image gallery', type: 'string[]', description: 'Comma separated list of URLs' },
+  { key: 'location', label: 'Location', type: 'string', description: 'Optional display string combining address and city' },
   { key: 'ownerUid', label: 'Owner UID', type: 'string', description: 'Optional UID of the dealer owner' },
   { key: 'createdBy', label: 'Created by UID', type: 'string' },
   { key: 'updatedBy', label: 'Updated by UID', type: 'string' },
@@ -92,6 +97,10 @@ const dealerFields: FieldDefinition[] = [
   { key: 'approvedAt', label: 'Approved at (timestamp)', type: 'string', description: 'ISO timestamp' },
   { key: 'rejectedAt', label: 'Rejected at (timestamp)', type: 'string', description: 'ISO timestamp' },
   { key: 'rejectionReason', label: 'Rejection reason', type: 'string' },
+  { key: 'status', label: 'Status', type: 'string', description: "Accepted values: pending, approved, rejected" },
+  { key: 'isActive', label: 'Is active', type: 'boolean', description: 'true/false' },
+  { key: 'isDeleted', label: 'Is deleted', type: 'boolean', description: 'true/false' },
+  { key: 'deletedAt', label: 'Deleted at (timestamp)', type: 'string', description: 'ISO timestamp' },
 ];
 
 const modelFields: FieldDefinition[] = [
@@ -427,17 +436,24 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         lng: Number(input.lng ?? 0),
         phone: input.phone ?? null,
         email: input.email ?? null,
+        contact_phone: (input.contact_phone as string | null | undefined) ?? null,
+        contact_email: (input.contact_email as string | null | undefined) ?? null,
         website: input.website ?? null,
         social_links: (input.social_links as DealerDocument['social_links']) ?? null,
         brands: (input.brands as string[]) ?? [],
         languages: (input.languages as string[]) ?? [],
         notes: input.notes ?? null,
+        description: input.description ?? null,
         typeOfCars: input.typeOfCars ?? '',
         priceRange: input.priceRange ?? null,
         modelsAvailable: (input.modelsAvailable as string[]) ?? [],
         image_url: input.image_url ?? null,
+        logo_url: input.logo_url ?? input.image_url ?? null,
         isFeatured: input.isFeatured ?? false,
         imageGallery: (input.imageGallery as string[]) ?? [],
+        location:
+          (input.location as string | null | undefined) ??
+          [input.address, input.city].filter(Boolean).join(', ') || null,
         approved: (input.approved as boolean | undefined) ?? false,
         approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
         rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
@@ -447,6 +463,10 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         updatedBy: (input.updatedBy as string | null | undefined) ?? null,
         createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
         updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
+        status: (input.status as DealerStatus | undefined) ?? (input.approved ? 'approved' : 'pending'),
+        isActive: input.isActive ?? true,
+        isDeleted: input.isDeleted ?? false,
+        deletedAt: (input.deletedAt ?? null) as DealerDocument['deletedAt'],
       };
 
       const actorUid = normalizeNullableString(userUid);

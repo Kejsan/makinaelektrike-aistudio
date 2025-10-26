@@ -120,6 +120,10 @@ export const createDealer = async (payload: DealerDocument): Promise<Dealer> => 
   const sanitizedPayload = omitUndefined(payload as Record<string, unknown>);
   const docRef = await addDoc(dealersCollection, {
     ...sanitizedPayload,
+    isActive: payload.isActive ?? true,
+    status: payload.status ?? 'pending',
+    isDeleted: payload.isDeleted ?? false,
+    deletedAt: payload.deletedAt ?? null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -137,11 +141,13 @@ export const updateDealer = async (id: string, updates: Partial<DealerDocument>)
 };
 
 export const deleteDealer = async (id: string): Promise<void> => {
-  await deleteDoc(doc(dealersCollection, id));
-
-  const linksSnapshot = await getDocs(query(dealerModelsCollection, where('dealer_id', '==', id)));
-  const deletions = linksSnapshot.docs.map(link => deleteDoc(link.ref));
-  await Promise.all(deletions);
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    isDeleted: true,
+    isActive: false,
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
 };
 
 export const subscribeToDealers = (
@@ -157,7 +163,10 @@ export const subscribeToApprovedDealers = (
   const dealersQuery = query(dealersCollection, where('approved', '==', true));
   return subscribeToCollection(
     dealersQuery,
-    snapshot => sortDealersByName(mapDealers(snapshot)),
+    snapshot =>
+      sortDealersByName(
+        mapDealers(snapshot).filter(dealer => dealer.isDeleted !== true && dealer.isActive !== false),
+      ),
     options,
   );
 };
