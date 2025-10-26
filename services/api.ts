@@ -209,6 +209,8 @@ export const reactivateDealerStatus = async (id: string): Promise<Dealer> => {
     isActive: true,
     isDeleted: false,
     deletedAt: null,
+    approvedAt: serverTimestamp(),
+    rejectedAt: null,
     updatedAt: serverTimestamp(),
   });
 
