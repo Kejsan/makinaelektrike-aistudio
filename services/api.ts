@@ -144,11 +144,17 @@ export const getDealerById = async (id: string): Promise<Dealer | null> => {
 
 export const createDealer = async (payload: DealerDocument): Promise<Dealer> => {
   const sanitizedPayload = omitUndefined(payload as Record<string, unknown>);
+  const derivedStatus = (payload.status ?? 'pending') as DealerDocument['status'];
+  const derivedApproved = payload.approved ?? derivedStatus === 'approved';
+  const derivedIsActive =
+    payload.isActive ?? (derivedStatus === 'approved' && derivedApproved ? true : false);
   const docRef = await addDoc(dealersCollection, {
     ...sanitizedPayload,
-    status: (sanitizedPayload.status as DealerStatus | undefined) ?? 'pending',
-    is_active: sanitizedPayload.is_active ?? true,
-    approved: sanitizedPayload.approved ?? false,
+    approved: derivedApproved,
+    isActive: derivedIsActive,
+    status: derivedStatus,
+    isDeleted: payload.isDeleted ?? false,
+    deletedAt: payload.deletedAt ?? null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -166,11 +172,76 @@ export const updateDealer = async (id: string, updates: Partial<DealerDocument>)
 };
 
 export const deleteDealer = async (id: string): Promise<void> => {
-  await deleteDoc(doc(dealersCollection, id));
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: false,
+    isDeleted: true,
+    isActive: false,
+    deletedAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+};
 
-  const linksSnapshot = await getDocs(query(dealerModelsCollection, where('dealer_id', '==', id)));
-  const deletions = linksSnapshot.docs.map(link => deleteDoc(link.ref));
-  await Promise.all(deletions);
+export const approveDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: true,
+    status: 'approved',
+    isActive: true,
+    isDeleted: false,
+    approvedAt: serverTimestamp(),
+    rejectedAt: null,
+    deletedAt: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+};
+
+export const rejectDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: false,
+    status: 'rejected',
+    isActive: false,
+    rejectedAt: serverTimestamp(),
+    approvedAt: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+};
+
+export const deactivateDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: true,
+    status: 'approved',
+    isActive: false,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+};
+
+export const reactivateDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: true,
+    status: 'approved',
+    isActive: true,
+    isDeleted: false,
+    deletedAt: null,
+    approvedAt: serverTimestamp(),
+    rejectedAt: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
 };
 
 export const approveDealerRecord = async (id: string): Promise<Dealer> => {
@@ -250,10 +321,14 @@ export const subscribeToApprovedDealers = (
   options: SubscriptionOptions<Dealer>,
 ): Unsubscribe => {
   const dealersQuery = query(dealersCollection, where('approved', '==', true));
-  return subscribeToCollection(dealersQuery, snapshot => {
-    const normalized = mapDealers(snapshot);
-    return sortDealersByName(normalized.filter(dealer => dealer.is_active !== false && dealer.status === 'approved'));
-  }, options);
+  return subscribeToCollection(
+    dealersQuery,
+    snapshot =>
+      sortDealersByName(
+        mapDealers(snapshot).filter(dealer => dealer.isDeleted !== true && dealer.isActive !== false),
+      ),
+    options,
+  );
 };
 
 export const subscribeToDealersByOwner = (

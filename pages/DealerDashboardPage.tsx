@@ -160,13 +160,12 @@ const DealerDashboardPage: React.FC = () => {
     setProfileState({
       name: dealer.name ?? dealer.companyName ?? '',
       contactName: dealer.contactName ?? '',
-      phone: dealer.phone ?? '',
-      email: dealer.email ?? '',
+      phone: dealer.contact_phone ?? dealer.phone ?? '',
+      email: dealer.contact_email ?? dealer.email ?? '',
       website: dealer.website ?? '',
-      address: dealer.address ?? '',
+      address: dealer.address ?? dealer.location ?? '',
       city: dealer.city ?? '',
-      notes: dealer.notes ?? '',
-      description: dealer.description ?? '',
+      notes: dealer.description ?? dealer.notes ?? '',
       brands: formatList(dealer.brands),
       languages: formatList(dealer.languages),
       typeOfCars: dealer.typeOfCars ?? '',
@@ -271,17 +270,17 @@ const DealerDashboardPage: React.FC = () => {
         email: profileState.email.trim() || undefined,
         contact_phone: profileState.phone.trim() || undefined,
         contact_email: profileState.email.trim() || undefined,
+        location:
+          [profileState.address.trim(), profileState.city.trim()].filter(Boolean).join(', ') || undefined,
         website: profileState.website.trim() || undefined,
         notes: profileState.notes.trim() || undefined,
-        description: profileState.description.trim() || undefined,
+        description: profileState.notes.trim() || undefined,
         brands: parseList(profileState.brands),
         languages: parseList(profileState.languages),
         typeOfCars: profileState.typeOfCars.trim() || dealer.typeOfCars || 'Electric Vehicles',
         priceRange: profileState.priceRange.trim() || undefined,
         image_url: profileState.imageUrl.trim() || undefined,
         logo_url: profileState.imageUrl.trim() || undefined,
-        location:
-          [profileState.address.trim(), profileState.city.trim()].filter(Boolean).join(', ') || dealer.city || undefined,
         social_links: Object.keys(sanitizedSocialLinks).length
           ? sanitizedSocialLinks
           : undefined,
@@ -332,8 +331,9 @@ const DealerDashboardPage: React.FC = () => {
     setProfileState(prev => ({ ...prev, imageUrl: '' }));
     try {
       const sanitizedGallery = (dealer.imageGallery ?? []).filter(Boolean);
-      const updatedGallery = sanitizedGallery.filter(url => url !== (dealer.image_url ?? ''));
-      await updateDealer(dealer.id, { image_url: '', logo_url: undefined, imageGallery: updatedGallery });
+      const primaryImage = dealer.logo_url ?? dealer.image_url ?? '';
+      const updatedGallery = sanitizedGallery.filter(url => url !== primaryImage);
+      await updateDealer(dealer.id, { image_url: '', logo_url: '', imageGallery: updatedGallery });
     } catch (error) {
       console.error('Failed to remove dealer image', error);
     }

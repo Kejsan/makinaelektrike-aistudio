@@ -127,7 +127,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       notes: initialValues.notes ?? '',
       typeOfCars: initialValues.typeOfCars ?? '',
       priceRange: initialValues.priceRange ?? '',
-      image_url: initialValues.image_url ?? '',
+    image_url: initialValues.logo_url ?? initialValues.image_url ?? '',
       modelsAvailable: initialValues.modelsAvailable?.join(', ') ?? '',
       socialFacebook: initialValues.social_links?.facebook ?? '',
       socialInstagram: initialValues.social_links?.instagram ?? '',
@@ -136,7 +136,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       isFeatured: Boolean(initialValues.isFeatured),
     });
     setImageFile(null);
-    setImagePreview(initialValues.image_url ?? '');
+    setImagePreview(initialValues.logo_url ?? initialValues.image_url ?? '');
     setPreviewFromFile(false);
     const sanitizedGallery = (initialValues.imageGallery ?? []).filter(Boolean);
     setExistingGallery([...sanitizedGallery]);
@@ -361,10 +361,15 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
     const lngValue = formState.lng.trim();
     const latNumber = Number(latValue);
     const lngNumber = Number(lngValue);
+    const address = formState.address.trim();
+    const city = formState.city.trim();
+    const locationValue = [address, city].filter(Boolean).join(', ');
     const payload: DealerFormValues = {
       name: formState.name.trim(),
-      address: formState.address.trim(),
-      city: formState.city.trim(),
+      companyName: formState.name.trim(),
+      address,
+      city,
+      location: locationValue || undefined,
       lat: Number.isFinite(latNumber) ? latNumber : 0,
       lng: Number.isFinite(lngNumber) ? lngNumber : 0,
       brands: parseList(formState.brands),
@@ -381,11 +386,13 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
     const phone = formState.phone.trim();
     if (phone) {
       payload.phone = phone;
+      payload.contact_phone = phone;
     }
 
     const email = formState.email.trim();
     if (email) {
       payload.email = email;
+      payload.contact_email = email;
     }
 
     const website = formState.website.trim();
@@ -396,6 +403,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
     const notes = formState.notes.trim();
     if (notes) {
       payload.notes = notes;
+      payload.description = notes;
     }
 
     const priceRange = formState.priceRange.trim();
@@ -406,6 +414,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
     const imageUrl = formState.image_url.trim();
     if (imageUrl) {
       payload.image_url = imageUrl;
+      payload.logo_url = imageUrl;
     }
 
     const socialLinks: NonNullable<DealerFormValues['social_links']> = {};

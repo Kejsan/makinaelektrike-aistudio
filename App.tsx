@@ -83,10 +83,11 @@ const DealerRoute: React.FC<{ children: React.ReactElement }> = ({ children }) =
     return <Navigate to="/" replace />;
   }
 
-  const isActiveDealer =
-    dealerRecord && dealerRecord.status === 'approved' && dealerRecord.is_active !== false;
+  const dealerStatus = dealerRecord?.status ?? (dealerRecord?.approved === false ? 'pending' : 'approved');
+  const dealerIsActive =
+    dealerRecord && dealerRecord.isDeleted !== true && dealerRecord.isActive !== false && dealerStatus === 'approved';
 
-  if (!dealerRecord || !isActiveDealer) {
+  if (!dealerRecord || !dealerIsActive) {
     return <Navigate to="/awaiting-approval" replace />;
   }
 

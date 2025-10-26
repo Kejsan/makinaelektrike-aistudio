@@ -27,6 +27,10 @@ import {
   createDealer as apiCreateDealer,
   updateDealer as apiUpdateDealer,
   deleteDealer as apiDeleteDealer,
+  approveDealerStatus as apiApproveDealerStatus,
+  rejectDealerStatus as apiRejectDealerStatus,
+  deactivateDealerStatus as apiDeactivateDealerStatus,
+  reactivateDealerStatus as apiReactivateDealerStatus,
   createModel as apiCreateModel,
   updateModel as apiUpdateModel,
   deleteModel as apiDeleteModel,
@@ -102,6 +106,8 @@ interface DataContextType {
   reactivateDealer: (id: string) => Promise<Dealer>;
   approveDealer: (id: string) => Promise<Dealer>;
   rejectDealer: (id: string) => Promise<Dealer>;
+  deactivateDealer: (id: string) => Promise<Dealer>;
+  reactivateDealer: (id: string) => Promise<Dealer>;
   addModel: (model: ModelInput) => Promise<Model>;
   updateModel: (id: string, updates: ModelUpdate) => Promise<Model>;
   deleteModel: (id: string) => Promise<void>;
@@ -774,30 +780,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         action: () => softDeleteDealerRecord(id),
         successMessage: 'Dealer deleted successfully.',
         errorMessage: 'Failed to delete dealer.',
-      }).then(() => undefined),
-    [runMutation],
-  );
-
-  const deactivateDealer = useCallback(
-    (id: string) =>
-      runMutation({
-        entity: 'dealers',
-        operation: 'update',
-        action: () => deactivateDealerRecord(id),
-        successMessage: 'Dealer deactivated successfully.',
-        errorMessage: 'Failed to deactivate dealer.',
-      }),
-    [runMutation],
-  );
-
-  const reactivateDealer = useCallback(
-    (id: string) =>
-      runMutation({
-        entity: 'dealers',
-        operation: 'update',
-        action: () => reactivateDealerRecord(id),
-        successMessage: 'Dealer reactivated successfully.',
-        errorMessage: 'Failed to reactivate dealer.',
+        allowedRoles: ['admin'],
       }),
     [runMutation],
   );
@@ -807,9 +790,10 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => approveDealerRecord(id),
+        action: () => apiApproveDealerStatus(id),
         successMessage: 'Dealer approved successfully.',
         errorMessage: 'Failed to approve dealer.',
+        allowedRoles: ['admin'],
       }),
     [runMutation],
   );
@@ -819,9 +803,36 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => rejectDealerRecord(id),
+        action: () => apiRejectDealerStatus(id),
         successMessage: 'Dealer rejected successfully.',
         errorMessage: 'Failed to reject dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
+  const deactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiDeactivateDealerStatus(id),
+        successMessage: 'Dealer deactivated successfully.',
+        errorMessage: 'Failed to deactivate dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
+  const reactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiReactivateDealerStatus(id),
+        successMessage: 'Dealer reactivated successfully.',
+        errorMessage: 'Failed to reactivate dealer.',
+        allowedRoles: ['admin'],
       }),
     [runMutation],
   );
@@ -1001,6 +1012,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       reactivateDealer,
       approveDealer,
       rejectDealer,
+      deactivateDealer,
+      reactivateDealer,
       addModel,
       updateModel,
       deleteModel,
@@ -1029,6 +1042,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       reactivateDealer,
       approveDealer,
       rejectDealer,
+      deactivateDealer,
+      reactivateDealer,
       addModel,
       updateModel,
       deleteModel,

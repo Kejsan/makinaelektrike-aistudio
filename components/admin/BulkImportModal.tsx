@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { DataContext } from '../../contexts/DataContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import type { DealerDocument, Model, BlogPost } from '../../types';
+import type { DealerDocument, DealerStatus, Model, BlogPost } from '../../types';
 
 export type BulkImportEntity = 'dealers' | 'models' | 'blog';
 
@@ -89,7 +89,7 @@ const dealerFields: FieldDefinition[] = [
   { key: 'logo_url', label: 'Logo URL', type: 'string' },
   { key: 'isFeatured', label: 'Is featured', type: 'boolean', description: 'Accepted values: true/false, yes/no, 1/0' },
   { key: 'imageGallery', label: 'Image gallery', type: 'string[]', description: 'Comma separated list of URLs' },
-  { key: 'location', label: 'Location text', type: 'string' },
+  { key: 'location', label: 'Location', type: 'string', description: 'Optional display string combining address and city' },
   { key: 'ownerUid', label: 'Owner UID', type: 'string', description: 'Optional UID of the dealer owner' },
   { key: 'createdBy', label: 'Created by UID', type: 'string' },
   { key: 'updatedBy', label: 'Updated by UID', type: 'string' },
@@ -101,6 +101,10 @@ const dealerFields: FieldDefinition[] = [
   { key: 'approvedAt', label: 'Approved at (timestamp)', type: 'string', description: 'ISO timestamp' },
   { key: 'rejectedAt', label: 'Rejected at (timestamp)', type: 'string', description: 'ISO timestamp' },
   { key: 'rejectionReason', label: 'Rejection reason', type: 'string' },
+  { key: 'status', label: 'Status', type: 'string', description: "Accepted values: pending, approved, rejected" },
+  { key: 'isActive', label: 'Is active', type: 'boolean', description: 'true/false' },
+  { key: 'isDeleted', label: 'Is deleted', type: 'boolean', description: 'true/false' },
+  { key: 'deletedAt', label: 'Deleted at (timestamp)', type: 'string', description: 'ISO timestamp' },
 ];
 
 const modelFields: FieldDefinition[] = [
@@ -437,8 +441,8 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         lng: Number(input.lng ?? 0),
         phone: input.phone ?? null,
         email: input.email ?? null,
-        contact_phone: input.contact_phone ?? input.phone ?? null,
-        contact_email: input.contact_email ?? input.email ?? null,
+        contact_phone: (input.contact_phone as string | null | undefined) ?? null,
+        contact_email: (input.contact_email as string | null | undefined) ?? null,
         website: input.website ?? null,
         social_links: (input.social_links as DealerDocument['social_links']) ?? null,
         brands: (input.brands as string[]) ?? [],
@@ -453,13 +457,9 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         isFeatured: input.isFeatured ?? false,
         imageGallery: (input.imageGallery as string[]) ?? [],
         location:
-          (input.location ??
-            [input.address, input.city].filter(Boolean).join(', ')) || null,
-        approved: status === 'approved',
-        status,
-        is_active: input.is_active ?? status === 'approved',
-        deletedAt: (input.deletedAt ?? null) as DealerDocument['deletedAt'],
-        isDeleted: input.isDeleted ?? (status === 'deleted'),
+          (input.location as string | null | undefined) ??
+          ([input.address, input.city].filter(Boolean).join(', ') || null),
+        approved: (input.approved as boolean | undefined) ?? false,
         approvedAt: (input.approvedAt ?? null) as DealerDocument['approvedAt'],
         rejectedAt: (input.rejectedAt ?? null) as DealerDocument['rejectedAt'],
         rejectionReason: (input.rejectionReason as string | null | undefined) ?? null,
@@ -468,6 +468,10 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ entity, onClose }) =>
         updatedBy: (input.updatedBy as string | null | undefined) ?? null,
         createdAt: (input.createdAt ?? null) as DealerDocument['createdAt'],
         updatedAt: (input.updatedAt ?? null) as DealerDocument['updatedAt'],
+        status: (input.status as DealerStatus | undefined) ?? (input.approved ? 'approved' : 'pending'),
+        isActive: input.isActive ?? true,
+        isDeleted: input.isDeleted ?? false,
+        deletedAt: (input.deletedAt ?? null) as DealerDocument['deletedAt'],
       };
 
       const actorUid = normalizeNullableString(userUid);

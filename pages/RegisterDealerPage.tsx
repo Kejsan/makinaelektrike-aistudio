@@ -86,31 +86,38 @@ const RegisterDealerPage: React.FC = () => {
 
       const currentUser = auth.currentUser;
       if (currentUser) {
+        const normalizedCity = city?.trim() ?? '';
+        const normalizedNotes = notes?.trim() ?? '';
+        const normalizedPhone = phone?.trim() ?? '';
+        const normalizedWebsite = website?.trim() ?? '';
+
+        const dealerDoc = {
+          uid: currentUser.uid,
+          ownerUid: currentUser.uid,
+          createdBy: currentUser.uid,
+          updatedBy: currentUser.uid,
+          name: companyName,
+          companyName,
+          contactName,
+          phone: normalizedPhone,
+          city: normalizedCity,
+          website: normalizedWebsite,
+          notes: normalizedNotes,
+          contact_email: email,
+          contact_phone: normalizedPhone,
+          location: normalizedCity || null,
+          description: normalizedNotes || null,
+          approved: false,
+          status: 'pending' as const,
+          isActive: false,
+          isDeleted: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
         await setDoc(
           doc(firestore, 'dealers', currentUser.uid),
-          {
-            uid: currentUser.uid,
-            ownerUid: currentUser.uid,
-            createdBy: currentUser.uid,
-            updatedBy: currentUser.uid,
-            name: companyName,
-            companyName,
-            contactName,
-            phone,
-            contact_phone: phone,
-            email,
-            contact_email: email,
-            city,
-            location: city,
-            website,
-            notes,
-            description: notes,
-            approved: false,
-            status: 'pending',
-            is_active: false,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          },
+          dealerDoc,
           { merge: true }
         );
 
@@ -119,10 +126,10 @@ const RegisterDealerPage: React.FC = () => {
           {
             companyName,
             contactName,
-            phone,
-            city,
-            website,
-            notes,
+            phone: normalizedPhone,
+            city: normalizedCity,
+            website: normalizedWebsite,
+            notes: normalizedNotes,
             status: 'pending',
             role: 'pending',
             is_active: false,
