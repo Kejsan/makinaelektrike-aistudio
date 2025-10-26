@@ -249,7 +249,7 @@ export const subscribeToDealers = (
 export const subscribeToApprovedDealers = (
   options: SubscriptionOptions<Dealer>,
 ): Unsubscribe => {
-  const dealersQuery = query(dealersCollection, where('status', '==', 'approved'));
+  const dealersQuery = query(dealersCollection, where('approved', '==', true));
   return subscribeToCollection(dealersQuery, snapshot => {
     const normalized = mapDealers(snapshot);
     return sortDealersByName(normalized.filter(dealer => dealer.is_active !== false && dealer.status === 'approved'));
