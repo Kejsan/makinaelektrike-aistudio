@@ -20,6 +20,10 @@ import {
   createDealer as apiCreateDealer,
   updateDealer as apiUpdateDealer,
   deleteDealer as apiDeleteDealer,
+  approveDealerStatus as apiApproveDealerStatus,
+  rejectDealerStatus as apiRejectDealerStatus,
+  deactivateDealerStatus as apiDeactivateDealerStatus,
+  reactivateDealerStatus as apiReactivateDealerStatus,
   createModel as apiCreateModel,
   updateModel as apiUpdateModel,
   deleteModel as apiDeleteModel,
@@ -741,13 +745,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () =>
-          apiUpdateDealer(id, {
-            approved: true,
-            status: 'approved',
-            isActive: true,
-            rejectedAt: null,
-          }),
+        action: () => apiApproveDealerStatus(id),
         successMessage: 'Dealer approved successfully.',
         errorMessage: 'Failed to approve dealer.',
         allowedRoles: ['admin'],
@@ -760,12 +758,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () =>
-          apiUpdateDealer(id, {
-            approved: false,
-            status: 'rejected',
-            isActive: false,
-          }),
+        action: () => apiRejectDealerStatus(id),
         successMessage: 'Dealer rejected successfully.',
         errorMessage: 'Failed to reject dealer.',
         allowedRoles: ['admin'],
@@ -778,7 +771,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiUpdateDealer(id, { isActive: false }),
+        action: () => apiDeactivateDealerStatus(id),
         successMessage: 'Dealer deactivated successfully.',
         errorMessage: 'Failed to deactivate dealer.',
         allowedRoles: ['admin'],
@@ -791,13 +784,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () =>
-          apiUpdateDealer(id, {
-            isActive: true,
-            status: 'approved',
-            isDeleted: false,
-            deletedAt: null,
-          }),
+        action: () => apiReactivateDealerStatus(id),
         successMessage: 'Dealer reactivated successfully.',
         errorMessage: 'Failed to reactivate dealer.',
         allowedRoles: ['admin'],

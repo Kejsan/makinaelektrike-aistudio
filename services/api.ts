@@ -118,10 +118,15 @@ export const getDealerById = async (id: string): Promise<Dealer | null> => {
 
 export const createDealer = async (payload: DealerDocument): Promise<Dealer> => {
   const sanitizedPayload = omitUndefined(payload as Record<string, unknown>);
+  const derivedStatus = (payload.status ?? 'pending') as DealerDocument['status'];
+  const derivedApproved = payload.approved ?? derivedStatus === 'approved';
+  const derivedIsActive =
+    payload.isActive ?? (derivedStatus === 'approved' && derivedApproved ? true : false);
   const docRef = await addDoc(dealersCollection, {
     ...sanitizedPayload,
-    isActive: payload.isActive ?? true,
-    status: payload.status ?? 'pending',
+    approved: derivedApproved,
+    isActive: derivedIsActive,
+    status: derivedStatus,
     isDeleted: payload.isDeleted ?? false,
     deletedAt: payload.deletedAt ?? null,
     createdAt: serverTimestamp(),
@@ -143,11 +148,72 @@ export const updateDealer = async (id: string, updates: Partial<DealerDocument>)
 export const deleteDealer = async (id: string): Promise<void> => {
   const dealerRef = doc(dealersCollection, id);
   await updateDoc(dealerRef, {
+    approved: false,
     isDeleted: true,
     isActive: false,
     deletedAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+};
+
+export const approveDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: true,
+    status: 'approved',
+    isActive: true,
+    isDeleted: false,
+    approvedAt: serverTimestamp(),
+    rejectedAt: null,
+    deletedAt: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+};
+
+export const rejectDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: false,
+    status: 'rejected',
+    isActive: false,
+    rejectedAt: serverTimestamp(),
+    approvedAt: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+};
+
+export const deactivateDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: true,
+    status: 'approved',
+    isActive: false,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
+};
+
+export const reactivateDealerStatus = async (id: string): Promise<Dealer> => {
+  const dealerRef = doc(dealersCollection, id);
+  await updateDoc(dealerRef, {
+    approved: true,
+    status: 'approved',
+    isActive: true,
+    isDeleted: false,
+    deletedAt: null,
+    updatedAt: serverTimestamp(),
+  });
+
+  const snapshot = await getDoc(dealerRef);
+  return { id: snapshot.id, ...(snapshot.data() as DealerDocument) };
 };
 
 export const subscribeToDealers = (
