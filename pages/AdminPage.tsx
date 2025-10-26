@@ -11,6 +11,8 @@ import {
   Loader2,
   Upload,
   ClipboardList,
+  Power,
+  RefreshCcw,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -59,6 +61,7 @@ const AdminModal: React.FC<ModalProps> = ({ title, onClose, children }) => (
 type FormState<T> = { mode: 'create' | 'edit'; entity?: T } | null;
 
 type TabKey = 'dealers' | 'models' | 'blog';
+type DealerFilter = 'active' | 'inactive' | 'pending' | 'deleted';
 
 const formatDate = (value: Dealer['createdAt']) => {
   if (!value) {
@@ -96,6 +99,8 @@ const AdminPage: React.FC = () => {
     addDealer,
     updateDealer,
     deleteDealer,
+    deactivateDealer,
+    reactivateDealer,
     approveDealer,
     rejectDealer,
     addModel,
@@ -114,7 +119,10 @@ const AdminPage: React.FC = () => {
   const [dealerSubmitting, setDealerSubmitting] = useState(false);
   const [modelSubmitting, setModelSubmitting] = useState(false);
   const [blogSubmitting, setBlogSubmitting] = useState(false);
-  const [dealerAction, setDealerAction] = useState<{ id: string; type: 'approve' | 'reject' } | null>(null);
+  const [dealerAction, setDealerAction] = useState<
+    { id: string; type: 'approve' | 'reject' | 'deactivate' | 'reactivate' | 'delete' } | null
+  >(null);
+  const [dealerFilter, setDealerFilter] = useState<DealerFilter>('active');
   const [offlineQueueOpen, setOfflineQueueOpen] = useState(false);
   const [offlineQueueCount, setOfflineQueueCount] = useState(() =>
     typeof window !== 'undefined' ? listOfflineMutations().length : 0,
@@ -168,15 +176,59 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const pendingDealers = useMemo(
-    () => dealers.filter(dealer => dealer.approved === false),
-    [dealers],
+  const dealerStatusBuckets = useMemo(() => {
+    const buckets: Record<'active' | 'inactive' | 'pending' | 'deleted', Dealer[]> = {
+      active: [],
+      inactive: [],
+      pending: [],
+      deleted: [],
+    };
+
+    dealers.forEach(dealer => {
+      const status = (dealer.status ?? (dealer.approved === false ? 'pending' : 'approved')) as Dealer['status'];
+      const isDeleted = status === 'deleted' || dealer.isDeleted;
+      const isActive = status === 'approved' && dealer.is_active !== false;
+      const isInactiveApproved = status === 'approved' && dealer.is_active === false;
+
+      if (isDeleted) {
+        buckets.deleted.push(dealer);
+        return;
+      }
+
+      if (status === 'pending') {
+        buckets.pending.push(dealer);
+        return;
+      }
+
+      if (status === 'rejected' || isInactiveApproved) {
+        buckets.inactive.push(dealer);
+        return;
+      }
+
+      buckets.active.push(dealer);
+    });
+
+    const sortByName = (list: Dealer[]) => [...list].sort((a, b) => a.name.localeCompare(b.name));
+
+    return {
+      active: sortByName(buckets.active),
+      inactive: sortByName(buckets.inactive),
+      pending: sortByName(buckets.pending),
+      deleted: sortByName(buckets.deleted),
+    };
+  }, [dealers]);
+
+  const dealerFilters = useMemo(
+    () => [
+      { id: 'active' as DealerFilter, label: t('admin.dealerFilters.active'), count: dealerStatusBuckets.active.length },
+      { id: 'inactive' as DealerFilter, label: t('admin.dealerFilters.inactive'), count: dealerStatusBuckets.inactive.length },
+      { id: 'pending' as DealerFilter, label: t('admin.dealerFilters.pending'), count: dealerStatusBuckets.pending.length },
+      { id: 'deleted' as DealerFilter, label: t('admin.dealerFilters.deleted'), count: dealerStatusBuckets.deleted.length },
+    ],
+    [dealerStatusBuckets, t],
   );
 
-  const approvedDealers = useMemo(
-    () => dealers.filter(dealer => dealer.approved !== false),
-    [dealers],
-  );
+  const filteredDealers = useMemo(() => dealerStatusBuckets[dealerFilter], [dealerFilter, dealerStatusBuckets]);
 
   const isAdmin = role === 'admin';
 
@@ -215,6 +267,51 @@ const AdminPage: React.FC = () => {
       await rejectDealer(dealerId);
     } catch (error) {
       console.error('Failed to reject dealer', error);
+    } finally {
+      setDealerAction(null);
+    }
+  };
+
+  const handleDeactivateDealer = async (dealerId: string) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setDealerAction({ id: dealerId, type: 'deactivate' });
+    try {
+      await deactivateDealer(dealerId);
+    } catch (error) {
+      console.error('Failed to deactivate dealer', error);
+    } finally {
+      setDealerAction(null);
+    }
+  };
+
+  const handleReactivateDealer = async (dealerId: string) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setDealerAction({ id: dealerId, type: 'reactivate' });
+    try {
+      await reactivateDealer(dealerId);
+    } catch (error) {
+      console.error('Failed to reactivate dealer', error);
+    } finally {
+      setDealerAction(null);
+    }
+  };
+
+  const handleDeleteDealer = async (dealerId: string) => {
+    if (!isAdmin) {
+      return;
+    }
+
+    setDealerAction({ id: dealerId, type: 'delete' });
+    try {
+      await deleteDealer(dealerId);
+    } catch (error) {
+      console.error('Failed to delete dealer', error);
     } finally {
       setDealerAction(null);
     }
@@ -395,6 +492,23 @@ const AdminPage: React.FC = () => {
     const dealerUpdateLoading = dealerMutations.update.loading;
     const dealerDeleteLoading = dealerMutations.delete.loading;
 
+    const getStatusBadge = (dealer: Dealer) => {
+      const status = (dealer.status ?? (dealer.approved === false ? 'pending' : 'approved')) as Dealer['status'];
+      if (status === 'deleted' || dealer.isDeleted) {
+        return { label: t('admin.dealerStatus.deleted'), className: 'bg-red-500/20 text-red-200' };
+      }
+      if (status === 'pending') {
+        return { label: t('admin.dealerStatus.pending'), className: 'bg-amber-500/20 text-amber-200' };
+      }
+      if (status === 'rejected') {
+        return { label: t('admin.dealerStatus.rejected'), className: 'bg-sky-500/20 text-sky-200' };
+      }
+      if (dealer.is_active === false) {
+        return { label: t('admin.dealerStatus.inactive'), className: 'bg-amber-500/20 text-amber-200' };
+      }
+      return { label: t('admin.dealerStatus.active'), className: 'bg-emerald-500/20 text-emerald-200' };
+    };
+
     let content: React.ReactNode;
     if (loadError) {
       content = renderErrorState();
@@ -402,167 +516,210 @@ const AdminPage: React.FC = () => {
       content = renderLoadingState();
     } else {
       content = (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
-            <header className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold text-white">{t('admin.pendingDealers')}</h3>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">
-                {pendingDealers.length}
-              </span>
-            </header>
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
+          <header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-white">{t('admin.dealersOverview')}</h3>
+              <p className="mt-1 text-sm text-gray-400">{t('admin.dealersOverviewDescription')}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {dealerFilters.map(filter => {
+                const isSelected = dealerFilter === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    onClick={() => setDealerFilter(filter.id)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus:ring-2 focus:ring-gray-cyan/60 focus:ring-offset-1 focus:ring-offset-gray-900 ${
+                      isSelected
+                        ? 'border-gray-cyan/60 bg-gray-cyan/20 text-white shadow'
+                        : 'border-white/10 bg-white/5 text-gray-300 hover:bg-white/10'
+                    }`}
+                  >
+                    <span>{filter.label}</span>
+                    <span
+                      className={`inline-flex min-w-[1.5rem] items-center justify-center rounded-full px-2 py-0.5 text-[11px] ${
+                        isSelected ? 'bg-gray-cyan text-white' : 'bg-white/10 text-gray-200'
+                      }`}
+                    >
+                      {filter.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </header>
 
-            {pendingDealers.length === 0 ? (
-              renderEmptyState(t('admin.noPendingDealers'))
-            ) : (
-              <ul className="divide-y divide-white/5">
-                {pendingDealers.map(dealer => {
-                  const isProcessing =
-                    dealerUpdateLoading && dealerAction?.id === dealer.id;
-                  const createdAt = formatDate(dealer.createdAt);
-                  const updatedAt = formatDate(dealer.updatedAt);
+          {filteredDealers.length === 0 ? (
+            renderEmptyState(t('admin.noDealersForFilter'))
+          ) : (
+            <ul className="divide-y divide-white/5">
+              {filteredDealers.map(dealer => {
+                const { label: statusLabel, className: statusClassName } = getStatusBadge(dealer);
+                const createdAt = formatDate(dealer.createdAt);
+                const updatedAt = formatDate(dealer.updatedAt);
+                const contactEmail = dealer.contact_email ?? dealer.email;
+                const contactPhone = dealer.contact_phone ?? dealer.phone;
+                const isProcessing = dealerAction?.id === dealer.id;
+                const isPendingDealer = dealerFilter === 'pending';
+                const isDeletedDealer = dealerFilter === 'deleted' || dealer.status === 'deleted' || dealer.isDeleted;
+                const isActiveDealer = dealer.status === 'approved' && dealer.is_active !== false;
 
-                  return (
-                    <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
-                      <div>
-                        <p className="font-semibold text-white">{dealer.name}</p>
-                        <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
-                        <p className="mt-2 text-xs text-gray-400">
-                          {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
-                        </p>
+                return (
+                  <li key={dealer.id} className="flex flex-col gap-4 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="space-y-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <p className="text-base font-semibold text-white">{dealer.name}</p>
+                        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide ${statusClassName}`}>
+                          {statusLabel}
+                        </span>
                         {dealer.ownerUid && (
-                          <p className="mt-2 text-xs text-gray-500">
-                            {t('admin.ownerUid', { defaultValue: 'Owner UID: {{uid}}', uid: dealer.ownerUid })}
-                          </p>
-                        )}
-                        {createdAt && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            {t('admin.createdOn', { defaultValue: 'Created on {{date}}', date: createdAt })}
-                          </p>
-                        )}
-                        {updatedAt && (
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            {t('admin.updatedOn', { defaultValue: 'Updated on {{date}}', date: updatedAt })}
-                          </p>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-gray-200">
+                            {t('admin.ownerUidShort', { uid: dealer.ownerUid })}
+                          </span>
                         )}
                       </div>
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        <button
-                          onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
-                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
-                          aria-label={t('admin.editDealer')}
-                        >
-                          <Pencil size={14} />
-                          <span>{t('admin.edit')}</span>
-                        </button>
-                        <button
-                          onClick={() => handleApproveDealer(dealer.id)}
-                          disabled={!isAdmin || dealerUpdateLoading}
-                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.approve')}
-                        >
-                          {isProcessing && dealerAction?.type === 'approve' ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Check size={14} />
+                      <div className="space-y-2 text-sm text-gray-300">
+                        <p>{dealer.location || dealer.city || t('admin.unknownCity')}</p>
+                        {dealer.description && <p className="text-xs text-gray-400">{dealer.description}</p>}
+                      </div>
+                      <div className="flex flex-wrap gap-4 text-xs text-gray-400">
+                        {contactPhone && <span>{t('admin.phoneLabel', { phone: contactPhone })}</span>}
+                        {contactEmail && <span>{contactEmail}</span>}
+                        {createdAt && <span>{t('admin.createdOnShort', { date: createdAt })}</span>}
+                        {updatedAt && <span>{t('admin.updatedOnShort', { date: updatedAt })}</span>}
+                      </div>
+                      {dealer.brands?.length ? (
+                        <div className="flex flex-wrap gap-2 text-xs text-gray-300">
+                          {dealer.brands.slice(0, 3).map(brand => (
+                            <span key={brand} className="rounded-full bg-white/10 px-3 py-1">
+                              {brand}
+                            </span>
+                          ))}
+                          {dealer.brands.length > 3 && (
+                            <span className="rounded-full bg-white/10 px-3 py-1">+{dealer.brands.length - 3}</span>
                           )}
-                          <span>{t('admin.approve')}</span>
-                        </button>
-                        <button
-                          onClick={() => handleRejectDealer(dealer.id)}
-                          disabled={!isAdmin || dealerUpdateLoading}
-                          className="inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.reject')}
-                        >
-                          {isProcessing && dealerAction?.type === 'reject' ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <XCircle size={14} />
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                      {isPendingDealer ? (
+                        <>
+                          <button
+                            onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
+                            className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
+                            aria-label={t('admin.editDealer')}
+                          >
+                            <Pencil size={14} />
+                            <span>{t('admin.edit')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleApproveDealer(dealer.id)}
+                            disabled={!isAdmin || dealerUpdateLoading}
+                            className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label={t('admin.approve')}
+                          >
+                            {isProcessing && dealerAction?.type === 'approve' ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Check size={14} />
+                            )}
+                            <span>{t('admin.approve')}</span>
+                          </button>
+                          <button
+                            onClick={() => handleRejectDealer(dealer.id)}
+                            disabled={!isAdmin || dealerUpdateLoading}
+                            className="inline-flex items-center gap-1 rounded-lg bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label={t('admin.reject')}
+                          >
+                            {isProcessing && dealerAction?.type === 'reject' ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <XCircle size={14} />
+                            )}
+                            <span>{t('admin.reject')}</span>
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {!isDeletedDealer && (
+                            <button
+                              onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
+                              aria-label={t('admin.editDealer')}
+                            >
+                              <Pencil size={14} />
+                              <span>{t('admin.edit')}</span>
+                            </button>
                           )}
-                          <span>{t('admin.reject')}</span>
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-
-          <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg">
-            <header className="mb-4 flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold text-white">{t('admin.approvedDealers')}</h3>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-gray-300">
-                {approvedDealers.length}
-              </span>
-            </header>
-
-            {approvedDealers.length === 0 ? (
-              renderEmptyState(t('admin.noApprovedDealers'))
-            ) : (
-              <ul className="divide-y divide-white/5">
-                {approvedDealers.map(dealer => {
-                  const createdAt = formatDate(dealer.createdAt);
-                  const updatedAt = formatDate(dealer.updatedAt);
-
-                  return (
-                    <li key={dealer.id} className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0">
-                      <div>
-                        <p className="font-semibold text-white">{dealer.name}</p>
-                        <p className="mt-1 text-sm text-gray-300">{dealer.city}</p>
-                        <p className="mt-2 text-xs text-gray-400">
-                          {dealer.brands?.length ? dealer.brands.join(', ') : t('admin.noBrands', { defaultValue: 'No brands listed' })}
-                        </p>
-                        {dealer.ownerUid && (
-                          <p className="mt-2 text-xs text-gray-500">
-                            {t('admin.ownerUid', { defaultValue: 'Owner UID: {{uid}}', uid: dealer.ownerUid })}
-                          </p>
-                        )}
-                        {createdAt && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            {t('admin.createdOn', { defaultValue: 'Created on {{date}}', date: createdAt })}
-                          </p>
-                        )}
-                        {updatedAt && (
-                          <p className="mt-0.5 text-xs text-gray-500">
-                            {t('admin.updatedOn', { defaultValue: 'Updated on {{date}}', date: updatedAt })}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center justify-end gap-2">
-                        <button
-                          onClick={() => setDealerFormState({ mode: 'edit', entity: dealer })}
-                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white"
-                          aria-label={t('admin.editDealer')}
-                        >
-                          <Pencil size={14} />
-                          <span>{t('admin.edit')}</span>
-                        </button>
-                        <button
-                          onClick={() => handleRejectDealer(dealer.id)}
-                          disabled={!isAdmin || dealerUpdateLoading}
-                          className="inline-flex items-center gap-1 rounded-lg bg-amber-500/20 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/30 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.reject')}
-                        >
-                          <XCircle size={14} />
-                          <span>{t('admin.reject')}</span>
-                        </button>
-                        <button
-                          onClick={() => confirmAndDelete(() => deleteDealer(dealer.id))}
-                          disabled={!isAdmin || dealerDeleteLoading}
-                          className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
-                          aria-label={t('admin.delete')}
-                        >
-                          {dealerDeleteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 size={14} />}
-                          <span>{t('admin.delete')}</span>
-                        </button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </section>
-        </div>
+                          {isActiveDealer ? (
+                            <button
+                              onClick={() => handleDeactivateDealer(dealer.id)}
+                              disabled={!isAdmin || dealerUpdateLoading}
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-amber-500/20 px-3 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-500/30 hover:text-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              aria-label={t('admin.deactivate')}
+                            >
+                              {isProcessing && dealerAction?.type === 'deactivate' ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Power size={14} />
+                              )}
+                              <span>{t('admin.deactivate')}</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleReactivateDealer(dealer.id)}
+                              disabled={!isAdmin || dealerUpdateLoading}
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-500/30 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              aria-label={t('admin.reactivate')}
+                            >
+                              {isProcessing && dealerAction?.type === 'reactivate' ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RefreshCcw size={14} />
+                              )}
+                              <span>{t('admin.reactivate')}</span>
+                            </button>
+                          )}
+                          {!isDeletedDealer && (
+                            <button
+                              onClick={() => confirmAndDelete(() => handleDeleteDealer(dealer.id))}
+                              disabled={!isAdmin || dealerDeleteLoading}
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-red-500/20 px-3 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-500/30 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              aria-label={t('admin.delete')}
+                            >
+                              {isProcessing && dealerAction?.type === 'delete' ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 size={14} />
+                              )}
+                              <span>{t('admin.delete')}</span>
+                            </button>
+                          )}
+                          {isDeletedDealer && (
+                            <button
+                              onClick={() => handleReactivateDealer(dealer.id)}
+                              disabled={!isAdmin || dealerUpdateLoading}
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-gray-200 transition hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                              aria-label={t('admin.restoreDealer')}
+                            >
+                              {isProcessing && dealerAction?.type === 'reactivate' ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <RefreshCcw size={14} />
+                              )}
+                              <span>{t('admin.restore')}</span>
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
       );
     }
 
