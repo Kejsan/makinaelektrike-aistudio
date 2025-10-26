@@ -31,9 +31,14 @@ const DealerCard: React.FC<DealerCardProps> = ({ dealer, isLoading = false }) =>
   }
 
   const favorited = isFavorite(dealer.id);
-  const imageUrl = dealer.image_url || dealer.imageGallery?.[0] || DEALERSHIP_PLACEHOLDER_IMAGE;
-  const city = dealer.city || t('common.unknownCity', { defaultValue: 'Unknown location' });
-  const approved = dealer.approved ?? true;
+  const imageUrl =
+    dealer.logo_url || dealer.image_url || dealer.imageGallery?.[0] || DEALERSHIP_PLACEHOLDER_IMAGE;
+  const city =
+    dealer.location || dealer.city || t('common.unknownCity', { defaultValue: 'Unknown location' });
+  const status = dealer.status ?? (dealer.approved === false ? 'pending' : 'approved');
+  const isPending = status === 'pending';
+  const isInactive = dealer.isActive === false;
+  const showStatusBadge = isPending || isInactive;
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 shadow-lg backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-neon-cyan">
@@ -57,10 +62,18 @@ const DealerCard: React.FC<DealerCardProps> = ({ dealer, isLoading = false }) =>
               {t('dealerDetails.officialBadge', { defaultValue: 'Official Dealer' })}
             </div>
           )}
-          {!approved && (
-            <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-black">
+          {showStatusBadge && (
+            <div
+              className={`absolute left-3 top-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
+                isPending
+                  ? 'bg-amber-500/90 text-black'
+                  : 'bg-red-500/80 text-white'
+              }`}
+            >
               <ShieldAlert size={14} />
-              {t('dealersPage.pendingApproval', { defaultValue: 'Pending approval' })}
+              {isPending
+                ? t('dealersPage.pendingApproval', { defaultValue: 'Pending approval' })
+                : t('dealersPage.inactiveDealer', { defaultValue: 'Inactive dealer' })}
             </div>
           )}
         </div>
