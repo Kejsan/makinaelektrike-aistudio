@@ -132,6 +132,7 @@ const RegisterDealerPage: React.FC = () => {
             notes: normalizedNotes,
             status: 'pending',
             role: 'pending',
+            is_active: false,
             updatedAt: serverTimestamp(),
           },
           { merge: true }

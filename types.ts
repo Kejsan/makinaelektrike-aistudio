@@ -15,6 +15,8 @@ export interface UserProfile extends AuthenticatedUser {
   [key: string]: unknown;
 }
 
+export type DealerStatus = 'pending' | 'approved' | 'rejected' | 'deleted';
+
 interface FirestoreTimestamps {
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
@@ -24,6 +26,7 @@ export type DealerStatus = 'pending' | 'approved' | 'rejected';
 
 interface DealerCore {
   name: string;
+  description?: string;
   companyName?: string;
   contactName?: string;
   address: string;
@@ -32,6 +35,8 @@ interface DealerCore {
   lng: number;
   phone?: string;
   email?: string;
+  contact_phone?: string;
+  contact_email?: string;
   website?: string;
   social_links?: { facebook?: string; instagram?: string; twitter?: string; youtube?: string; };
   brands: string[];

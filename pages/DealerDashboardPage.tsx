@@ -23,6 +23,7 @@ interface ProfileFormState {
   address: string;
   city: string;
   notes: string;
+  description: string;
   brands: string;
   languages: string;
   typeOfCars: string;
@@ -58,6 +59,7 @@ const defaultProfileState: ProfileFormState = {
   address: '',
   city: '',
   notes: '',
+  description: '',
   brands: '',
   languages: '',
   typeOfCars: '',
@@ -562,7 +564,7 @@ const DealerDashboardPage: React.FC = () => {
     );
   }
 
-  const isApprovedDealer = dealer.approved ?? false;
+  const isApprovedDealer = dealer.status === 'approved' && dealer.is_active !== false;
   const isUpdatingDealer = savingProfile || dealerMutations.update.loading || uploadingImage;
   const isCreatingModel = creatingModel || modelMutations.create.loading;
   const newModelGalleryLimit = 3;
@@ -790,6 +792,21 @@ const DealerDashboardPage: React.FC = () => {
                       placeholder="€20,000 - €60,000"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-200" htmlFor="description">
+                    Business description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={profileState.description}
+                    onChange={handleProfileChange}
+                    rows={4}
+                    className="w-full rounded-lg border border-white/10 bg-gray-900/60 px-4 py-2 text-white focus:border-gray-cyan focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                    placeholder="Tell customers about your dealership, services, and specialties."
+                  />
                 </div>
 
                 <div>

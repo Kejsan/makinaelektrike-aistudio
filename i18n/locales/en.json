@@ -416,6 +416,7 @@
     "locationOnMap": "Showroom location",
     "metaTitleSuffix": "Electric vehicle dealer | Makina Elektrike",
     "metaDescription": "Discover {{name}} in {{city}} — authorised retailer for {{brands}} and specialist support for electric drivers in Albania.",
+    "aboutDealer": "About this dealer",
     "aboutTitle": "About {{name}}",
     "aboutDescription": "{{name}} helps drivers in {{city}} experience electric mobility with dedicated advisers and certified service for {{brands}}.",
     "faqTitle": "Dealer support FAQ",
@@ -775,6 +776,22 @@
       "content management"
     ],
     "manageDealers": "Manage dealers",
+    "dealersOverview": "Dealer status overview",
+    "dealersOverviewDescription": "Filter and review dealers by activation state or approval status. Actions update in real time.",
+    "dealerFilters": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "deleted": "Deleted"
+    },
+    "dealerStatus": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "deleted": "Deleted"
+    },
+    "noDealersForFilter": "No dealers match this filter yet.",
     "manageModels": "Manage models",
     "manageBlog": "Manage blog",
     "bulkUploadDealers": "Bulk upload dealers",
@@ -788,8 +805,12 @@
     "noPendingDealers": "No dealers are awaiting approval.",
     "noBrands": "No brands listed",
     "ownerUid": "Owner UID: {{uid}}",
+    "ownerUidShort": "UID {{uid}}",
     "createdOn": "Created on {{date}}",
     "updatedOn": "Updated on {{date}}",
+    "createdOnShort": "Created {{date}}",
+    "updatedOnShort": "Updated {{date}}",
+    "phoneLabel": "Phone: {{phone}}",
     "editDealer": "Edit dealer",
     "edit": "Edit",
     "approve": "Approve",
