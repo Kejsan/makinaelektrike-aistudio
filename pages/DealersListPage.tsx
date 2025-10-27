@@ -7,11 +7,29 @@ import GoogleMap from '../components/GoogleMap';
 import { Building, Car, Globe, ListFilter } from 'lucide-react';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
+import type { Dealer } from '../types';
 
 const DealersListPage: React.FC = () => {
     const { t } = useTranslation();
     const { dealers: allDealers, loading } = useContext(DataContext);
-    const [filteredDealers, setFilteredDealers] = useState(allDealers);
+    const visibleDealers = useMemo(
+        () =>
+            allDealers.filter(dealer => {
+                const status = dealer.status ?? (dealer.approved === false ? 'pending' : 'approved');
+                if (dealer.isDeleted === true) {
+                    return false;
+                }
+                if (status !== 'approved') {
+                    return false;
+                }
+                if (dealer.isActive === false) {
+                    return false;
+                }
+                return true;
+            }),
+        [allDealers],
+    );
+    const [filteredDealers, setFilteredDealers] = useState(visibleDealers);
     const insights = t('dealersPage.insights', { returnObjects: true }) as Array<{ title: string; description: string }>;
     const faqItems = t('dealersPage.faqItems', { returnObjects: true }) as Array<{ question: string; answer: string }>;
 
@@ -20,7 +38,7 @@ const DealersListPage: React.FC = () => {
         '@type': 'ItemList',
         name: t('dealersPage.metaTitle'),
         description: t('dealersPage.metaDescription'),
-        itemListElement: allDealers.map((dealer, index) => ({
+        itemListElement: visibleDealers.map((dealer, index) => ({
             '@type': 'ListItem',
             position: index + 1,
             name: dealer.name,
@@ -35,14 +53,14 @@ const DealersListPage: React.FC = () => {
     const [sortBy, setSortBy] = useState('name_asc');
 
     const filterOptions = useMemo(() => {
-        const cities = [...new Set(allDealers.map(d => d.city))].sort();
-        const brands = [...new Set(allDealers.flatMap(d => d.brands))].sort();
-        const languages = [...new Set(allDealers.flatMap(d => d.languages))].sort();
+        const cities = [...new Set(visibleDealers.map(d => d.city))].sort();
+        const brands = [...new Set(visibleDealers.flatMap(d => d.brands))].sort();
+        const languages = [...new Set(visibleDealers.flatMap(d => d.languages))].sort();
         return { cities, brands, languages };
-    }, [allDealers]);
+    }, [visibleDealers]);
 
     useEffect(() => {
-        let dealers = [...allDealers];
+        let dealers = [...visibleDealers];
 
         if (selectedCity) {
             dealers = dealers.filter(d => d.city === selectedCity);
@@ -69,7 +87,7 @@ const DealersListPage: React.FC = () => {
         });
 
         setFilteredDealers(dealers);
-    }, [allDealers, selectedCity, selectedBrand, selectedLanguage, sortBy]);
+    }, [visibleDealers, selectedCity, selectedBrand, selectedLanguage, sortBy]);
 
     const clearFilters = () => {
         setSelectedCity('');
