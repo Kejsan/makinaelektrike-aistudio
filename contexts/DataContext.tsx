@@ -88,6 +88,8 @@ interface DataContextType {
   deleteDealer: (id: string) => Promise<void>;
   approveDealer: (id: string) => Promise<Dealer>;
   rejectDealer: (id: string) => Promise<Dealer>;
+  deactivateDealer: (id: string) => Promise<Dealer>;
+  reactivateDealer: (id: string) => Promise<Dealer>;
   addModel: (model: ModelInput) => Promise<Model>;
   updateModel: (id: string, updates: ModelUpdate) => Promise<Model>;
   deleteModel: (id: string) => Promise<void>;
@@ -275,6 +277,8 @@ export const DataContext = createContext<DataContextType>({
   deleteDealer: rejectUsage as DataContextType['deleteDealer'],
   approveDealer: rejectUsage as DataContextType['approveDealer'],
   rejectDealer: rejectUsage as DataContextType['rejectDealer'],
+  deactivateDealer: rejectUsage as DataContextType['deactivateDealer'],
+  reactivateDealer: rejectUsage as DataContextType['reactivateDealer'],
   addModel: rejectUsage as DataContextType['addModel'],
   updateModel: rejectUsage as DataContextType['updateModel'],
   deleteModel: rejectUsage as DataContextType['deleteModel'],
@@ -757,6 +761,38 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     [runMutation],
   );
 
+  const deactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiUpdateDealer(id, { isActive: false, status: 'inactive' }),
+        successMessage: 'Dealer deactivated successfully.',
+        errorMessage: 'Failed to deactivate dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
+  const reactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () =>
+          apiUpdateDealer(id, {
+            isActive: true,
+            isDeleted: false,
+            status: 'approved',
+            approved: true,
+          }),
+        successMessage: 'Dealer reactivated successfully.',
+        errorMessage: 'Failed to reactivate dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
   const addModel = useCallback(
     (model: ModelInput) => {
       const payload = enhanceModelInput(model);
@@ -930,6 +966,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       deleteDealer,
       approveDealer,
       rejectDealer,
+      deactivateDealer,
+      reactivateDealer,
       addModel,
       updateModel,
       deleteModel,
@@ -956,6 +994,8 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       deleteDealer,
       approveDealer,
       rejectDealer,
+      deactivateDealer,
+      reactivateDealer,
       addModel,
       updateModel,
       deleteModel,
