@@ -15,13 +15,18 @@ export interface UserProfile extends AuthenticatedUser {
   [key: string]: unknown;
 }
 
+export type DealerStatus = 'pending' | 'approved' | 'rejected' | 'deleted';
+
 interface FirestoreTimestamps {
   createdAt?: Timestamp | null;
   updatedAt?: Timestamp | null;
 }
 
+export type DealerStatus = 'pending' | 'approved' | 'rejected';
+
 interface DealerCore {
   name: string;
+  description?: string;
   companyName?: string;
   contactName?: string;
   address: string;
@@ -30,6 +35,8 @@ interface DealerCore {
   lng: number;
   phone?: string;
   email?: string;
+  contact_phone?: string;
+  contact_email?: string;
   website?: string;
   social_links?: { facebook?: string; instagram?: string; twitter?: string; youtube?: string; };
   brands: string[];
@@ -39,6 +46,15 @@ interface DealerCore {
   priceRange?: string;
   modelsAvailable: string[];
   image_url?: string;
+  logo_url?: string | null;
+  description?: string | null;
+  location?: string | null;
+  contact_email?: string | null;
+  contact_phone?: string | null;
+  isActive?: boolean;
+  status?: DealerStatus;
+  isDeleted?: boolean;
+  deletedAt?: Timestamp | null;
   isFeatured?: boolean;
   imageGallery?: string[];
 }

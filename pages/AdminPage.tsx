@@ -103,6 +103,8 @@ const AdminPage: React.FC = () => {
     reactivateDealer,
     approveDealer,
     rejectDealer,
+    deactivateDealer,
+    reactivateDealer,
     addModel,
     updateModel,
     deleteModel,
