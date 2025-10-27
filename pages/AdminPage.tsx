@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { DataContext } from '../contexts/DataContext';
-import { Dealer, DealerStatus, Model, BlogPost } from '../types';
+import type { Dealer, DealerStatus, Model, BlogPost } from '../types';
 import DealerForm, { DealerFormValues } from '../components/admin/DealerForm';
 import ModelForm, { ModelFormValues } from '../components/admin/ModelForm';
 import BlogPostForm, { BlogPostFormValues } from '../components/admin/BlogPostForm';
