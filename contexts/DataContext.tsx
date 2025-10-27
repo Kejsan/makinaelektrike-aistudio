@@ -32,7 +32,7 @@ import {
 import { useAuth } from './AuthContext';
 import type { UserRole } from '../types';
 import { useToast } from './ToastContext';
-import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
+import { serverTimestamp, type FirestoreError, type Unsubscribe } from 'firebase/firestore';
 import blogPostsData from '../data/blogPosts';
 import { FirebaseError } from 'firebase/app';
 import { addOfflineMutation } from '../services/offlineQueue';
@@ -754,7 +754,13 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiUpdateDealer(id, { approved: false }),
+        action: () =>
+          apiUpdateDealer(id, {
+            approved: false,
+            status: 'rejected',
+            rejectedAt: serverTimestamp(),
+            isActive: false,
+          }),
         successMessage: 'Dealer rejected successfully.',
         errorMessage: 'Failed to reject dealer.',
       }),
