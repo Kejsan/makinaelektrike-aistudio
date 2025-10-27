@@ -2,6 +2,7 @@
 import type { Timestamp } from 'firebase/firestore';
 
 export type UserRole = 'admin' | 'dealer' | 'user' | 'pending';
+export type DealerStatus = 'pending' | 'approved' | 'rejected' | 'inactive' | 'deleted';
 
 export interface AuthenticatedUser {
   uid: string;
@@ -51,7 +52,7 @@ export interface DealerDocument extends DealerCore, FirestoreTimestamps {
   approvedAt?: Timestamp | null;
   rejectedAt?: Timestamp | null;
   rejectionReason?: string | null;
-  status?: 'pending' | 'approved' | 'rejected' | 'inactive' | 'deleted' | string;
+  status?: DealerStatus | string;
   isActive?: boolean;
   isDeleted?: boolean;
 }
