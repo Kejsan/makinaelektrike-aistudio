@@ -48,7 +48,7 @@ import {
 import { useAuth } from './AuthContext';
 import type { UserRole } from '../types';
 import { useToast } from './ToastContext';
-import type { FirestoreError, Unsubscribe } from 'firebase/firestore';
+import { serverTimestamp, type FirestoreError, type Unsubscribe } from 'firebase/firestore';
 import blogPostsData from '../data/blogPosts';
 import { FirebaseError } from 'firebase/app';
 import { addOfflineMutation } from '../services/offlineQueue';
@@ -297,6 +297,8 @@ export const DataContext = createContext<DataContextType>({
   reactivateDealer: rejectUsage as DataContextType['reactivateDealer'],
   approveDealer: rejectUsage as DataContextType['approveDealer'],
   rejectDealer: rejectUsage as DataContextType['rejectDealer'],
+  deactivateDealer: rejectUsage as DataContextType['deactivateDealer'],
+  reactivateDealer: rejectUsage as DataContextType['reactivateDealer'],
   addModel: rejectUsage as DataContextType['addModel'],
   updateModel: rejectUsage as DataContextType['updateModel'],
   deleteModel: rejectUsage as DataContextType['deleteModel'],
@@ -790,7 +792,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiApproveDealerStatus(id),
+        action: () =>
+          apiUpdateDealer(id, {
+            approved: true,
+            status: 'approved',
+            approvedAt: serverTimestamp(),
+            rejectedAt: null,
+            isActive: true,
+          }),
         successMessage: 'Dealer approved successfully.',
         errorMessage: 'Failed to approve dealer.',
         allowedRoles: ['admin'],
@@ -803,7 +812,14 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       runMutation({
         entity: 'dealers',
         operation: 'update',
-        action: () => apiRejectDealerStatus(id),
+        action: () =>
+          apiUpdateDealer(id, {
+            approved: false,
+            status: 'rejected',
+            rejectedAt: serverTimestamp(),
+            approvedAt: null,
+            isActive: false,
+          }),
         successMessage: 'Dealer rejected successfully.',
         errorMessage: 'Failed to reject dealer.',
         allowedRoles: ['admin'],
@@ -830,6 +846,40 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
         entity: 'dealers',
         operation: 'update',
         action: () => apiReactivateDealerStatus(id),
+        successMessage: 'Dealer reactivated successfully.',
+        errorMessage: 'Failed to reactivate dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
+  const deactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () => apiUpdateDealer(id, { isActive: false, status: 'inactive' }),
+        successMessage: 'Dealer deactivated successfully.',
+        errorMessage: 'Failed to deactivate dealer.',
+        allowedRoles: ['admin'],
+      }),
+    [runMutation],
+  );
+
+  const reactivateDealer = useCallback(
+    (id: string) =>
+      runMutation({
+        entity: 'dealers',
+        operation: 'update',
+        action: () =>
+          apiUpdateDealer(id, {
+            isActive: true,
+            isDeleted: false,
+            status: 'approved',
+            approved: true,
+            approvedAt: serverTimestamp(),
+            rejectedAt: null,
+          }),
         successMessage: 'Dealer reactivated successfully.',
         errorMessage: 'Failed to reactivate dealer.',
         allowedRoles: ['admin'],

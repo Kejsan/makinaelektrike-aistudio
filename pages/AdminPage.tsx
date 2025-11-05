@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { DataContext } from '../contexts/DataContext';
-import { Dealer, DealerStatus, Model, BlogPost } from '../types';
+import type { Dealer, DealerStatus, Model, BlogPost } from '../types';
 import DealerForm, { DealerFormValues } from '../components/admin/DealerForm';
 import ModelForm, { ModelFormValues } from '../components/admin/ModelForm';
 import BlogPostForm, { BlogPostFormValues } from '../components/admin/BlogPostForm';
@@ -87,6 +87,7 @@ const AdminPage: React.FC = () => {
   const { logout, user, role } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const dataContext = useContext(DataContext);
   const {
     dealers,
     models,
@@ -111,7 +112,11 @@ const AdminPage: React.FC = () => {
     addBlogPost,
     updateBlogPost,
     deleteBlogPost,
-  } = useContext(DataContext);
+  } = dataContext;
+  const {
+    deactivateDealer: deactivateDealerAction,
+    reactivateDealer: reactivateDealerAction,
+  } = dataContext;
 
   const [activeTab, setActiveTab] = useState<TabKey>('dealers');
   const [dealerFormState, setDealerFormState] = useState<FormState<Dealer>>(null);
@@ -290,7 +295,7 @@ const AdminPage: React.FC = () => {
 
     setDealerAction({ id: dealerId, type: 'deactivate' });
     try {
-      await deactivateDealer(dealerId);
+      await deactivateDealerAction(dealerId);
     } catch (error) {
       console.error('Failed to deactivate dealer', error);
     } finally {
@@ -305,7 +310,7 @@ const AdminPage: React.FC = () => {
 
     setDealerAction({ id: dealerId, type: 'reactivate' });
     try {
-      await reactivateDealer(dealerId);
+      await reactivateDealerAction(dealerId);
     } catch (error) {
       console.error('Failed to reactivate dealer', error);
     } finally {
