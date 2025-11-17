@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-transparent text-white mt-20 border-t border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid gap-12 lg:grid-cols-[2fr,1fr] lg:gap-16 xl:grid-cols-[2fr,1fr,1fr]">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 md:grid-cols-4">
           <div className="space-y-8">
             <Link to="/" className="inline-flex items-center text-white" aria-label={t('header.home')}>
               <img src={SITE_LOGO} alt={SITE_LOGO_ALT} className="h-16 w-auto rounded md:h-20" />
@@ -59,7 +59,7 @@ const Footer: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="space-y-10">
             <div>
               <h3 className="text-sm font-semibold text-white tracking-wider uppercase">{t('footer.explore')}</h3>
               <ul className="mt-4 space-y-3 text-base text-gray-300">
@@ -73,6 +73,8 @@ const Footer: React.FC = () => {
                 <li><Link to="/blog" className="hover:text-white transition-colors">{t('header.blog')}</Link></li>
               </ul>
             </div>
+          </div>
+          <div className="space-y-10">
             <div>
               <h3 className="text-sm font-semibold text-white tracking-wider uppercase">{t('footer.services')}</h3>
               <ul className="mt-4 space-y-3 text-base text-gray-300">
@@ -98,28 +100,26 @@ const Footer: React.FC = () => {
                 <li><Link to="/cookies" className="hover:text-white transition-colors">{t('footer.cookies')}</Link></li>
               </ul>
             </div>
-            <details className="group rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-gray-300 transition-colors open:border-gray-cyan/40 open:bg-white/10">
-              <summary className="flex cursor-pointer items-center justify-between font-semibold text-white">
-                {t('footer.moreInfo')}
-                <span className="ml-3 text-xs uppercase tracking-widest text-gray-400 group-open:text-gray-cyan">
-                  {t('footer.legalSummary')}
-                </span>
-              </summary>
-              <p className="mt-4 leading-relaxed">
-                The information on this website is provided on "as is, as available basis" without warranty of any kind. Makina Elektrike is
-                not responsible for any omissions, inaccuracies or other errors in the information it publishes. All warranties with respect to
-                this information are disclaimed. Reproduction of any part of this website in its entirety or partially or in any form or medium
-                without prior written permission is prohibited. The trademarks, marques and logos of the manufacturers of devices and/or
-                dealerships described and/or promoted, software, hardware, etc. are the property of their respective owners.
-              </p>
-            </details>
           </div>
+        </div>
+        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-gray-300">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <span className="font-semibold text-white">{t('footer.moreInfo')}</span>
+            <span className="text-xs uppercase tracking-widest text-gray-400">{t('footer.legalSummary')}</span>
+          </div>
+          <p className="mt-4 leading-relaxed">
+            The information on this website is provided on "as is, as available basis" without warranty of any kind. Makina Elektrike is not
+            responsible for any omissions, inaccuracies or other errors in the information it publishes. All warranties with respect to this
+            information are disclaimed. Reproduction of any part of this website in its entirety or partially or in any form or medium without
+            prior written permission is prohibited. The trademarks, marques and logos of the manufacturers of devices and/or dealerships
+            described and/or promoted, software, hardware, etc. are the property of their respective owners.
+          </p>
         </div>
         <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-6 text-center md:flex-row md:items-center md:justify-between md:text-left">
           <p className="text-sm text-gray-400">&copy; {new Date().getFullYear()} Makina Elektrike. {t('footer.rightsReserved')}</p>
           <p className="text-sm text-gray-400">
             {t('footer.credits')}{' '}
-            <a href="https://kejsan-coku.netlify.app/" target="_blank" rel="noreferrer" className="text-gray-cyan hover:text-white">
+            <a href="https://kejsancoku.com/" target="_blank" rel="noreferrer" className="text-gray-cyan hover:text-white">
               Kejsan Coku
             </a>
           </p>

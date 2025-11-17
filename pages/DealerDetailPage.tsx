@@ -188,8 +188,9 @@ const DealerDetailPage: React.FC = () => {
     const canonical = `${BASE_URL}/dealers/${dealer.id}/`;
     const description = t('dealerDetails.metaDescription', {
         name: dealer.name,
-        city: dealer.city,
+        city: dealer.location || dealer.city,
         brands: dealer.brands.join(', '),
+        description: dealer.description ?? '',
     });
     const keywords = [
         dealer.name,
@@ -205,11 +206,11 @@ const DealerDetailPage: React.FC = () => {
             name: dealer.name,
             url: canonical,
             image: heroImage,
-            telephone: dealer.phone ?? undefined,
-            email: dealer.email ?? undefined,
+            telephone: dealer.contact_phone ?? dealer.phone ?? undefined,
+            email: dealer.contact_email ?? dealer.email ?? undefined,
             address: {
                 '@type': 'PostalAddress',
-                streetAddress: dealer.address ?? dealer.city,
+                streetAddress: displayAddress || dealer.city,
                 addressLocality: dealer.city,
                 addressCountry: 'AL',
             },
@@ -316,12 +317,42 @@ const DealerDetailPage: React.FC = () => {
                             </div>
                             <div className="space-y-4">
                                 <h2 className="text-xl font-bold text-white">{t('dealerDetails.contactInfo')}</h2>
-                                <p className="flex items-start text-gray-300"><MapPin className="text-gray-cyan mt-1 mr-3 flex-shrink-0" size={20} /><span>{dealer.address}</span></p>
-                                {dealer.phone && <p className="flex items-center text-gray-300"><Phone className="text-gray-cyan mr-3" size={20} /><a href={`tel:${dealer.phone}`} className="hover:underline">{dealer.phone}</a></p>}
-                                {dealer.email && <p className="flex items-center text-gray-300"><Mail className="text-gray-cyan mr-3" size={20} /><a href={`mailto:${dealer.email}`} className="hover:underline">{dealer.email}</a></p>}
+                                <p className="flex items-start text-gray-300">
+                                    <MapPin className="text-gray-cyan mt-1 mr-3 flex-shrink-0" size={20} />
+                                    <span>{displayAddress}</span>
+                                </p>
+                                {(dealer.contact_phone || dealer.phone) && (
+                                    <p className="flex items-center text-gray-300">
+                                        <Phone className="text-gray-cyan mr-3" size={20} />
+                                        <a
+                                            href={`tel:${dealer.contact_phone || dealer.phone}`}
+                                            className="hover:underline"
+                                        >
+                                            {dealer.contact_phone || dealer.phone}
+                                        </a>
+                                    </p>
+                                )}
+                                {(dealer.contact_email || dealer.email) && (
+                                    <p className="flex items-center text-gray-300">
+                                        <Mail className="text-gray-cyan mr-3" size={20} />
+                                        <a
+                                            href={`mailto:${dealer.contact_email || dealer.email}`}
+                                            className="hover:underline"
+                                        >
+                                            {dealer.contact_email || dealer.email}
+                                        </a>
+                                    </p>
+                                )}
                                 {dealer.website && <p className="flex items-center text-gray-300"><Globe className="text-gray-cyan mr-3" size={20} /><a href={dealer.website} target="_blank" rel="noopener noreferrer" className="hover:underline">Visit Website</a></p>}
                             </div>
-                            
+
+                            {dealer.description && (
+                                <div>
+                                    <h3 className="font-semibold text-white">{t('dealerDetails.aboutDealer')}</h3>
+                                    <p className="text-gray-300">{dealer.description}</p>
+                                </div>
+                            )}
+
                             <div>
                                 <h3 className="font-semibold text-white">{t('dealerDetails.brandsSold')}</h3>
                                 <div className="flex flex-wrap gap-2 mt-2">
@@ -333,9 +364,9 @@ const DealerDetailPage: React.FC = () => {
                                 <h3 className="font-semibold text-white">{t('dealerDetails.languagesSpoken')}</h3>
                                 <p className="text-gray-300">{dealer.languages?.length ? dealer.languages.join(', ') : t('dealerDetails.noLanguages', { defaultValue: 'No languages specified' })}</p>
                             </div>
-                             {dealer.notes && <div>
+                             {(dealer.description || dealer.notes) && <div>
                                 <h3 className="font-semibold text-white">{t('dealerDetails.notes')}</h3>
-                                <p className="text-gray-300">{dealer.notes}</p>
+                                <p className="text-gray-300">{dealer.description || dealer.notes}</p>
                             </div>}
                         </div>
                     </div>
