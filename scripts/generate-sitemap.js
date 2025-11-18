@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const SITE = "https://makina-elektrike.netlify.app";
+const SITE = "https://makinaelektrike.com";
 const today = new Date().toISOString().slice(0, 10);
 
 const urls = [
