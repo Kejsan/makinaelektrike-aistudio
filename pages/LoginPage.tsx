@@ -225,7 +225,7 @@ const LoginPage: React.FC = () => {
             <div className="mt-10 border-t border-white/10 pt-6 text-sm text-gray-400">
               <span>{t('loginPage.adminPrompt')}</span>{' '}
               <a
-                href="https://makina-elektrike.netlify.app/admin/login"
+                href="https://makinaelektrike.com/admin/login"
                 target="_blank"
                 rel="noreferrer"
                 className="font-semibold text-gray-cyan hover:text-white"
