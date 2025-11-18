@@ -3,7 +3,7 @@
 # Updated: 2025-10-04
 # =========================
 
-Sitemap: https://makina-elektrike.netlify.app/sitemap.xml
+Sitemap: https://makinaelektrike.com/sitemap.xml
 
 # Generic rules
 User-agent: *
