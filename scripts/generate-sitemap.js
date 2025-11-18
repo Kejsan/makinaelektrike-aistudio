@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+// Base site URL used when building sitemap entries.
 const SITE = "https://makinaelektrike.com";
 const today = new Date().toISOString().slice(0, 10);
 
