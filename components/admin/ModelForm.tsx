@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Model } from '../../types';
 import { MODEL_PLACEHOLDER_IMAGE } from '../../constants/media';
+import EVModelSearch from './EVModelSearch';
 
 export interface ModelFormValues extends Omit<Model, 'id'> {
   id?: string;
@@ -98,6 +99,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
   const [previewFromFile, setPreviewFromFile] = useState(false);
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [galleryDrafts, setGalleryDrafts] = useState<GalleryDraft[]>([]);
+  const [isPrefillLoading, setIsPrefillLoading] = useState(false);
   const galleryDraftsRef = useRef<GalleryDraft[]>([]);
 
   const galleryLimit = 3;
@@ -249,6 +251,60 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
 
   const handleExistingGalleryRemove = (url: string) => {
     setExistingGallery(prev => prev.filter(item => item !== url));
+  };
+
+  const handlePrefill = (model: Model) => {
+    setFormState(prev => ({
+      ...prev,
+      brand: model.brand ?? prev.brand,
+      model_name: model.model_name ?? prev.model_name,
+      year_start: model.year_start !== undefined && model.year_start !== null ? String(model.year_start) : prev.year_start,
+      body_type: model.body_type ?? prev.body_type,
+      battery_capacity:
+        model.battery_capacity !== undefined && model.battery_capacity !== null
+          ? String(model.battery_capacity)
+          : prev.battery_capacity,
+      battery_useable_capacity:
+        model.battery_useable_capacity !== undefined && model.battery_useable_capacity !== null
+          ? String(model.battery_useable_capacity)
+          : prev.battery_useable_capacity,
+      battery_type: model.battery_type ?? prev.battery_type,
+      battery_voltage:
+        model.battery_voltage !== undefined && model.battery_voltage !== null
+          ? String(model.battery_voltage)
+          : prev.battery_voltage,
+      range_wltp:
+        model.range_wltp !== undefined && model.range_wltp !== null ? String(model.range_wltp) : prev.range_wltp,
+      power_kw: model.power_kw !== undefined && model.power_kw !== null ? String(model.power_kw) : prev.power_kw,
+      torque_nm: model.torque_nm !== undefined && model.torque_nm !== null ? String(model.torque_nm) : prev.torque_nm,
+      acceleration_0_100:
+        model.acceleration_0_100 !== undefined && model.acceleration_0_100 !== null
+          ? String(model.acceleration_0_100)
+          : prev.acceleration_0_100,
+      top_speed: model.top_speed !== undefined && model.top_speed !== null ? String(model.top_speed) : prev.top_speed,
+      drive_type: model.drive_type ?? prev.drive_type,
+      seats: model.seats !== undefined && model.seats !== null ? String(model.seats) : prev.seats,
+      charging_ac: model.charging_ac ?? prev.charging_ac,
+      charging_dc: model.charging_dc ?? prev.charging_dc,
+      notes: model.notes ?? prev.notes,
+      image_url: model.image_url ?? prev.image_url,
+      isFeatured: model.isFeatured ?? prev.isFeatured,
+    }));
+
+    if (model.image_url) {
+      setImageFile(null);
+      setImagePreview(model.image_url);
+      setPreviewFromFile(false);
+    }
+
+    if (model.imageGallery?.length) {
+      const sanitizedGallery = model.imageGallery.filter(Boolean).slice(0, galleryLimit);
+      setExistingGallery(sanitizedGallery);
+      setGalleryDrafts(previousDrafts => {
+        previousDrafts.forEach(draft => URL.revokeObjectURL(draft.preview));
+        return [];
+      });
+    }
   };
 
   const validate = () => {
@@ -443,7 +499,9 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
   const galleryUploadDisabled = availableGallerySlots <= 0;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
+      <EVModelSearch onPrefill={handlePrefill} onLoadingChange={setIsPrefillLoading} />
+      <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {renderInput(t('admin.brand'), 'brand')}
         {renderInput(t('admin.name'), 'model_name')}
@@ -712,13 +770,14 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isPrefillLoading}
           className="rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? `${t('admin.save')}...` : t('admin.save')}
         </button>
       </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

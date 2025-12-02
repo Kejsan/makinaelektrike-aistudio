@@ -7,9 +7,10 @@ import type { Model } from '../../types';
 
 interface EVModelSearchProps {
   onPrefill: (model: Model) => void;
+  onLoadingChange?: (isLoading: boolean) => void;
 }
 
-const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill }) => {
+const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChange }) => {
   const { t } = useTranslation();
   const [makes, setMakes] = useState<string[]>([]);
   const [models, setModels] = useState<string[]>([]);
@@ -145,6 +146,12 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill }) => {
   };
 
   const isBusy = isLoadingMakes || isLoadingModels || isLoadingVehicle;
+
+  useEffect(() => {
+    if (onLoadingChange) {
+      onLoadingChange(isBusy);
+    }
+  }, [isBusy, onLoadingChange]);
 
   return (
     <div className="space-y-4 rounded-xl border border-white/10 bg-white/5 p-4">
