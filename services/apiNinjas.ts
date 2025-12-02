@@ -1,0 +1,185 @@
+import type { Model } from '../types';
+
+const BASE_URL = 'https://api.api-ninjas.com/v1';
+
+const { VITE_API_NINJAS_KEY } = import.meta.env;
+
+const apiKey = (VITE_API_NINJAS_KEY ?? '').trim();
+
+if (!apiKey) {
+  // Surface a clear error at import-time to make misconfiguration obvious during development.
+  console.warn(
+    'API Ninjas key is missing. Set VITE_API_NINJAS_KEY in your environment to enable EV lookups.',
+  );
+}
+
+type QueryParams = Record<string, string | number | undefined | null>;
+
+interface ElectricVehicleResponse {
+  make?: string;
+  model?: string;
+  drivetrain?: string;
+  drive?: string;
+  body_style?: string;
+  body_type?: string;
+  seats?: number | string | null;
+  range_km?: number | string | null;
+  battery_capacity_kwh?: number | string | null;
+  power_kw?: number | string | null;
+  motor_power_kw?: number | string | null;
+  torque_nm?: number | string | null;
+  acceleration_seconds_0_to_100_kph?: number | string | null;
+  acceleration_0_to_100?: number | string | null;
+  top_speed_km_per_hour?: number | string | null;
+  top_speed?: number | string | null;
+  ac_charger_kw?: number | string | null;
+  ac_charge_kw?: number | string | null;
+  fast_charge_power_kw?: number | string | null;
+  fast_charge_km_per_min?: number | string | null;
+  efficiency_wh_per_km?: number | string | null;
+}
+
+export const API_NINJAS_CONFIG = {
+  BASE_URL,
+};
+
+const buildQueryString = (params: QueryParams) => {
+  const searchParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === '') {
+      return;
+    }
+    searchParams.append(key, String(value));
+  });
+  return searchParams.toString();
+};
+
+const parseNumber = (value: unknown): number | undefined => {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined;
+  }
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/,/g, '').trim();
+    if (!cleaned) {
+      return undefined;
+    }
+    const parsed = Number(cleaned);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+};
+
+const toModelId = (brand: string, modelName: string) =>
+  `${brand}-${modelName}`
+    .toLocaleLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .trim();
+
+const normalizeElectricVehicle = (vehicle: ElectricVehicleResponse): Model => {
+  const brand = (vehicle.make ?? '').trim();
+  const modelName = (vehicle.model ?? '').trim();
+  const resolvedBrand = brand || 'Unknown';
+  const resolvedModelName = modelName || 'Unknown';
+  const battery_capacity = parseNumber(vehicle.battery_capacity_kwh);
+  const range_wltp = parseNumber(vehicle.range_km);
+  const power_kw = parseNumber(vehicle.power_kw ?? vehicle.motor_power_kw);
+  const torque_nm = parseNumber(vehicle.torque_nm);
+  const acceleration_0_100 = parseNumber(
+    vehicle.acceleration_seconds_0_to_100_kph ?? vehicle.acceleration_0_to_100,
+  );
+  const top_speed = parseNumber(vehicle.top_speed_km_per_hour ?? vehicle.top_speed);
+  const acKw = parseNumber(vehicle.ac_charger_kw ?? vehicle.ac_charge_kw);
+  const dcCharge = parseNumber(vehicle.fast_charge_power_kw ?? vehicle.fast_charge_km_per_min);
+
+  return {
+    id: toModelId(resolvedBrand, resolvedModelName),
+    brand: resolvedBrand,
+    model_name: resolvedModelName,
+    body_type: vehicle.body_style ?? vehicle.body_type,
+    battery_capacity,
+    range_wltp,
+    power_kw,
+    torque_nm,
+    acceleration_0_100,
+    top_speed,
+    drive_type: vehicle.drive ?? vehicle.drivetrain,
+    seats: parseNumber(vehicle.seats),
+    charging_ac: acKw ? `${acKw} kW` : undefined,
+    charging_dc: dcCharge
+      ? `${dcCharge} ${vehicle.fast_charge_power_kw ? 'kW' : 'km/min'}`
+      : undefined,
+    isFeatured: false,
+    imageGallery: [],
+    image_url: undefined,
+    notes: vehicle.efficiency_wh_per_km
+      ? `Efficiency: ${parseNumber(vehicle.efficiency_wh_per_km)} Wh/km`
+      : undefined,
+  } satisfies Model;
+};
+
+const buildHeaders = () => ({
+  Accept: 'application/json',
+  'X-Api-Key': apiKey,
+});
+
+const assertApiKey = () => {
+  if (!apiKey) {
+    throw new Error('API Ninjas key is not configured. Please set VITE_API_NINJAS_KEY.');
+  }
+};
+
+const handleError = async (response: Response, context: string) => {
+  if (response.status === 429) {
+    throw new Error('API Ninjas rate limit exceeded. Please try again later.');
+  }
+
+  let detail = '';
+  try {
+    const body = await response.text();
+    detail = body || response.statusText;
+  } catch (error) {
+    console.error('Failed to read API Ninjas error response', error);
+  }
+  throw new Error(`${context}: ${response.status} ${detail}`);
+};
+
+async function fetchFromApi<T>(endpoint: string, params?: QueryParams, signal?: AbortSignal): Promise<T> {
+  assertApiKey();
+  const queryString = params ? buildQueryString(params) : '';
+  const suffix = queryString ? `?${queryString}` : '';
+  const response = await fetch(`${BASE_URL}${endpoint}${suffix}`, {
+    headers: buildHeaders(),
+    signal,
+  });
+
+  if (!response.ok) {
+    await handleError(response, `API Ninjas request to ${endpoint} failed`);
+  }
+
+  return response.json();
+}
+
+export async function getEVMakes(signal?: AbortSignal): Promise<string[]> {
+  const data = await fetchFromApi<string[]>('/evmakes', undefined, signal);
+  return data.map(make => make.trim()).filter(Boolean);
+}
+
+export async function getEVModels(make: string, signal?: AbortSignal): Promise<string[]> {
+  const data = await fetchFromApi<string[]>('/evmodels', { make }, signal);
+  return data.map(model => model.trim()).filter(Boolean);
+}
+
+export async function getElectricVehicle(
+  make?: string,
+  model?: string,
+  signal?: AbortSignal,
+): Promise<Model[]> {
+  const vehicles = await fetchFromApi<ElectricVehicleResponse[]>(
+    '/electricvehicle',
+    { make, model },
+    signal,
+  );
+
+  return vehicles.map(normalizeElectricVehicle);
+}
