@@ -101,11 +101,7 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
       } catch (err) {
         if ((err as Error)?.name === 'AbortError') return;
         console.error('Failed to fetch EV details', err);
-        setError(
-          t('admin.evSearch.vehicleError', {
-            defaultValue: 'Could not load the selected vehicle. Please try again.',
-          }),
-        );
+        setError(t('admin.apiError', { defaultValue: 'Unable to fetch EV data. Please try again.' }));
       } finally {
         setIsLoadingVehicle(false);
       }
@@ -158,7 +154,7 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-white">
-            {t('admin.evSearch.title', { defaultValue: 'Prefill from EV database' })}
+            {t('admin.searchEV', { defaultValue: 'Search electric vehicles' })}
           </h3>
           <p className="text-sm text-gray-300">
             {t('admin.evSearch.subtitle', {
@@ -189,7 +185,7 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
             placeholder={
               isLoadingMakes
                 ? t('admin.evSearch.loadingMakes', { defaultValue: 'Loading manufacturers…' })
-                : t('admin.evSearch.makePlaceholder', { defaultValue: 'Select a manufacturer' })
+                : t('admin.selectMake', { defaultValue: 'Select a manufacturer' })
             }
             icon={<Search className="h-4 w-4" />}
           />
@@ -213,7 +209,7 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
               selectedMake
                 ? isLoadingModels
                   ? t('admin.evSearch.loadingModels', { defaultValue: 'Loading models…' })
-                  : t('admin.evSearch.modelPlaceholder', { defaultValue: 'Select a model' })
+                  : t('admin.selectModel', { defaultValue: 'Select a model' })
                 : t('admin.evSearch.selectMakeFirst', { defaultValue: 'Choose a manufacturer first' })
             }
             icon={<Search className="h-4 w-4" />}
@@ -235,7 +231,7 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
           className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-3 py-2 font-semibold text-white transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoadingVehicle ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-          <span>{t('admin.evSearch.loadVehicle', { defaultValue: 'Load details' })}</span>
+          <span>{t('admin.prefillButton', { defaultValue: 'Prefill model details' })}</span>
         </button>
         {isBusy && !error && (
           <p className="flex items-center gap-2 text-gray-300">

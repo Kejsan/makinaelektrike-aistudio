@@ -880,6 +880,11 @@
     "offlineQueueCopyUnavailable": "Aksesi në kujtesë nuk është i disponueshëm në këtë shfletues.",
     "offlineQueueDownloaded": "Radha offline u shkarkua.",
     "offlineQueueUnknownError": "Gabim i panjohur",
+    "searchEV": "Kërko automjete elektrike",
+    "selectMake": "Zgjidh markën",
+    "selectModel": "Zgjidh modelin",
+    "prefillButton": "Plotëso automatikisht modelin",
+    "apiError": "Nuk u morën të dhëna për EV. Provo sërish.",
     "fields": {
       "title": "Titulli",
       "excerpt": "Përmbledhja",
