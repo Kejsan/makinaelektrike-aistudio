@@ -19,6 +19,7 @@ interface DealerFormProps {
   onSubmit: (values: DealerFormValues) => void | Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
+  canManageModels?: boolean;
 }
 
 interface DealerFormState {
@@ -85,7 +86,7 @@ const isValidEmail = (value: string) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 };
 
-const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting }) => {
+const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting, canManageModels = true }) => {
   const { t } = useTranslation();
   const { isLoaded: isMapsApiLoaded } = useGoogleMapsApi();
   const { models, addModel, getModelsForDealer } = useContext(DataContext);
@@ -155,13 +156,31 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
   }, [initialValues]);
 
   useEffect(() => {
-    if (!initialValues?.id) {
+    if (!initialValues) {
       setSelectedModels([]);
       return;
     }
 
-    setSelectedModels(getModelsForDealer(initialValues.id));
-  }, [getModelsForDealer, initialValues?.id]);
+    if (initialValues.id) {
+      const linkedModels = getModelsForDealer(initialValues.id);
+      if (linkedModels.length > 0) {
+        setSelectedModels(linkedModels);
+        return;
+      }
+    }
+
+    const availableNames = (initialValues.modelsAvailable ?? []).map(item => item.trim().toLowerCase());
+    if (availableNames.length === 0) {
+      setSelectedModels([]);
+      return;
+    }
+
+    const inferredModels = models.filter(model => {
+      const label = `${model.brand ?? ''} ${model.model_name ?? ''}`.trim().toLowerCase();
+      return availableNames.includes(label);
+    });
+    setSelectedModels(inferredModels);
+  }, [getModelsForDealer, initialValues, models]);
 
   useEffect(() => {
     if (imageFile) {
@@ -514,6 +533,9 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
   }, [modelSearchTerm, models]);
 
   const toggleModelSelection = (model: Model) => {
+    if (!canManageModels) {
+      return;
+    }
     setSelectedModels(prev => {
       const exists = prev.some(entry => entry.id === model.id);
       if (exists) {
@@ -657,7 +679,8 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
             <button
               type="button"
               onClick={() => setIsModelModalOpen(true)}
-              className="rounded-lg bg-gray-cyan px-3 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90"
+              disabled={!canManageModels}
+              className="rounded-lg bg-gray-cyan px-3 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {t('admin.manageModels', { defaultValue: 'Manage models' })}
             </button>
@@ -811,7 +834,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       </form>
 
       <ModalLayout
-        isOpen={isModelModalOpen}
+        isOpen={isModelModalOpen && canManageModels}
         onClose={() => setIsModelModalOpen(false)}
         title={t('admin.manageModels', { defaultValue: 'Manage models' })}
         maxWidthClass="max-w-4xl"
