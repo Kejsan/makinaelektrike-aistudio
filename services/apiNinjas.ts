@@ -161,12 +161,12 @@ async function fetchFromApi<T>(endpoint: string, params?: QueryParams, signal?: 
 }
 
 export async function getEVMakes(signal?: AbortSignal): Promise<string[]> {
-  const data = await fetchFromApi<string[]>('/evmakes', undefined, signal);
+  const data = await fetchFromApi<string[]>('/electricvehiclemakes', undefined, signal);
   return data.map(make => make.trim()).filter(Boolean);
 }
 
 export async function getEVModels(make: string, signal?: AbortSignal): Promise<string[]> {
-  const data = await fetchFromApi<string[]>('/evmodels', { make }, signal);
+  const data = await fetchFromApi<string[]>('/electricvehiclemodels', { make }, signal);
   return data.map(model => model.trim()).filter(Boolean);
 }
 
