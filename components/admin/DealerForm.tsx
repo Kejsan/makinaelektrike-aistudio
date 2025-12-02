@@ -5,6 +5,7 @@ import { Dealer, Model } from '../../types';
 import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../../constants/media';
 import { useGoogleMapsApi } from '../../hooks/useGoogleMapsApi';
 import { DataContext } from '../../contexts/DataContext';
+import ModalLayout from '../ModalLayout';
 
 export interface DealerFormValues extends Omit<Dealer, 'id'> {
   id?: string;
@@ -809,165 +810,153 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       </div>
       </form>
 
-      {isModelModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-slate-900 text-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-              <h3 className="text-lg font-semibold">
-                {t('admin.manageModels', { defaultValue: 'Manage models' })}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsModelModalOpen(false)}
-                className="rounded-full px-3 py-1 text-sm text-gray-300 transition hover:bg-white/10 hover:text-white"
-              >
-                ×
-              </button>
+      <ModalLayout
+        isOpen={isModelModalOpen}
+        onClose={() => setIsModelModalOpen(false)}
+        title={t('admin.manageModels', { defaultValue: 'Manage models' })}
+        maxWidthClass="max-w-4xl"
+      >
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-200">
+                {t('admin.searchModels', { defaultValue: 'Search existing models' })}
+              </label>
+              <input
+                type="text"
+                value={modelSearchTerm}
+                onChange={event => setModelSearchTerm(event.target.value)}
+                placeholder={t('admin.searchModelsPlaceholder', { defaultValue: 'Search by brand or model name' })}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+              />
             </div>
 
-            <div className="grid gap-6 p-6 lg:grid-cols-[2fr_1fr]">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-200">
-                    {t('admin.searchModels', { defaultValue: 'Search existing models' })}
-                  </label>
-                  <input
-                    type="text"
-                    value={modelSearchTerm}
-                    onChange={event => setModelSearchTerm(event.target.value)}
-                    placeholder={t('admin.searchModelsPlaceholder', { defaultValue: 'Search by brand or model name' })}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm text-gray-300">
-                    <span>
-                      {t('admin.availableModels', { defaultValue: 'Available models' })}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {t('admin.modelsCount', {
-                        defaultValue: '{{count}} results',
-                        count: filteredModels.length,
-                      })}
-                    </span>
-                  </div>
-                  <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-white/5 p-2">
-                    {filteredModels.length === 0 ? (
-                      <p className="text-sm text-gray-400">
-                        {t('admin.noModelsFound', { defaultValue: 'No models match your search.' })}
-                      </p>
-                    ) : (
-                      filteredModels.map(model => {
-                        const isSelected = selectedModels.some(entry => entry.id === model.id);
-                        const label = `${model.brand ?? ''} ${model.model_name ?? ''}`.trim() ||
-                          t('admin.unknownModel', { defaultValue: 'Unnamed model' });
-                        return (
-                          <button
-                            type="button"
-                            key={model.id}
-                            onClick={() => toggleModelSelection(model)}
-                            className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
-                              isSelected ? 'bg-gray-cyan text-gray-900' : 'bg-transparent text-white hover:bg-white/10'
-                            }`}
-                            aria-pressed={isSelected}
-                          >
-                            <span className="truncate">{label}</span>
-                            <span className="text-xs font-semibold">
-                              {isSelected
-                                ? t('admin.modelSelected', { defaultValue: 'Selected' })
-                                : t('admin.selectModel', { defaultValue: 'Select' })}
-                            </span>
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm text-gray-300">
+                <span>
+                  {t('admin.availableModels', { defaultValue: 'Available models' })}
+                </span>
+                <span className="text-xs text-gray-400">
+                  {t('admin.modelsCount', {
+                    defaultValue: '{{count}} results',
+                    count: filteredModels.length,
+                  })}
+                </span>
               </div>
-
-              <div className="space-y-4">
-                <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
-                  <h4 className="text-sm font-semibold text-white">
-                    {t('admin.createModel', { defaultValue: 'Add a new model' })}
-                  </h4>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={newModelBrand}
-                      onChange={event => setNewModelBrand(event.target.value)}
-                      placeholder={t('admin.modelBrandPlaceholder', { defaultValue: 'Brand' })}
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
-                    />
-                    <input
-                      type="text"
-                      value={newModelName}
-                      onChange={event => setNewModelName(event.target.value)}
-                      placeholder={t('admin.modelNamePlaceholder', { defaultValue: 'Model name' })}
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCreateModel}
-                      disabled={isCreatingModel || !newModelBrand.trim() || !newModelName.trim()}
-                      className="w-full rounded-lg bg-gray-cyan px-3 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {isCreatingModel
-                        ? t('admin.creatingModel', { defaultValue: 'Creating…' })
-                        : t('admin.createAndSelectModel', { defaultValue: 'Create & select' })}
-                    </button>
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {t('admin.createModelHelper', {
-                      defaultValue: 'New models will be linked to this dealer after you save the form.',
-                    })}
+              <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-white/5 p-2">
+                {filteredModels.length === 0 ? (
+                  <p className="text-sm text-gray-400">
+                    {t('admin.noModelsFound', { defaultValue: 'No models match your search.' })}
                   </p>
-                </div>
-
-                <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-center justify-between text-sm text-gray-200">
-                    <span>{t('admin.selectedModels', { defaultValue: 'Selected models' })}</span>
-                    <span className="text-xs text-gray-400">{selectedModels.length}</span>
-                  </div>
-                  {selectedModels.length === 0 ? (
-                    <p className="text-sm text-gray-400">
-                      {t('admin.noModelsSelected', { defaultValue: 'No models linked yet.' })}
-                    </p>
-                  ) : (
-                    <ul className="space-y-2 text-sm text-white">
-                      {selectedModels.map(model => (
-                        <li key={model.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-3 py-2">
-                          <span className="truncate">
-                            {`${model.brand ?? ''} ${model.model_name ?? ''}`.trim() ||
-                              t('admin.unknownModel', { defaultValue: 'Unnamed model' })}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => toggleModelSelection(model)}
-                            className="text-xs text-gray-300 transition hover:text-white"
-                          >
-                            {t('admin.remove', { defaultValue: 'Remove' })}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => setIsModelModalOpen(false)}
-                    className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
-                  >
-                    {t('admin.done', { defaultValue: 'Done' })}
-                  </button>
-                </div>
+                ) : (
+                  filteredModels.map(model => {
+                    const isSelected = selectedModels.some(entry => entry.id === model.id);
+                    const label = `${model.brand ?? ''} ${model.model_name ?? ''}`.trim() ||
+                      t('admin.unknownModel', { defaultValue: 'Unnamed model' });
+                    return (
+                      <button
+                        type="button"
+                        key={model.id}
+                        onClick={() => toggleModelSelection(model)}
+                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
+                          isSelected ? 'bg-gray-cyan text-gray-900' : 'bg-transparent text-white hover:bg-white/10'
+                        }`}
+                        aria-pressed={isSelected}
+                      >
+                        <span className="truncate">{label}</span>
+                        <span className="text-xs font-semibold">
+                          {isSelected
+                            ? t('admin.modelSelected', { defaultValue: 'Selected' })
+                            : t('admin.selectModel', { defaultValue: 'Select' })}
+                        </span>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
           </div>
+
+          <div className="space-y-4">
+            <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
+              <h4 className="text-sm font-semibold text-white">
+                {t('admin.createModel', { defaultValue: 'Add a new model' })}
+              </h4>
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={newModelBrand}
+                  onChange={event => setNewModelBrand(event.target.value)}
+                  placeholder={t('admin.modelBrandPlaceholder', { defaultValue: 'Brand' })}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                />
+                <input
+                  type="text"
+                  value={newModelName}
+                  onChange={event => setNewModelName(event.target.value)}
+                  placeholder={t('admin.modelNamePlaceholder', { defaultValue: 'Model name' })}
+                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateModel}
+                  disabled={isCreatingModel || !newModelBrand.trim() || !newModelName.trim()}
+                  className="w-full rounded-lg bg-gray-cyan px-3 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isCreatingModel
+                    ? t('admin.creatingModel', { defaultValue: 'Creating…' })
+                    : t('admin.createAndSelectModel', { defaultValue: 'Create & select' })}
+                </button>
+              </div>
+              <p className="text-xs text-gray-400">
+                {t('admin.createModelHelper', {
+                  defaultValue: 'New models will be linked to this dealer after you save the form.',
+                })}
+              </p>
+            </div>
+
+            <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between text-sm text-gray-200">
+                <span>{t('admin.selectedModels', { defaultValue: 'Selected models' })}</span>
+                <span className="text-xs text-gray-400">{selectedModels.length}</span>
+              </div>
+              {selectedModels.length === 0 ? (
+                <p className="text-sm text-gray-400">
+                  {t('admin.noModelsSelected', { defaultValue: 'No models linked yet.' })}
+                </p>
+              ) : (
+                <ul className="space-y-2 text-sm text-white">
+                  {selectedModels.map(model => (
+                    <li key={model.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-3 py-2">
+                      <span className="truncate">
+                        {`${model.brand ?? ''} ${model.model_name ?? ''}`.trim() ||
+                          t('admin.unknownModel', { defaultValue: 'Unnamed model' })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleModelSelection(model)}
+                        className="text-xs text-gray-300 transition hover:text-white"
+                      >
+                        {t('admin.remove', { defaultValue: 'Remove' })}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsModelModalOpen(false)}
+                className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+              >
+                {t('admin.done', { defaultValue: 'Done' })}
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+      </ModalLayout>
     </>
   );
 };
