@@ -90,6 +90,7 @@ const AdminPage: React.FC = () => {
   const {
     dealers,
     models,
+    getModelsForDealer,
     blogPosts,
     loading,
     loadError,
@@ -106,6 +107,8 @@ const AdminPage: React.FC = () => {
     addModel,
     updateModel,
     deleteModel,
+    linkModelToDealer,
+    unlinkModelFromDealer,
     addBlogPost,
     updateBlogPost,
     deleteBlogPost,
@@ -317,11 +320,27 @@ const AdminPage: React.FC = () => {
       Array.from(new Set([...existing, ...additions].filter(Boolean))).slice(0, 3);
 
     try {
-      const { imageFile, galleryFiles = [], imageGallery = [], ...restValues } = values;
+      const { imageFile, galleryFiles = [], imageGallery = [], modelIds = [], ...restValues } = values;
       const baseGallery = Array.isArray(imageGallery)
         ? imageGallery.filter(Boolean).slice(0, 3)
         : [];
       const normalizedRest = { ...restValues, imageGallery: baseGallery };
+
+      const syncModelsForDealer = async (dealerId: string, desiredIds: string[]) => {
+        const currentIds = new Set(getModelsForDealer(dealerId).map(model => model.id));
+        const desiredSet = new Set(desiredIds.filter(Boolean));
+
+        const toAdd = desiredIds.filter(id => !currentIds.has(id));
+        const toRemove = [...currentIds].filter(id => !desiredSet.has(id));
+
+        for (const modelId of toAdd) {
+          await linkModelToDealer(dealerId, modelId);
+        }
+
+        for (const modelId of toRemove) {
+          await unlinkModelFromDealer(dealerId, modelId);
+        }
+      };
 
       if (dealerFormState?.mode === 'edit' && dealerFormState.entity) {
         const { id, ...rest } = normalizedRest;
@@ -340,6 +359,8 @@ const AdminPage: React.FC = () => {
           const nextGallery = mergeGallery(baseGallery, uploadedGallery);
           await updateDealer(dealerId, { imageGallery: nextGallery });
         }
+
+        await syncModelsForDealer(dealerId, modelIds);
       } else {
         const { id: _omit, ...rest } = normalizedRest;
         const createdDealer = await addDealer(rest);
@@ -359,6 +380,8 @@ const AdminPage: React.FC = () => {
             nextGallery = mergeGallery(nextGallery, uploadedGallery);
             await updateDealer(createdDealer.id, { imageGallery: nextGallery });
           }
+
+          await syncModelsForDealer(createdDealer.id, modelIds);
         }
       }
       closeAllModals();

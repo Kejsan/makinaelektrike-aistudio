@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useContext } from 'react';
 import { Autocomplete } from '@react-google-maps/api';
 import { useTranslation } from 'react-i18next';
-import { Dealer } from '../../types';
+import { Dealer, Model } from '../../types';
 import { DEALERSHIP_PLACEHOLDER_IMAGE } from '../../constants/media';
 import { useGoogleMapsApi } from '../../hooks/useGoogleMapsApi';
+import { DataContext } from '../../contexts/DataContext';
 
 export interface DealerFormValues extends Omit<Dealer, 'id'> {
   id?: string;
   imageFile?: File | null;
   galleryFiles?: File[];
+  modelIds?: string[];
 }
 
 interface DealerFormProps {
@@ -33,7 +35,6 @@ interface DealerFormState {
   typeOfCars: string;
   priceRange: string;
   image_url: string;
-  modelsAvailable: string;
   socialFacebook: string;
   socialInstagram: string;
   socialTwitter: string;
@@ -61,7 +62,6 @@ const defaultState: DealerFormState = {
   typeOfCars: '',
   priceRange: '',
   image_url: '',
-  modelsAvailable: '',
   socialFacebook: '',
   socialInstagram: '',
   socialTwitter: '',
@@ -87,7 +87,9 @@ const isValidEmail = (value: string) => {
 const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting }) => {
   const { t } = useTranslation();
   const { isLoaded: isMapsApiLoaded } = useGoogleMapsApi();
+  const { models, addModel, getModelsForDealer } = useContext(DataContext);
   const [formState, setFormState] = useState<DealerFormState>(defaultState);
+  const [selectedModels, setSelectedModels] = useState<Model[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState('');
@@ -96,12 +98,18 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
   const [galleryDrafts, setGalleryDrafts] = useState<GalleryDraft[]>([]);
   const galleryDraftsRef = useRef<GalleryDraft[]>([]);
   const autocompleteRef = useRef<any>(null);
+  const [isModelModalOpen, setIsModelModalOpen] = useState(false);
+  const [modelSearchTerm, setModelSearchTerm] = useState('');
+  const [newModelBrand, setNewModelBrand] = useState('');
+  const [newModelName, setNewModelName] = useState('');
+  const [isCreatingModel, setIsCreatingModel] = useState(false);
 
   const galleryLimit = 3;
 
   useEffect(() => {
     if (!initialValues) {
       setFormState(defaultState);
+      setSelectedModels([]);
       setImageFile(null);
       setImagePreview('');
       setPreviewFromFile(false);
@@ -127,8 +135,7 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       notes: initialValues.notes ?? '',
       typeOfCars: initialValues.typeOfCars ?? '',
       priceRange: initialValues.priceRange ?? '',
-    image_url: initialValues.logo_url ?? initialValues.image_url ?? '',
-      modelsAvailable: initialValues.modelsAvailable?.join(', ') ?? '',
+      image_url: initialValues.logo_url ?? initialValues.image_url ?? '',
       socialFacebook: initialValues.social_links?.facebook ?? '',
       socialInstagram: initialValues.social_links?.instagram ?? '',
       socialTwitter: initialValues.social_links?.twitter ?? '',
@@ -145,6 +152,15 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       return [];
     });
   }, [initialValues]);
+
+  useEffect(() => {
+    if (!initialValues?.id) {
+      setSelectedModels([]);
+      return;
+    }
+
+    setSelectedModels(getModelsForDealer(initialValues.id));
+  }, [getModelsForDealer, initialValues?.id]);
 
   useEffect(() => {
     if (imageFile) {
@@ -351,12 +367,6 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       return;
     }
 
-    const parseList = (value: string) =>
-      value
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-
     const latValue = formState.lat.trim();
     const lngValue = formState.lng.trim();
     const latNumber = Number(latValue);
@@ -372,11 +382,18 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       location: locationValue || undefined,
       lat: Number.isFinite(latNumber) ? latNumber : 0,
       lng: Number.isFinite(lngNumber) ? lngNumber : 0,
-      brands: parseList(formState.brands),
-      languages: parseList(formState.languages),
+      brands: formState.brands
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean),
+      languages: formState.languages
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean),
       typeOfCars: formState.typeOfCars.trim() || 'Unknown',
-      modelsAvailable: parseList(formState.modelsAvailable),
+      modelsAvailable: selectedModels.map(model => `${model.brand ?? ''} ${model.model_name ?? ''}`.trim()).filter(Boolean),
       isFeatured: formState.isFeatured,
+      modelIds: selectedModels.map(model => model.id),
     };
 
     if (initialValues?.id) {
@@ -485,12 +502,55 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
   const availableGallerySlots = Math.max(0, galleryLimit - currentGalleryCount);
   const galleryUploadDisabled = availableGallerySlots <= 0;
 
+  const filteredModels = useMemo(() => {
+    const term = modelSearchTerm.trim().toLowerCase();
+    if (!term) return models;
+    return models.filter(model => {
+      const brandMatch = model.brand?.toLowerCase().includes(term);
+      const nameMatch = model.model_name?.toLowerCase().includes(term);
+      return brandMatch || nameMatch;
+    });
+  }, [modelSearchTerm, models]);
+
+  const toggleModelSelection = (model: Model) => {
+    setSelectedModels(prev => {
+      const exists = prev.some(entry => entry.id === model.id);
+      if (exists) {
+        return prev.filter(entry => entry.id !== model.id);
+      }
+      return [...prev, model];
+    });
+  };
+
+  const handleCreateModel = async () => {
+    const brand = newModelBrand.trim();
+    const modelName = newModelName.trim();
+
+    if (!brand || !modelName) {
+      return;
+    }
+
+    setIsCreatingModel(true);
+    try {
+      const createdModel = await addModel({ brand, model_name: modelName });
+      setSelectedModels(prev => [...prev, createdModel]);
+      setNewModelBrand('');
+      setNewModelName('');
+      setModelSearchTerm('');
+    } catch (error) {
+      console.error('Failed to create model', error);
+    } finally {
+      setIsCreatingModel(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {renderInput(t('admin.name'), 'name')}
-        {renderInput(t('admin.city'), 'city')}
-        <div className="md:col-span-2">
+    <>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {renderInput(t('admin.name'), 'name')}
+          {renderInput(t('admin.city'), 'city')}
+          <div className="md:col-span-2">
           <label className="block text-sm text-gray-300">
             <span className="mb-1 inline-block font-medium">
               {t('dealerDetails.address', { defaultValue: 'Address' })}
@@ -535,10 +595,10 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
               </span>
             )}
           </label>
+          </div>
+          {renderInput(t('admin.fields.typeOfCars'), 'typeOfCars')}
+          {renderInput(t('admin.fields.priceRange'), 'priceRange')}
         </div>
-        {renderInput(t('admin.fields.typeOfCars'), 'typeOfCars')}
-        {renderInput(t('admin.fields.priceRange'), 'priceRange')}
-      </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {renderInput(t('dealerDetails.phone', { defaultValue: 'Phone' }), 'phone')}
@@ -581,7 +641,51 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {renderInput(t('admin.brands'), 'brands', 'text', 'BYD, Tesla')}
         {renderInput(t('dealerDetails.languagesSpoken', { defaultValue: 'Languages' }), 'languages', 'text', 'Albanian, English')}
-        {renderInput(t('admin.fields.modelsAvailable'), 'modelsAvailable', 'text', 'Model A, Model B')}
+        <div className="md:col-span-2 space-y-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="block text-sm font-medium text-gray-300">
+                {t('admin.fields.modelsAvailable')}
+              </span>
+              <p className="text-xs text-gray-400">
+                {t('admin.selectModelsForDealer', {
+                  defaultValue: 'Choose models to link to this dealer profile.',
+                })}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsModelModalOpen(true)}
+              className="rounded-lg bg-gray-cyan px-3 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90"
+            >
+              {t('admin.manageModels', { defaultValue: 'Manage models' })}
+            </button>
+          </div>
+          {selectedModels.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {selectedModels.map(model => (
+                <span
+                  key={model.id}
+                  className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs text-white"
+                >
+                  {`${model.brand ?? ''} ${model.model_name ?? ''}`.trim() || t('admin.unknownModel', { defaultValue: 'Unnamed model' })}
+                  <button
+                    type="button"
+                    onClick={() => toggleModelSelection(model)}
+                    className="text-gray-300 transition hover:text-white"
+                    aria-label={t('admin.removeModel', { defaultValue: 'Remove model' })}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">
+              {t('admin.noModelsSelected', { defaultValue: 'No models linked yet.' })}
+            </p>
+          )}
+        </div>
       </div>
 
       {renderInput(t('dealerDetails.notes', { defaultValue: 'Notes' }), 'notes', 'text', undefined, { isTextArea: true, rows: 4 })}
@@ -703,7 +807,168 @@ const DealerForm: React.FC<DealerFormProps> = ({ initialValues, onSubmit, onCanc
           {isSubmitting ? `${t('admin.save')}...` : t('admin.save')}
         </button>
       </div>
-    </form>
+      </form>
+
+      {isModelModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-slate-900 text-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+              <h3 className="text-lg font-semibold">
+                {t('admin.manageModels', { defaultValue: 'Manage models' })}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsModelModalOpen(false)}
+                className="rounded-full px-3 py-1 text-sm text-gray-300 transition hover:bg-white/10 hover:text-white"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="grid gap-6 p-6 lg:grid-cols-[2fr_1fr]">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-200">
+                    {t('admin.searchModels', { defaultValue: 'Search existing models' })}
+                  </label>
+                  <input
+                    type="text"
+                    value={modelSearchTerm}
+                    onChange={event => setModelSearchTerm(event.target.value)}
+                    placeholder={t('admin.searchModelsPlaceholder', { defaultValue: 'Search by brand or model name' })}
+                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm text-gray-300">
+                    <span>
+                      {t('admin.availableModels', { defaultValue: 'Available models' })}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      {t('admin.modelsCount', {
+                        defaultValue: '{{count}} results',
+                        count: filteredModels.length,
+                      })}
+                    </span>
+                  </div>
+                  <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-white/10 bg-white/5 p-2">
+                    {filteredModels.length === 0 ? (
+                      <p className="text-sm text-gray-400">
+                        {t('admin.noModelsFound', { defaultValue: 'No models match your search.' })}
+                      </p>
+                    ) : (
+                      filteredModels.map(model => {
+                        const isSelected = selectedModels.some(entry => entry.id === model.id);
+                        const label = `${model.brand ?? ''} ${model.model_name ?? ''}`.trim() ||
+                          t('admin.unknownModel', { defaultValue: 'Unnamed model' });
+                        return (
+                          <button
+                            type="button"
+                            key={model.id}
+                            onClick={() => toggleModelSelection(model)}
+                            className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
+                              isSelected ? 'bg-gray-cyan text-gray-900' : 'bg-transparent text-white hover:bg-white/10'
+                            }`}
+                            aria-pressed={isSelected}
+                          >
+                            <span className="truncate">{label}</span>
+                            <span className="text-xs font-semibold">
+                              {isSelected
+                                ? t('admin.modelSelected', { defaultValue: 'Selected' })
+                                : t('admin.selectModel', { defaultValue: 'Select' })}
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
+                  <h4 className="text-sm font-semibold text-white">
+                    {t('admin.createModel', { defaultValue: 'Add a new model' })}
+                  </h4>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={newModelBrand}
+                      onChange={event => setNewModelBrand(event.target.value)}
+                      placeholder={t('admin.modelBrandPlaceholder', { defaultValue: 'Brand' })}
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                    />
+                    <input
+                      type="text"
+                      value={newModelName}
+                      onChange={event => setNewModelName(event.target.value)}
+                      placeholder={t('admin.modelNamePlaceholder', { defaultValue: 'Model name' })}
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-cyan"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCreateModel}
+                      disabled={isCreatingModel || !newModelBrand.trim() || !newModelName.trim()}
+                      className="w-full rounded-lg bg-gray-cyan px-3 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isCreatingModel
+                        ? t('admin.creatingModel', { defaultValue: 'Creating…' })
+                        : t('admin.createAndSelectModel', { defaultValue: 'Create & select' })}
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {t('admin.createModelHelper', {
+                      defaultValue: 'New models will be linked to this dealer after you save the form.',
+                    })}
+                  </p>
+                </div>
+
+                <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center justify-between text-sm text-gray-200">
+                    <span>{t('admin.selectedModels', { defaultValue: 'Selected models' })}</span>
+                    <span className="text-xs text-gray-400">{selectedModels.length}</span>
+                  </div>
+                  {selectedModels.length === 0 ? (
+                    <p className="text-sm text-gray-400">
+                      {t('admin.noModelsSelected', { defaultValue: 'No models linked yet.' })}
+                    </p>
+                  ) : (
+                    <ul className="space-y-2 text-sm text-white">
+                      {selectedModels.map(model => (
+                        <li key={model.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-3 py-2">
+                          <span className="truncate">
+                            {`${model.brand ?? ''} ${model.model_name ?? ''}`.trim() ||
+                              t('admin.unknownModel', { defaultValue: 'Unnamed model' })}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => toggleModelSelection(model)}
+                            className="text-xs text-gray-300 transition hover:text-white"
+                          >
+                            {t('admin.remove', { defaultValue: 'Remove' })}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setIsModelModalOpen(false)}
+                    className="rounded-lg border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+                  >
+                    {t('admin.done', { defaultValue: 'Done' })}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
