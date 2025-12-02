@@ -1110,6 +1110,7 @@ const AdminPage: React.FC = () => {
             onSubmit={handleDealerSubmit}
             onCancel={closeAllModals}
             isSubmitting={dealerSubmitting}
+            canManageModels={isAdmin}
           />
         </AdminModal>
       )}
