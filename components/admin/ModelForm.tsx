@@ -19,8 +19,12 @@ interface ModelFormProps {
 interface ModelFormState {
   brand: string;
   model_name: string;
+  year_start: string;
   body_type: string;
   battery_capacity: string;
+  battery_useable_capacity: string;
+  battery_type: string;
+  battery_voltage: string;
   range_wltp: string;
   power_kw: string;
   torque_nm: string;
@@ -43,8 +47,12 @@ interface GalleryDraft {
 const defaultState: ModelFormState = {
   brand: '',
   model_name: '',
+  year_start: '',
   body_type: '',
   battery_capacity: '',
+  battery_useable_capacity: '',
+  battery_type: '',
+  battery_voltage: '',
   range_wltp: '',
   power_kw: '',
   torque_nm: '',
@@ -111,8 +119,18 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     setFormState({
       brand: initialValues.brand ?? '',
       model_name: initialValues.model_name ?? '',
+      year_start: initialValues.year_start !== undefined && initialValues.year_start !== null ? String(initialValues.year_start) : '',
       body_type: initialValues.body_type ?? '',
       battery_capacity: initialValues.battery_capacity !== undefined && initialValues.battery_capacity !== null ? String(initialValues.battery_capacity) : '',
+      battery_useable_capacity:
+        initialValues.battery_useable_capacity !== undefined && initialValues.battery_useable_capacity !== null
+          ? String(initialValues.battery_useable_capacity)
+          : '',
+      battery_type: initialValues.battery_type ?? '',
+      battery_voltage:
+        initialValues.battery_voltage !== undefined && initialValues.battery_voltage !== null
+          ? String(initialValues.battery_voltage)
+          : '',
       range_wltp: initialValues.range_wltp !== undefined && initialValues.range_wltp !== null ? String(initialValues.range_wltp) : '',
       power_kw: initialValues.power_kw !== undefined && initialValues.power_kw !== null ? String(initialValues.power_kw) : '',
       torque_nm: initialValues.torque_nm !== undefined && initialValues.torque_nm !== null ? String(initialValues.torque_nm) : '',
@@ -245,7 +263,10 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     }
 
     const numericFields: Array<[keyof ModelFormState, string]> = [
+      ['year_start', 'Year start'],
       ['battery_capacity', 'Battery Capacity'],
+      ['battery_useable_capacity', 'Usable capacity'],
+      ['battery_voltage', 'Battery voltage'],
       ['range_wltp', 'Range'],
       ['power_kw', 'Power'],
       ['torque_nm', 'Torque'],
@@ -295,9 +316,29 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       payload.body_type = bodyType;
     }
 
+    const yearStart = parseInteger(formState.year_start);
+    if (yearStart !== undefined) {
+      payload.year_start = yearStart;
+    }
+
     const batteryCapacity = parseNumber(formState.battery_capacity);
     if (batteryCapacity !== undefined) {
       payload.battery_capacity = batteryCapacity;
+    }
+
+    const batteryUseableCapacity = parseNumber(formState.battery_useable_capacity);
+    if (batteryUseableCapacity !== undefined) {
+      payload.battery_useable_capacity = batteryUseableCapacity;
+    }
+
+    const batteryType = formState.battery_type.trim();
+    if (batteryType) {
+      payload.battery_type = batteryType;
+    }
+
+    const batteryVoltage = parseNumber(formState.battery_voltage);
+    if (batteryVoltage !== undefined) {
+      payload.battery_voltage = batteryVoltage;
     }
 
     const rangeWltp = parseNumber(formState.range_wltp);
@@ -406,12 +447,16 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {renderInput(t('admin.brand'), 'brand')}
         {renderInput(t('admin.name'), 'model_name')}
+        {renderInput(t('admin.fields.yearStart', { defaultValue: 'Production start year' }), 'year_start')}
         {renderInput(t('modelsPage.bodyType', { defaultValue: 'Body Type' }), 'body_type')}
         {renderInput(t('admin.fields.driveType'), 'drive_type')}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {renderInput(t('admin.fields.batteryCapacity'), 'battery_capacity')}
+        {renderInput(t('admin.fields.batteryUsableCapacity', { defaultValue: 'Usable battery capacity' }), 'battery_useable_capacity')}
+        {renderInput(t('admin.fields.batteryType', { defaultValue: 'Battery type' }), 'battery_type')}
+        {renderInput(t('admin.fields.batteryVoltage', { defaultValue: 'Battery voltage' }), 'battery_voltage')}
         {renderInput(t('admin.fields.rangeWltp'), 'range_wltp')}
         {renderInput(t('admin.fields.powerKw'), 'power_kw')}
         {renderInput(t('admin.fields.torqueNm'), 'torque_nm')}

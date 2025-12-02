@@ -76,8 +76,12 @@ export interface Dealer extends DealerDocument {
 interface ModelCore {
   brand: string;
   model_name: string;
+  year_start?: number;
   body_type?: string;
   battery_capacity?: number; // in kWh
+  battery_useable_capacity?: number; // in kWh
+  battery_type?: string;
+  battery_voltage?: number;
   range_wltp?: number; // in km
   power_kw?: number; // in kW
   torque_nm?: number; // in Nm
