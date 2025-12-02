@@ -1,12 +1,13 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, Plus, Trash2, X } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import SEO from '../components/SEO';
 import { BASE_URL, DEFAULT_OG_IMAGE } from '../constants/seo';
 import { DataContext } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import EVModelSearch from '../components/admin/EVModelSearch';
+import ModalLayout from '../components/ModalLayout';
 import type { Dealer, Model } from '../types';
 
 const DealerInventoryPage: React.FC = () => {
@@ -243,95 +244,80 @@ const DealerInventoryPage: React.FC = () => {
         ) : null}
       </div>
 
-      {isModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-3xl rounded-2xl bg-slate-900 p-6 shadow-2xl">
-            <div className="mb-4 flex items-start justify-between">
-              <div>
-                <p className="text-sm text-blue-300">Add model</p>
-                <h3 className="text-2xl font-semibold">Search and link</h3>
-                <p className="text-gray-300">Use EV database search, then set price and notes.</p>
-              </div>
-              <button
-                type="button"
-                onClick={resetModal}
-                className="rounded-full p-2 text-gray-300 transition hover:bg-white/5"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      <ModalLayout
+        isOpen={isModalOpen}
+        onClose={resetModal}
+        title="Search and link"
+        description="Use EV database search, then set price and notes."
+        maxWidthClass="max-w-3xl"
+      >
+        <EVModelSearch onPrefill={handlePrefill} onLoadingChange={setIsPrefillLoading} />
 
-            <div className="space-y-6">
-              <EVModelSearch onPrefill={handlePrefill} onLoadingChange={setIsPrefillLoading} />
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm text-gray-200">Brand</span>
+            <input
+              type="text"
+              value={formModel.brand ?? ''}
+              onChange={e => setFormModel(prev => ({ ...prev, brand: e.target.value }))}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
+              placeholder="e.g. Tesla"
+            />
+          </label>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="space-y-2">
-                  <span className="text-sm text-gray-200">Brand</span>
-                  <input
-                    type="text"
-                    value={formModel.brand ?? ''}
-                    onChange={e => setFormModel(prev => ({ ...prev, brand: e.target.value }))}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
-                    placeholder="e.g. Tesla"
-                  />
-                </label>
+          <label className="space-y-2">
+            <span className="text-sm text-gray-200">Model name</span>
+            <input
+              type="text"
+              value={formModel.model_name ?? ''}
+              onChange={e => setFormModel(prev => ({ ...prev, model_name: e.target.value }))}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
+              placeholder="e.g. Model 3"
+            />
+          </label>
 
-                <label className="space-y-2">
-                  <span className="text-sm text-gray-200">Model name</span>
-                  <input
-                    type="text"
-                    value={formModel.model_name ?? ''}
-                    onChange={e => setFormModel(prev => ({ ...prev, model_name: e.target.value }))}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
-                    placeholder="e.g. Model 3"
-                  />
-                </label>
+          <label className="space-y-2">
+            <span className="text-sm text-gray-200">Price (optional)</span>
+            <input
+              type="text"
+              value={priceInput}
+              onChange={e => setPriceInput(e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
+              placeholder="e.g. €35,000"
+            />
+          </label>
 
-                <label className="space-y-2">
-                  <span className="text-sm text-gray-200">Price (optional)</span>
-                  <input
-                    type="text"
-                    value={priceInput}
-                    onChange={e => setPriceInput(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
-                    placeholder="e.g. €35,000"
-                  />
-                </label>
-
-                <label className="space-y-2">
-                  <span className="text-sm text-gray-200">Notes</span>
-                  <input
-                    type="text"
-                    value={notesInput}
-                    onChange={e => setNotesInput(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
-                    placeholder="Special trim, condition, etc."
-                  />
-                </label>
-              </div>
-
-              <div className="flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={resetModal}
-                  className="rounded-lg px-4 py-2 font-semibold text-gray-200 transition hover:bg-white/5"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLink}
-                  disabled={isSubmitting || isPrefillLoading}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
-                  Confirm &amp; Link
-                </button>
-              </div>
-            </div>
-          </div>
+          <label className="space-y-2">
+            <span className="text-sm text-gray-200">Notes</span>
+            <input
+              type="text"
+              value={notesInput}
+              onChange={e => setNotesInput(e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white outline-none focus:border-blue-400"
+              placeholder="Special trim, condition, etc."
+            />
+          </label>
         </div>
-      ) : null}
+
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={resetModal}
+            className="rounded-lg px-4 py-2 font-semibold text-gray-200 transition hover:bg-white/5"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleLink}
+            disabled={isSubmitting || isPrefillLoading}
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Plus className="h-5 w-5" />}
+            Confirm &amp; Link
+          </button>
+        </div>
+      </ModalLayout>
     </div>
   );
 };
