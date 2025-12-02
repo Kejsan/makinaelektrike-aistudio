@@ -62,7 +62,7 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, allM
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" role="dialog" aria-modal="true">
             <div className="bg-navy-blue/80 backdrop-blur-2xl border border-gray-cyan/30 rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="flex justify-between items-center p-4 border-b border-white/10 flex-shrink-0">

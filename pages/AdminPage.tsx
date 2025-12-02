@@ -41,7 +41,7 @@ interface ModalProps {
 }
 
 const AdminModal: React.FC<ModalProps> = ({ title, onClose, children }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
     <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-gray-900/95 text-white shadow-2xl">
       <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
         <h2 className="text-lg font-semibold">{title}</h2>
