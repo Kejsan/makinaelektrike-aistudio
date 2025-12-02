@@ -880,6 +880,11 @@
     "offlineQueueCopyUnavailable": "L'accesso agli appunti non è disponibile in questo browser.",
     "offlineQueueDownloaded": "Coda offline scaricata.",
     "offlineQueueUnknownError": "Errore sconosciuto",
+    "searchEV": "Cerca veicoli elettrici",
+    "selectMake": "Seleziona la marca",
+    "selectModel": "Seleziona il modello",
+    "prefillButton": "Compila automaticamente il modello",
+    "apiError": "Impossibile recuperare i dati EV. Riprova.",
     "fields": {
       "title": "Titolo",
       "excerpt": "Estratto",

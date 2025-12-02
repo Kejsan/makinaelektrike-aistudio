@@ -880,6 +880,11 @@
     "offlineQueueCopyUnavailable": "Clipboard access is not available in this browser.",
     "offlineQueueDownloaded": "Offline queue downloaded.",
     "offlineQueueUnknownError": "Unknown error",
+    "searchEV": "Search electric vehicles",
+    "selectMake": "Select a manufacturer",
+    "selectModel": "Select a model",
+    "prefillButton": "Prefill model details",
+    "apiError": "Unable to fetch EV data. Please try again.",
     "fields": {
       "title": "Title",
       "excerpt": "Excerpt",
