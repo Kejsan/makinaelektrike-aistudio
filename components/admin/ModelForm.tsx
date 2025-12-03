@@ -100,6 +100,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
   const [existingGallery, setExistingGallery] = useState<string[]>([]);
   const [galleryDrafts, setGalleryDrafts] = useState<GalleryDraft[]>([]);
   const [isPrefillLoading, setIsPrefillLoading] = useState(false);
+  const [hasUsedPrefill, setHasUsedPrefill] = useState(false);
   const galleryDraftsRef = useRef<GalleryDraft[]>([]);
 
   const galleryLimit = 3;
@@ -115,6 +116,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         previousDrafts.forEach(draft => URL.revokeObjectURL(draft.preview));
         return [];
       });
+      setHasUsedPrefill(false);
       return;
     }
 
@@ -155,6 +157,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       previousDrafts.forEach(draft => URL.revokeObjectURL(draft.preview));
       return [];
     });
+    setHasUsedPrefill(false);
   }, [initialValues]);
 
   useEffect(() => {
@@ -305,10 +308,13 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         return [];
       });
     }
+
+    setHasUsedPrefill(true);
   };
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
+    const isNewModel = !initialValues;
 
     if (!formState.brand.trim()) {
       nextErrors.brand = `${t('admin.brand')} ${t('admin.required', { defaultValue: 'is required' })}`;
@@ -318,16 +324,38 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       nextErrors.model_name = `${t('admin.name')} ${t('admin.required', { defaultValue: 'is required' })}`;
     }
 
+    if (isNewModel) {
+      if (!formState.year_start.trim()) {
+        nextErrors.year_start = `${t('admin.fields.yearStart', { defaultValue: 'Production start year' })} ${t('admin.requiredNew', { defaultValue: 'is required for new models' })}`;
+      }
+
+      if (!formState.battery_useable_capacity.trim()) {
+        nextErrors.battery_useable_capacity = `${t('admin.fields.batteryUsableCapacity', { defaultValue: 'Usable battery capacity' })} ${t('admin.requiredNew', { defaultValue: 'is required for new models' })}`;
+      }
+
+      if (!formState.battery_type.trim()) {
+        nextErrors.battery_type = `${t('admin.fields.batteryType', { defaultValue: 'Battery type' })} ${t('admin.requiredNew', { defaultValue: 'is required for new models' })}`;
+      }
+
+      if (!formState.battery_voltage.trim()) {
+        nextErrors.battery_voltage = `${t('admin.fields.batteryVoltage', { defaultValue: 'Battery voltage' })} ${t('admin.requiredNew', { defaultValue: 'is required for new models' })}`;
+      }
+
+      if (!formState.image_url.trim() && !imageFile) {
+        nextErrors.image_url = t('admin.mediaRequired', { defaultValue: 'Add at least one image URL or upload a cover image.' });
+      }
+    }
+
     const numericFields: Array<[keyof ModelFormState, string]> = [
-      ['year_start', 'Year start'],
-      ['battery_capacity', 'Battery Capacity'],
-      ['battery_useable_capacity', 'Usable capacity'],
-      ['battery_voltage', 'Battery voltage'],
-      ['range_wltp', 'Range'],
-      ['power_kw', 'Power'],
-      ['torque_nm', 'Torque'],
-      ['acceleration_0_100', 'Acceleration'],
-      ['top_speed', 'Top Speed'],
+      ['year_start', t('admin.fields.yearStart', { defaultValue: 'Production start year' })],
+      ['battery_capacity', t('admin.fields.batteryCapacity', { defaultValue: 'Battery (kWh)' })],
+      ['battery_useable_capacity', t('admin.fields.batteryUsableCapacity', { defaultValue: 'Usable battery capacity' })],
+      ['battery_voltage', t('admin.fields.batteryVoltage', { defaultValue: 'Battery voltage' })],
+      ['range_wltp', t('admin.fields.rangeWltp', { defaultValue: 'Range (WLTP)' })],
+      ['power_kw', t('admin.fields.powerKw', { defaultValue: 'Power (kW)' })],
+      ['torque_nm', t('admin.fields.torqueNm', { defaultValue: 'Torque (Nm)' })],
+      ['acceleration_0_100', t('admin.fields.acceleration', { defaultValue: '0-100 km/h (s)' })],
+      ['top_speed', t('admin.fields.topSpeed', { defaultValue: 'Top speed (km/h)' })],
     ];
 
     numericFields.forEach(([key, label]) => {
@@ -500,7 +528,11 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
 
   return (
     <div className="space-y-6">
-      <EVModelSearch onPrefill={handlePrefill} onLoadingChange={setIsPrefillLoading} />
+      <EVModelSearch
+        onPrefill={handlePrefill}
+        onLoadingChange={setIsPrefillLoading}
+        isPrefillUsed={hasUsedPrefill}
+      />
       <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {renderInput(t('admin.brand'), 'brand')}
