@@ -23,7 +23,7 @@ const LanguageSwitcher: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 text-white hover:text-gray-cyan transition-colors"
+        className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold text-white transition-colors hover:text-gray-cyan"
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
@@ -140,6 +140,8 @@ const Header: React.FC = () => {
     { to: '/about', label: t('header.about') },
   ];
 
+  const actionButtonBase = 'h-10 px-4 text-sm font-semibold';
+
   return (
     <header
       className={`sticky top-0 z-[1200] border-b border-gray-cyan/20 backdrop-blur-lg transition-all duration-300 ${
@@ -147,23 +149,8 @@ const Header: React.FC = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4 py-3 lg:py-4 lg:grid-cols-[1fr_auto_1fr]">
-          <nav className="hidden lg:flex items-center gap-2 justify-start justify-self-start">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={navLinkClasses(item.to)}
-                aria-current={isActivePath(item.to) ? 'page' : undefined}
-              >
-                {item.label}
-                {isActivePath(item.to) && (
-                  <span className="absolute inset-x-2 -bottom-[6px] h-1 rounded-full bg-gradient-to-r from-gray-cyan via-white/70 to-gray-cyan" aria-hidden="true" />
-                )}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center justify-center justify-self-center">
+        <div className="relative flex items-center justify-between gap-3 sm:gap-4 py-3 lg:py-4">
+          <div className="flex items-center gap-4 lg:gap-6 min-w-0">
             <Link to="/" className="flex-shrink-0 flex items-center text-white" aria-label={t('header.home')}>
               <img
                 src={SITE_LOGO}
@@ -171,18 +158,34 @@ const Header: React.FC = () => {
                 className="h-12 w-auto rounded sm:h-14 lg:h-16"
               />
             </Link>
+            <nav className="hidden lg:flex items-center gap-2">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={navLinkClasses(item.to)}
+                  aria-current={isActivePath(item.to) ? 'page' : undefined}
+                >
+                  {item.label}
+                  {isActivePath(item.to) && (
+                    <span className="absolute inset-x-2 -bottom-[6px] h-1 rounded-full bg-gradient-to-r from-gray-cyan via-white/70 to-gray-cyan" aria-hidden="true" />
+                  )}
+                </Link>
+              ))}
+            </nav>
           </div>
-          <div className="flex items-center space-x-3 justify-end lg:space-x-4 lg:pl-4 justify-self-end">
-            <div className="hidden lg:flex items-center space-x-3">
+
+          <div className="flex items-center gap-2 lg:gap-3">
+            <div className="hidden lg:flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2 py-1.5 lg:px-3 lg:py-2 shadow-lg shadow-black/10">
               {!user ? (
                 <>
-                  <Link to="/register" className="btn btn-outline">
+                  <Link to="/register" className={`btn btn-outline ${actionButtonBase}`}>
                     {t('header.register')}
                   </Link>
-                  <Link to="/register-dealer" className="btn btn-outline">
+                  <Link to="/register-dealer" className={`btn btn-outline ${actionButtonBase}`}>
                     {t('header.becomeDealer')}
                   </Link>
-                  <Link to="/login" className="btn btn-primary">
+                  <Link to="/login" className={`btn btn-primary ${actionButtonBase}`}>
                     {t('header.login')}
                   </Link>
                 </>
@@ -190,8 +193,8 @@ const Header: React.FC = () => {
                 <div className="relative" ref={accountMenuRef}>
                   <button
                     type="button"
-                    onClick={() => setAccountMenuOpen(open => !open)}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-white transition hover:border-gray-cyan/70 hover:text-gray-cyan"
+                    onClick={() => setAccountMenuOpen((open) => !open)}
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-sm font-medium text-white transition hover:border-gray-cyan/70 hover:text-gray-cyan"
                     aria-haspopup="true"
                     aria-expanded={accountMenuOpen}
                   >
@@ -245,9 +248,10 @@ const Header: React.FC = () => {
                   )}
                 </div>
               )}
-            </div>
-            <div className="hidden lg:block">
-              <LanguageSwitcher />
+              <span className="hidden h-6 w-px bg-white/15 lg:block" aria-hidden="true" />
+              <div className="hidden lg:block">
+                <LanguageSwitcher />
+              </div>
             </div>
             <button
               type="button"
