@@ -147,17 +147,8 @@ const Header: React.FC = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative flex items-center justify-between gap-4 py-3 lg:py-4">
-          <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center text-white" aria-label={t('header.home')}>
-              <img
-                src={SITE_LOGO}
-                alt={SITE_LOGO_ALT}
-                className="h-14 w-auto rounded sm:h-16 lg:h-20"
-              />
-            </Link>
-          </div>
-          <nav className="hidden lg:flex items-center gap-2">
+        <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-4 py-3 lg:py-4 lg:grid-cols-[1fr_auto_1fr]">
+          <nav className="hidden lg:flex items-center gap-2 justify-start justify-self-start">
             {navigationItems.map((item) => (
               <Link
                 key={item.to}
@@ -172,7 +163,16 @@ const Header: React.FC = () => {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-center justify-self-center">
+            <Link to="/" className="flex-shrink-0 flex items-center text-white" aria-label={t('header.home')}>
+              <img
+                src={SITE_LOGO}
+                alt={SITE_LOGO_ALT}
+                className="h-12 w-auto rounded sm:h-14 lg:h-16"
+              />
+            </Link>
+          </div>
+          <div className="flex items-center space-x-3 justify-end lg:space-x-4 lg:pl-4 justify-self-end">
             <div className="hidden lg:flex items-center space-x-3">
               {!user ? (
                 <>
