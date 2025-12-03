@@ -3,6 +3,12 @@ import { Model } from '../types';
 import { X, Search, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { MODEL_PLACEHOLDER_IMAGE } from '../constants/media';
+import {
+  modalCloseButtonClass,
+  modalContainerClass,
+  modalHeaderClass,
+  modalOverlayClass,
+} from '../constants/modalStyles';
 
 interface ComparisonModalProps {
     isOpen: boolean;
@@ -62,15 +68,16 @@ const ComparisonModal: React.FC<ComparisonModalProps> = ({ isOpen, onClose, allM
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-            <div className="bg-navy-blue/80 backdrop-blur-2xl border border-gray-cyan/30 rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col">
+        <div className={modalOverlayClass} role="dialog" aria-modal="true">
+            <div className={`${modalContainerClass} max-w-7xl h-[90vh] w-full bg-navy-blue/80 backdrop-blur-2xl border border-gray-cyan/30 flex flex-col`}>
                 {/* Header */}
-                <div className="flex justify-between items-center p-4 border-b border-white/10 flex-shrink-0">
+                <div className={`${modalHeaderClass} flex-shrink-0 border-b border-white/10 p-4`}
+                >
                     <div>
                         <h2 className="text-2xl font-bold text-white">{t('compare.title')}</h2>
                         <p className="text-sm text-gray-400">{t('compare.selectPrompt')}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-full text-white hover:bg-white/10 transition-colors" aria-label="Close">
+                    <button onClick={onClose} className={modalCloseButtonClass} aria-label="Close">
                         <X size={24} />
                     </button>
                 </div>
