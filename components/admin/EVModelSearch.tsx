@@ -7,9 +7,10 @@ import type { Model } from '../../types';
 interface EVModelSearchProps {
   onPrefill: (model: Model) => void;
   onLoadingChange?: (isLoading: boolean) => void;
+  isPrefillUsed?: boolean;
 }
 
-const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChange }) => {
+const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChange, isPrefillUsed }) => {
   const { t } = useTranslation();
   const [makeInput, setMakeInput] = useState('');
   const [modelInput, setModelInput] = useState('');
@@ -128,17 +129,24 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
         <button
           type="button"
           onClick={fetchVehicle}
-          disabled={isLoadingVehicle}
+          disabled={isLoadingVehicle || isPrefillUsed}
           className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-3 py-2 font-semibold text-white transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoadingVehicle ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-          <span>{t('admin.prefillButton', { defaultValue: 'Prefill model details' })}</span>
+          <span>
+            {isPrefillUsed
+              ? t('admin.prefillUsed', { defaultValue: 'Prefill applied' })
+              : t('admin.prefillButton', { defaultValue: 'Prefill model details' })}
+          </span>
         </button>
         {isLoadingVehicle && !error && (
           <p className="flex items-center gap-2 text-gray-300">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t('admin.evSearch.fetching', { defaultValue: 'Fetching vehicle data…' })}
           </p>
+        )}
+        {isPrefillUsed && !isLoadingVehicle && !error && (
+          <p className="text-gray-300">{t('admin.prefillDisabled', { defaultValue: 'Prefill available once per new model.' })}</p>
         )}
         {error && <p className="text-red-300">{error}</p>}
       </div>

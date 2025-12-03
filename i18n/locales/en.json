@@ -853,6 +853,7 @@
     "brands": "Brands",
     "city": "City",
     "required": "is required",
+    "requiredNew": "is required for new models",
     "invalidNumber": "Please enter a valid number",
     "invalidUrl": "Enter a valid URL",
     "invalidEmail": "Enter a valid email address",
@@ -884,7 +885,10 @@
     "selectMake": "Select a manufacturer",
     "selectModel": "Select a model",
     "prefillButton": "Prefill model details",
+    "prefillUsed": "Prefill applied",
+    "prefillDisabled": "Prefill available once per new model.",
     "apiError": "Unable to fetch EV data. Please try again.",
+    "mediaRequired": "Add at least one image URL or upload a cover image.",
     "fields": {
       "title": "Title",
       "excerpt": "Excerpt",
@@ -908,7 +912,11 @@
       "acceleration": "0-100 km/h (s)",
       "topSpeed": "Top speed (km/h)",
       "chargingAc": "AC charging",
-      "chargingDc": "DC charging"
+      "chargingDc": "DC charging",
+      "yearStart": "Production start year",
+      "batteryUsableCapacity": "Usable battery capacity",
+      "batteryType": "Battery type",
+      "batteryVoltage": "Battery voltage"
     },
     "bulkImport": {
       "missingMapping": "Please map all required columns before importing.",

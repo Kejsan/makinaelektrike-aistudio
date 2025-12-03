@@ -853,6 +853,7 @@
     "brands": "Marche",
     "city": "Città",
     "required": "è obbligatorio",
+    "requiredNew": "è obbligatorio per i nuovi modelli",
     "invalidNumber": "Inserisci un numero valido",
     "invalidUrl": "Inserisci un URL valido",
     "invalidEmail": "Inserisci un indirizzo email valido",
@@ -884,7 +885,10 @@
     "selectMake": "Seleziona la marca",
     "selectModel": "Seleziona il modello",
     "prefillButton": "Compila automaticamente il modello",
+    "prefillUsed": "Precompilazione applicata",
+    "prefillDisabled": "La precompilazione è disponibile una sola volta per ogni nuovo modello.",
     "apiError": "Impossibile recuperare i dati EV. Riprova.",
+    "mediaRequired": "Aggiungi almeno un URL immagine o carica un'immagine di copertina.",
     "fields": {
       "title": "Titolo",
       "excerpt": "Estratto",
@@ -908,7 +912,11 @@
       "acceleration": "0-100 km/h (s)",
       "topSpeed": "Velocità massima (km/h)",
       "chargingAc": "Ricarica AC",
-      "chargingDc": "Ricarica DC"
+      "chargingDc": "Ricarica DC",
+      "yearStart": "Anno di inizio produzione",
+      "batteryUsableCapacity": "Capacità batteria utilizzabile",
+      "batteryType": "Tipo di batteria",
+      "batteryVoltage": "Voltaggio batteria"
     },
     "bulkImport": {
       "missingMapping": "Mappa tutte le colonne obbligatorie prima di importare.",

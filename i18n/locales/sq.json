@@ -853,6 +853,7 @@
     "brands": "Markat",
     "city": "Qyteti",
     "required": "është i detyrueshëm",
+    "requiredNew": "është i detyrueshëm për modelet e reja",
     "invalidNumber": "Ju lutemi shkruani një numër të vlefshëm",
     "invalidUrl": "Vendosni një URL të vlefshme",
     "invalidEmail": "Vendosni një adresë email të vlefshme",
@@ -884,7 +885,10 @@
     "selectMake": "Zgjidh markën",
     "selectModel": "Zgjidh modelin",
     "prefillButton": "Plotëso automatikisht modelin",
+    "prefillUsed": "Paraplotësimi u aplikua",
+    "prefillDisabled": "Paraplotësimi është i disponueshëm vetëm një herë për çdo model të ri.",
     "apiError": "Nuk u morën të dhëna për EV. Provo sërish.",
+    "mediaRequired": "Shto të paktën një URL imazhi ose ngarko një imazh kopertine.",
     "fields": {
       "title": "Titulli",
       "excerpt": "Përmbledhja",
@@ -908,7 +912,11 @@
       "acceleration": "0-100 km/orë (s)",
       "topSpeed": "Shpejtësia maksimale (km/orë)",
       "chargingAc": "Karikimi AC",
-      "chargingDc": "Karikimi DC"
+      "chargingDc": "Karikimi DC",
+      "yearStart": "Viti i nisjes së prodhimit",
+      "batteryUsableCapacity": "Kapaciteti i përdorshëm i baterisë",
+      "batteryType": "Lloji i baterisë",
+      "batteryVoltage": "Voltazhi i baterisë"
     },
     "bulkImport": {
       "missingMapping": "Plotësoni të gjitha kolonat e detyrueshme para importit.",
