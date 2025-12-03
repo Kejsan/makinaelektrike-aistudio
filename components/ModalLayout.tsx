@@ -1,5 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import {
+  modalCloseButtonClass,
+  modalContainerClass,
+  modalHeaderClass,
+  modalOverlayClass,
+} from '../constants/modalStyles';
 
 interface ModalLayoutProps {
   isOpen: boolean;
@@ -102,7 +108,7 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[11000] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm"
+      className={modalOverlayClass}
       role="presentation"
       onClick={handleOverlayClick}
     >
@@ -110,9 +116,9 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
         ref={contentRef}
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidthClass} rounded-2xl border border-white/10 bg-slate-900/95 p-6 text-white shadow-2xl`}
+        className={`${modalContainerClass} ${maxWidthClass} p-6`}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className={modalHeaderClass}>
           {headerContent ?? (
             <div className="space-y-1">
               {title ? <h3 className="text-2xl font-semibold leading-tight">{title}</h3> : null}
@@ -123,7 +129,7 @@ const ModalLayout: React.FC<ModalLayoutProps> = ({
             type="button"
             ref={closeButtonRef}
             onClick={onClose}
-            className="rounded-full p-2 text-gray-200 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={modalCloseButtonClass}
             aria-label="Close"
           >
             <X className="h-5 w-5" />
