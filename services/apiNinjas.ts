@@ -160,16 +160,6 @@ async function fetchFromApi<T>(endpoint: string, params?: QueryParams, signal?: 
   return response.json();
 }
 
-export async function getEVMakes(signal?: AbortSignal): Promise<string[]> {
-  const data = await fetchFromApi<string[]>('/electricvehiclemakes', undefined, signal);
-  return data.map(make => make.trim()).filter(Boolean);
-}
-
-export async function getEVModels(make: string, signal?: AbortSignal): Promise<string[]> {
-  const data = await fetchFromApi<string[]>('/electricvehiclemodels', { make }, signal);
-  return data.map(model => model.trim()).filter(Boolean);
-}
-
 export async function getElectricVehicle(
   make?: string,
   model?: string,
@@ -177,7 +167,7 @@ export async function getElectricVehicle(
 ): Promise<Model[]> {
   const vehicles = await fetchFromApi<ElectricVehicleResponse[]>(
     '/electricvehicle',
-    { make, model },
+    { make: make?.trim(), model: model?.trim() },
     signal,
   );
 
