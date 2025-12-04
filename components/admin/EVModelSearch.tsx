@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Loader2, Search } from 'lucide-react';
 import { getElectricVehicle } from '../../services/apiNinjas';
+import { enrichModelWithGemini, isGeminiEnabled } from '../../services/gemini';
 import type { Model } from '../../types';
 
 interface EVModelSearchProps {
@@ -45,7 +46,32 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
     vehicleControllerRef.current = controller;
 
     try {
-      const vehicles = await getElectricVehicle(make || undefined, model || undefined, controller.signal);
+      let vehicles: Model[] = [];
+
+      if (isGeminiEnabled) {
+        try {
+          const aiVehicle = await enrichModelWithGemini(make || 'Unknown', model || 'Unknown', controller.signal);
+          vehicles = [aiVehicle];
+          setStatusMessage(
+            t('admin.evSearch.aiSuccess', {
+              defaultValue: 'AI-enriched specifications ready to review.',
+            }),
+          );
+        } catch (aiError) {
+          if ((aiError as Error)?.name === 'AbortError') return;
+          console.warn('Gemini enrichment unavailable, falling back to API Ninjas', aiError);
+          setStatusMessage(
+            t('admin.evSearch.aiFallback', {
+              defaultValue: 'AI enrichment unavailable. Falling back to verified database results.',
+            }),
+          );
+        }
+      }
+
+      if (!vehicles.length) {
+        vehicles = await getElectricVehicle(make || undefined, model || undefined, controller.signal);
+      }
+
       const firstVehicle = vehicles[0];
 
       if (!firstVehicle) {

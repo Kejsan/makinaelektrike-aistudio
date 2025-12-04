@@ -76,6 +76,7 @@ export interface Dealer extends DealerDocument {
 interface ModelCore {
   brand: string;
   model_name: string;
+  source?: 'ai' | 'api' | 'manual';
   year_start?: number;
   body_type?: string;
   charge_port?: string;
