@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Loader2, Sparkles } from 'lucide-react';
 import { Model } from '../../types';
 import { MODEL_PLACEHOLDER_IMAGE } from '../../constants/media';
 import EVModelSearch from './EVModelSearch';
+import { enrichModelWithGemini, isGeminiEnabled } from '../../services/gemini';
 
 export interface ModelFormValues extends Omit<Model, 'id'> {
   id?: string;
@@ -15,6 +17,7 @@ interface ModelFormProps {
   onSubmit: (values: ModelFormValues) => void | Promise<void>;
   onCancel: () => void;
   isSubmitting?: boolean;
+  isAdmin?: boolean;
 }
 
 interface ModelFormState {
@@ -110,7 +113,47 @@ const parseInteger = (value: string) => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
-const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting }) => {
+const mapModelToFormState = (model: Model): Partial<ModelFormState> => ({
+  brand: model.brand ?? '',
+  model_name: model.model_name ?? '',
+  year_start: model.year_start !== undefined && model.year_start !== null ? String(model.year_start) : '',
+  body_type: model.body_type ?? '',
+  charge_port: model.charge_port ?? '',
+  charge_power: model.charge_power !== undefined && model.charge_power !== null ? String(model.charge_power) : '',
+  autocharge_supported: model.autocharge_supported ?? false,
+  battery_capacity: model.battery_capacity !== undefined && model.battery_capacity !== null ? String(model.battery_capacity) : '',
+  battery_useable_capacity:
+    model.battery_useable_capacity !== undefined && model.battery_useable_capacity !== null
+      ? String(model.battery_useable_capacity)
+      : '',
+  battery_type: model.battery_type ?? '',
+  battery_voltage: model.battery_voltage !== undefined && model.battery_voltage !== null ? String(model.battery_voltage) : '',
+  range_wltp: model.range_wltp !== undefined && model.range_wltp !== null ? String(model.range_wltp) : '',
+  power_kw: model.power_kw !== undefined && model.power_kw !== null ? String(model.power_kw) : '',
+  torque_nm: model.torque_nm !== undefined && model.torque_nm !== null ? String(model.torque_nm) : '',
+  acceleration_0_100:
+    model.acceleration_0_100 !== undefined && model.acceleration_0_100 !== null
+      ? String(model.acceleration_0_100)
+      : '',
+  acceleration_0_60:
+    model.acceleration_0_60 !== undefined && model.acceleration_0_60 !== null ? String(model.acceleration_0_60) : '',
+  top_speed: model.top_speed !== undefined && model.top_speed !== null ? String(model.top_speed) : '',
+  drive_type: model.drive_type ?? '',
+  seats: model.seats !== undefined && model.seats !== null ? String(model.seats) : '',
+  charging_ac: model.charging_ac ?? '',
+  charging_dc: model.charging_dc ?? '',
+  length_mm: model.length_mm !== undefined && model.length_mm !== null ? String(model.length_mm) : '',
+  width_mm: model.width_mm !== undefined && model.width_mm !== null ? String(model.width_mm) : '',
+  height_mm: model.height_mm !== undefined && model.height_mm !== null ? String(model.height_mm) : '',
+  wheelbase_mm: model.wheelbase_mm !== undefined && model.wheelbase_mm !== null ? String(model.wheelbase_mm) : '',
+  weight_kg: model.weight_kg !== undefined && model.weight_kg !== null ? String(model.weight_kg) : '',
+  cargo_volume_l: model.cargo_volume_l !== undefined && model.cargo_volume_l !== null ? String(model.cargo_volume_l) : '',
+  notes: model.notes ?? '',
+  image_url: model.image_url ?? '',
+  isFeatured: model.isFeatured ?? false,
+});
+
+const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel, isSubmitting, isAdmin }) => {
   const { t } = useTranslation();
   const [formState, setFormState] = useState<ModelFormState>(defaultState);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -121,24 +164,32 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
   const [galleryDrafts, setGalleryDrafts] = useState<GalleryDraft[]>([]);
   const [isPrefillLoading, setIsPrefillLoading] = useState(false);
   const [hasUsedPrefill, setHasUsedPrefill] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<Partial<ModelFormState> | null>(null);
+  const [aiStatus, setAiStatus] = useState('');
+  const [aiError, setAiError] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const aiControllerRef = useRef<AbortController | null>(null);
   const galleryDraftsRef = useRef<GalleryDraft[]>([]);
 
   const galleryLimit = 3;
 
   useEffect(() => {
     if (!initialValues) {
-      setFormState(defaultState);
-      setImageFile(null);
-      setImagePreview('');
-      setPreviewFromFile(false);
-      setExistingGallery([]);
-      setGalleryDrafts(previousDrafts => {
-        previousDrafts.forEach(draft => URL.revokeObjectURL(draft.preview));
-        return [];
-      });
-      setHasUsedPrefill(false);
-      return;
-    }
+    setFormState(defaultState);
+    setImageFile(null);
+    setImagePreview('');
+    setPreviewFromFile(false);
+    setExistingGallery([]);
+    setGalleryDrafts(previousDrafts => {
+      previousDrafts.forEach(draft => URL.revokeObjectURL(draft.preview));
+      return [];
+    });
+    setHasUsedPrefill(false);
+    setAiSuggestions(null);
+    setAiStatus('');
+    setAiError('');
+    return;
+  }
 
     setFormState({
       brand: initialValues.brand ?? '',
@@ -188,6 +239,9 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       return [];
     });
     setHasUsedPrefill(false);
+    setAiSuggestions(null);
+    setAiStatus('');
+    setAiError('');
   }, [initialValues]);
 
   useEffect(() => {
@@ -217,6 +271,12 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     },
     [],
   );
+
+  useEffect(() => {
+    return () => {
+      aiControllerRef.current?.abort();
+    };
+  }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type, checked } = event.target;
@@ -284,6 +344,84 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
 
   const handleExistingGalleryRemove = (url: string) => {
     setExistingGallery(prev => prev.filter(item => item !== url));
+  };
+
+  const handleAiEnrich = async () => {
+    if (!isAdmin) {
+      return;
+    }
+
+    if (!isGeminiEnabled) {
+      setAiError(
+        t('admin.aiEnrich.disabled', {
+          defaultValue: 'Gemini enrichment is disabled or not configured.',
+        }),
+      );
+      return;
+    }
+
+    const brand = formState.brand.trim();
+    const modelName = formState.model_name.trim();
+
+    if (!brand || !modelName) {
+      setAiError(
+        t('admin.aiEnrich.missingFields', {
+          defaultValue: 'Add a brand and model first to request AI suggestions.',
+        }),
+      );
+      return;
+    }
+
+    setAiError('');
+    setAiStatus('');
+    setIsAiLoading(true);
+    setAiSuggestions(null);
+    aiControllerRef.current?.abort();
+    const controller = new AbortController();
+    aiControllerRef.current = controller;
+
+    try {
+      const aiModel = await enrichModelWithGemini(brand, modelName, controller.signal);
+      const normalized = mapModelToFormState(aiModel);
+      setAiSuggestions(normalized);
+      setAiStatus(
+        t('admin.aiEnrich.success', {
+          defaultValue: 'Gemini AI suggestions are ready. Review and apply them selectively.',
+        }),
+      );
+    } catch (error) {
+      if ((error as Error)?.name === 'AbortError') return;
+      console.error('Gemini enrichment failed', error);
+      setAiError(
+        t('admin.aiEnrich.error', {
+          defaultValue: 'Unable to fetch AI suggestions. Please try again.',
+        }),
+      );
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const applyAiSuggestion = (field: keyof ModelFormState) => {
+    if (!aiSuggestions || !(field in aiSuggestions)) {
+      return;
+    }
+
+    const value = aiSuggestions[field];
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    setFormState(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+
+    if (field === 'image_url' && typeof value === 'string') {
+      setImageFile(null);
+      setImagePreview(value);
+      setPreviewFromFile(false);
+    }
   };
 
   const handlePrefill = (model: Model) => {
@@ -630,6 +768,90 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     );
   };
 
+  const formatValueForDisplay = (value: ModelFormState[keyof ModelFormState]) => {
+    if (typeof value === 'boolean') {
+      return value
+        ? t('common.yes', { defaultValue: 'Yes' })
+        : t('common.no', { defaultValue: 'No' });
+    }
+
+    if (!value) {
+      return t('admin.notProvided', { defaultValue: 'Not provided' });
+    }
+
+    return value;
+  };
+
+  const aiFieldOrder: Array<keyof ModelFormState> = [
+    'brand',
+    'model_name',
+    'year_start',
+    'body_type',
+    'charge_port',
+    'charge_power',
+    'autocharge_supported',
+    'battery_capacity',
+    'battery_useable_capacity',
+    'battery_type',
+    'battery_voltage',
+    'range_wltp',
+    'power_kw',
+    'torque_nm',
+    'acceleration_0_100',
+    'acceleration_0_60',
+    'top_speed',
+    'drive_type',
+    'seats',
+    'charging_ac',
+    'charging_dc',
+    'length_mm',
+    'width_mm',
+    'height_mm',
+    'wheelbase_mm',
+    'weight_kg',
+    'cargo_volume_l',
+    'notes',
+    'image_url',
+    'isFeatured',
+  ];
+
+  const getFieldLabel = (field: keyof ModelFormState) => {
+    const labels: Partial<Record<keyof ModelFormState, string>> = {
+      brand: t('admin.fields.brand', { defaultValue: 'Brand' }),
+      model_name: t('admin.fields.modelName', { defaultValue: 'Model' }),
+      year_start: t('admin.fields.yearStart', { defaultValue: 'Production start year' }),
+      body_type: t('admin.fields.bodyType', { defaultValue: 'Body type' }),
+      charge_port: t('admin.fields.chargePort', { defaultValue: 'Charge port' }),
+      charge_power: t('admin.fields.chargingDc', { defaultValue: 'Charging power (kW)' }),
+      autocharge_supported: t('admin.fields.autochargeSupported', { defaultValue: 'Autocharge supported' }),
+      battery_capacity: t('admin.fields.batteryCapacity', { defaultValue: 'Battery (kWh)' }),
+      battery_useable_capacity: t('admin.fields.batteryUsableCapacity', { defaultValue: 'Usable battery capacity' }),
+      battery_type: t('admin.fields.batteryType', { defaultValue: 'Battery chemistry' }),
+      battery_voltage: t('admin.fields.batteryVoltage', { defaultValue: 'Battery voltage' }),
+      range_wltp: t('admin.fields.rangeWltp', { defaultValue: 'Range (WLTP)' }),
+      power_kw: t('admin.fields.powerKw', { defaultValue: 'Power (kW)' }),
+      torque_nm: t('admin.fields.torqueNm', { defaultValue: 'Torque (Nm)' }),
+      acceleration_0_100: t('admin.fields.acceleration', { defaultValue: '0-100 km/h (s)' }),
+      acceleration_0_60: t('admin.fields.accelerationMph', { defaultValue: '0-60 mph (s)' }),
+      top_speed: t('admin.fields.topSpeed', { defaultValue: 'Top speed (km/h)' }),
+      drive_type: t('admin.fields.driveType', { defaultValue: 'Drive type' }),
+      seats: t('modelDetails.seats', { defaultValue: 'Seats' }),
+      charging_ac: t('admin.fields.chargingAc', { defaultValue: 'AC charging' }),
+      charging_dc: t('admin.fields.chargingDc', { defaultValue: 'DC charging' }),
+      length_mm: t('admin.fields.length', { defaultValue: 'Length (mm)' }),
+      width_mm: t('admin.fields.width', { defaultValue: 'Width (mm)' }),
+      height_mm: t('admin.fields.height', { defaultValue: 'Height (mm)' }),
+      wheelbase_mm: t('admin.fields.wheelbase', { defaultValue: 'Wheelbase (mm)' }),
+      weight_kg: t('admin.fields.weight', { defaultValue: 'Weight (kg)' }),
+      cargo_volume_l: t('admin.fields.cargoVolume', { defaultValue: 'Cargo volume (L)' }),
+      notes: t('admin.fields.notes', { defaultValue: 'Notes' }),
+      image_url: t('admin.fields.imageUrl', { defaultValue: 'Hero image URL' }),
+      isFeatured: t('admin.featured', { defaultValue: 'Featured' }),
+    };
+
+    return labels[field] ?? field;
+  };
+
   const currentGalleryCount = existingGallery.length + galleryDrafts.length;
   const availableGallerySlots = Math.max(0, galleryLimit - currentGalleryCount);
   const galleryUploadDisabled = availableGallerySlots <= 0;
@@ -641,6 +863,96 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         onLoadingChange={setIsPrefillLoading}
         isPrefillUsed={hasUsedPrefill}
       />
+      {isAdmin && (
+        <div className="space-y-3 rounded-xl border border-white/10 bg-gradient-to-br from-gray-900/80 to-gray-800/70 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-gray-100">
+                <Sparkles className="h-5 w-5 text-gray-cyan" />
+                <h3 className="text-lg font-semibold">
+                  {t('admin.aiEnrich.title', { defaultValue: 'Enrich with AI (Gemini)' })}
+                </h3>
+              </div>
+              <p className="text-sm text-gray-300">
+                {t('admin.aiEnrich.subtitle', {
+                  defaultValue: 'Request Gemini AI suggestions without overwriting your current entries.',
+                })}
+              </p>
+              {aiStatus && <p className="text-xs text-gray-200">{aiStatus}</p>}
+              {aiError && <p className="text-xs text-red-400">{aiError}</p>}
+            </div>
+            <button
+              type="button"
+              onClick={handleAiEnrich}
+              disabled={isAiLoading || !isGeminiEnabled}
+              className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+              <span>{t('admin.aiEnrich.cta', { defaultValue: 'Enrich with AI' })}</span>
+            </button>
+          </div>
+
+          {aiSuggestions && (
+            <div className="space-y-2 rounded-lg border border-white/10 bg-white/5 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-300">
+                {t('admin.aiEnrich.suggestionHeader', { defaultValue: 'Gemini AI suggestions' })}
+              </p>
+              <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
+                {aiFieldOrder.map(field => {
+                  const suggestedValue = aiSuggestions[field];
+
+                  if (suggestedValue === undefined || suggestedValue === null) {
+                    return null;
+                  }
+
+                  const currentValue = formState[field];
+                  const isSame = String(suggestedValue) === String(currentValue);
+
+                  return (
+                    <div key={field} className="rounded-lg border border-white/10 bg-gray-900/50 p-3">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-gray-100">
+                            <span className="rounded-full bg-gray-cyan/20 px-2 py-0.5 text-[11px] font-bold uppercase text-gray-cyan">
+                              AI
+                            </span>
+                            <span>{getFieldLabel(field)}</span>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            {t('admin.aiEnrich.currentValue', { defaultValue: 'Current' })}:{' '}
+                            <span className="text-gray-200">{formatValueForDisplay(currentValue)}</span>
+                          </p>
+                          <p className="text-xs text-gray-cyan">
+                            {t('admin.aiEnrich.suggestedValue', { defaultValue: 'Gemini suggestion' })}:{' '}
+                            <span className="text-gray-100">
+                              {formatValueForDisplay(suggestedValue as ModelFormState[keyof ModelFormState])}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-start gap-1 sm:items-end">
+                          <button
+                            type="button"
+                            onClick={() => applyAiSuggestion(field)}
+                            disabled={isSame || isAiLoading}
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-cyan/40 px-3 py-2 text-sm font-semibold text-white transition hover:bg-gray-cyan/10 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {t('admin.aiEnrich.apply', { defaultValue: 'Apply suggestion' })}
+                          </button>
+                          {isSame && (
+                            <span className="text-[11px] text-gray-400">
+                              {t('admin.aiEnrich.matching', { defaultValue: 'Matches current value' })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {renderInput(t('admin.brand'), 'brand')}
