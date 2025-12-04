@@ -1,25 +1,23 @@
 import type { Model } from '../types';
 
-const GEMINI_MODEL = 'gemini-2.0-flash-lite';
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 export const GEMINI_TIMEOUT_MS = 12000;
 
-const readEnvValue = (key: string): string | undefined => {
+const readEnvValue = (...keys: string[]): string | undefined => {
   const metaEnv = typeof import.meta !== 'undefined' ? (import.meta as { env?: Record<string, string> }).env : undefined;
-  return (process.env[key] ?? metaEnv?.[key]) as string | undefined;
+  for (const key of keys) {
+    const value = (process.env[key] ?? metaEnv?.[key]) as string | undefined;
+    if (value) return value;
+  }
+  return undefined;
 };
 
-const apiKey = (readEnvValue('GEMINI_API_KEY') ?? '').trim();
+const apiKey = (readEnvValue('GEMINI_API_KEY', 'GEMINI_KEY') ?? '').trim();
 const featureToggle = (readEnvValue('VITE_ENABLE_GEMINI_PREFILL') ?? 'true').toString().toLowerCase();
 export const isGeminiConfigured = Boolean(apiKey);
 export const isGeminiEnabled = isGeminiConfigured && featureToggle !== 'false';
 
 let cachedClient: InstanceType<(typeof import('@google/genai'))['GoogleGenAI']> | null = null;
-
-const ensureServerContext = () => {
-  if (typeof window !== 'undefined') {
-    throw new Error('Gemini enrichment is only available on the server.');
-  }
-};
 
 const getClient = async () => {
   if (!isGeminiConfigured) {
@@ -28,8 +26,6 @@ const getClient = async () => {
   if (!isGeminiEnabled) {
     throw new Error('Gemini enrichment is disabled.');
   }
-
-  ensureServerContext();
 
   if (cachedClient) return cachedClient;
 
