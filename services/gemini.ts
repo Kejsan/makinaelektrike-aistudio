@@ -141,14 +141,11 @@ export const enrichModelWithGemini = async (
 ): Promise<Model> => {
   const client = await getClient();
 
-  const model = client.getGenerativeModel({
-    model: GEMINI_MODEL,
-    generationConfig: { responseMimeType: 'application/json', temperature: 0.35 },
-  });
-
   const prompt = buildGeminiPrompt(brand, modelName);
-  const request = model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }], },],
+  const request = client.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: 'application/json', temperature: 0.35 },
   });
 
   const abortPromise = signal
