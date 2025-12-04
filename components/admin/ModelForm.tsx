@@ -22,6 +22,9 @@ interface ModelFormState {
   model_name: string;
   year_start: string;
   body_type: string;
+  charge_port: string;
+  charge_power: string;
+  autocharge_supported: boolean;
   battery_capacity: string;
   battery_useable_capacity: string;
   battery_type: string;
@@ -30,11 +33,18 @@ interface ModelFormState {
   power_kw: string;
   torque_nm: string;
   acceleration_0_100: string;
+  acceleration_0_60: string;
   top_speed: string;
   drive_type: string;
   seats: string;
   charging_ac: string;
   charging_dc: string;
+  length_mm: string;
+  width_mm: string;
+  height_mm: string;
+  wheelbase_mm: string;
+  weight_kg: string;
+  cargo_volume_l: string;
   notes: string;
   image_url: string;
   isFeatured: boolean;
@@ -50,6 +60,9 @@ const defaultState: ModelFormState = {
   model_name: '',
   year_start: '',
   body_type: '',
+  charge_port: '',
+  charge_power: '',
+  autocharge_supported: false,
   battery_capacity: '',
   battery_useable_capacity: '',
   battery_type: '',
@@ -58,11 +71,18 @@ const defaultState: ModelFormState = {
   power_kw: '',
   torque_nm: '',
   acceleration_0_100: '',
+  acceleration_0_60: '',
   top_speed: '',
   drive_type: '',
   seats: '',
   charging_ac: '',
   charging_dc: '',
+  length_mm: '',
+  width_mm: '',
+  height_mm: '',
+  wheelbase_mm: '',
+  weight_kg: '',
+  cargo_volume_l: '',
   notes: '',
   image_url: '',
   isFeatured: false,
@@ -125,6 +145,9 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       model_name: initialValues.model_name ?? '',
       year_start: initialValues.year_start !== undefined && initialValues.year_start !== null ? String(initialValues.year_start) : '',
       body_type: initialValues.body_type ?? '',
+      charge_port: initialValues.charge_port ?? '',
+      charge_power: initialValues.charge_power !== undefined && initialValues.charge_power !== null ? String(initialValues.charge_power) : '',
+      autocharge_supported: Boolean(initialValues.autocharge_supported),
       battery_capacity: initialValues.battery_capacity !== undefined && initialValues.battery_capacity !== null ? String(initialValues.battery_capacity) : '',
       battery_useable_capacity:
         initialValues.battery_useable_capacity !== undefined && initialValues.battery_useable_capacity !== null
@@ -139,11 +162,18 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       power_kw: initialValues.power_kw !== undefined && initialValues.power_kw !== null ? String(initialValues.power_kw) : '',
       torque_nm: initialValues.torque_nm !== undefined && initialValues.torque_nm !== null ? String(initialValues.torque_nm) : '',
       acceleration_0_100: initialValues.acceleration_0_100 !== undefined && initialValues.acceleration_0_100 !== null ? String(initialValues.acceleration_0_100) : '',
+      acceleration_0_60: initialValues.acceleration_0_60 !== undefined && initialValues.acceleration_0_60 !== null ? String(initialValues.acceleration_0_60) : '',
       top_speed: initialValues.top_speed !== undefined && initialValues.top_speed !== null ? String(initialValues.top_speed) : '',
       drive_type: initialValues.drive_type ?? '',
       seats: initialValues.seats !== undefined && initialValues.seats !== null ? String(initialValues.seats) : '',
       charging_ac: initialValues.charging_ac ?? '',
       charging_dc: initialValues.charging_dc ?? '',
+      length_mm: initialValues.length_mm !== undefined && initialValues.length_mm !== null ? String(initialValues.length_mm) : '',
+      width_mm: initialValues.width_mm !== undefined && initialValues.width_mm !== null ? String(initialValues.width_mm) : '',
+      height_mm: initialValues.height_mm !== undefined && initialValues.height_mm !== null ? String(initialValues.height_mm) : '',
+      wheelbase_mm: initialValues.wheelbase_mm !== undefined && initialValues.wheelbase_mm !== null ? String(initialValues.wheelbase_mm) : '',
+      weight_kg: initialValues.weight_kg !== undefined && initialValues.weight_kg !== null ? String(initialValues.weight_kg) : '',
+      cargo_volume_l: initialValues.cargo_volume_l !== undefined && initialValues.cargo_volume_l !== null ? String(initialValues.cargo_volume_l) : '',
       notes: initialValues.notes ?? '',
       image_url: initialValues.image_url ?? '',
       isFeatured: Boolean(initialValues.isFeatured),
@@ -263,6 +293,13 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       model_name: model.model_name ?? prev.model_name,
       year_start: model.year_start !== undefined && model.year_start !== null ? String(model.year_start) : prev.year_start,
       body_type: model.body_type ?? prev.body_type,
+      charge_port: model.charge_port ?? prev.charge_port,
+      charge_power:
+        model.charge_power !== undefined && model.charge_power !== null
+          ? String(model.charge_power)
+          : prev.charge_power,
+      autocharge_supported:
+        model.autocharge_supported !== undefined ? Boolean(model.autocharge_supported) : prev.autocharge_supported,
       battery_capacity:
         model.battery_capacity !== undefined && model.battery_capacity !== null
           ? String(model.battery_capacity)
@@ -284,11 +321,27 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         model.acceleration_0_100 !== undefined && model.acceleration_0_100 !== null
           ? String(model.acceleration_0_100)
           : prev.acceleration_0_100,
+      acceleration_0_60:
+        model.acceleration_0_60 !== undefined && model.acceleration_0_60 !== null
+          ? String(model.acceleration_0_60)
+          : prev.acceleration_0_60,
       top_speed: model.top_speed !== undefined && model.top_speed !== null ? String(model.top_speed) : prev.top_speed,
       drive_type: model.drive_type ?? prev.drive_type,
       seats: model.seats !== undefined && model.seats !== null ? String(model.seats) : prev.seats,
       charging_ac: model.charging_ac ?? prev.charging_ac,
       charging_dc: model.charging_dc ?? prev.charging_dc,
+      length_mm: model.length_mm !== undefined && model.length_mm !== null ? String(model.length_mm) : prev.length_mm,
+      width_mm: model.width_mm !== undefined && model.width_mm !== null ? String(model.width_mm) : prev.width_mm,
+      height_mm: model.height_mm !== undefined && model.height_mm !== null ? String(model.height_mm) : prev.height_mm,
+      wheelbase_mm:
+        model.wheelbase_mm !== undefined && model.wheelbase_mm !== null
+          ? String(model.wheelbase_mm)
+          : prev.wheelbase_mm,
+      weight_kg: model.weight_kg !== undefined && model.weight_kg !== null ? String(model.weight_kg) : prev.weight_kg,
+      cargo_volume_l:
+        model.cargo_volume_l !== undefined && model.cargo_volume_l !== null
+          ? String(model.cargo_volume_l)
+          : prev.cargo_volume_l,
       notes: model.notes ?? prev.notes,
       image_url: model.image_url ?? prev.image_url,
       isFeatured: model.isFeatured ?? prev.isFeatured,
@@ -353,9 +406,17 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       ['battery_voltage', t('admin.fields.batteryVoltage', { defaultValue: 'Battery voltage' })],
       ['range_wltp', t('admin.fields.rangeWltp', { defaultValue: 'Range (WLTP)' })],
       ['power_kw', t('admin.fields.powerKw', { defaultValue: 'Power (kW)' })],
+      ['charge_power', t('admin.fields.chargingDc', { defaultValue: 'Charging power (kW)' })],
       ['torque_nm', t('admin.fields.torqueNm', { defaultValue: 'Torque (Nm)' })],
       ['acceleration_0_100', t('admin.fields.acceleration', { defaultValue: '0-100 km/h (s)' })],
+      ['acceleration_0_60', t('admin.fields.acceleration', { defaultValue: '0-60 mph (s)' })],
       ['top_speed', t('admin.fields.topSpeed', { defaultValue: 'Top speed (km/h)' })],
+      ['length_mm', t('admin.fields.length', { defaultValue: 'Length (mm)' })],
+      ['width_mm', t('admin.fields.width', { defaultValue: 'Width (mm)' })],
+      ['height_mm', t('admin.fields.height', { defaultValue: 'Height (mm)' })],
+      ['wheelbase_mm', t('admin.fields.wheelbase', { defaultValue: 'Wheelbase (mm)' })],
+      ['weight_kg', t('admin.fields.weight', { defaultValue: 'Weight (kg)' })],
+      ['cargo_volume_l', t('admin.fields.cargoVolume', { defaultValue: 'Cargo volume (L)' })],
     ];
 
     numericFields.forEach(([key, label]) => {
@@ -399,6 +460,18 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     if (bodyType) {
       payload.body_type = bodyType;
     }
+
+    const chargePort = formState.charge_port.trim();
+    if (chargePort) {
+      payload.charge_port = chargePort;
+    }
+
+    const chargePower = parseNumber(formState.charge_power);
+    if (chargePower !== undefined) {
+      payload.charge_power = chargePower;
+    }
+
+    payload.autocharge_supported = formState.autocharge_supported;
 
     const yearStart = parseInteger(formState.year_start);
     if (yearStart !== undefined) {
@@ -445,6 +518,11 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       payload.acceleration_0_100 = acceleration;
     }
 
+    const accelerationSixty = parseNumber(formState.acceleration_0_60);
+    if (accelerationSixty !== undefined) {
+      payload.acceleration_0_60 = accelerationSixty;
+    }
+
     const topSpeed = parseNumber(formState.top_speed);
     if (topSpeed !== undefined) {
       payload.top_speed = topSpeed;
@@ -468,6 +546,36 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     const chargingDc = formState.charging_dc.trim();
     if (chargingDc) {
       payload.charging_dc = chargingDc;
+    }
+
+    const lengthMm = parseNumber(formState.length_mm);
+    if (lengthMm !== undefined) {
+      payload.length_mm = lengthMm;
+    }
+
+    const widthMm = parseNumber(formState.width_mm);
+    if (widthMm !== undefined) {
+      payload.width_mm = widthMm;
+    }
+
+    const heightMm = parseNumber(formState.height_mm);
+    if (heightMm !== undefined) {
+      payload.height_mm = heightMm;
+    }
+
+    const wheelbaseMm = parseNumber(formState.wheelbase_mm);
+    if (wheelbaseMm !== undefined) {
+      payload.wheelbase_mm = wheelbaseMm;
+    }
+
+    const weightKg = parseNumber(formState.weight_kg);
+    if (weightKg !== undefined) {
+      payload.weight_kg = weightKg;
+    }
+
+    const cargoVolume = parseNumber(formState.cargo_volume_l);
+    if (cargoVolume !== undefined) {
+      payload.cargo_volume_l = cargoVolume;
     }
 
     const notes = formState.notes.trim();
@@ -540,6 +648,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         {renderInput(t('admin.fields.yearStart', { defaultValue: 'Production start year' }), 'year_start')}
         {renderInput(t('modelsPage.bodyType', { defaultValue: 'Body Type' }), 'body_type')}
         {renderInput(t('admin.fields.driveType'), 'drive_type')}
+        {renderInput(t('admin.fields.chargePort', { defaultValue: 'Charge port' }), 'charge_port')}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -551,13 +660,41 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
         {renderInput(t('admin.fields.powerKw'), 'power_kw')}
         {renderInput(t('admin.fields.torqueNm'), 'torque_nm')}
         {renderInput(t('admin.fields.acceleration'), 'acceleration_0_100')}
+        {renderInput(t('admin.fields.acceleration', { defaultValue: '0-60 mph (s)' }), 'acceleration_0_60')}
         {renderInput(t('admin.fields.topSpeed'), 'top_speed')}
         {renderInput(t('modelDetails.seats', { defaultValue: 'Seats' }), 'seats')}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {renderInput(t('admin.fields.chargingAc'), 'charging_ac')}
         {renderInput(t('admin.fields.chargingDc'), 'charging_dc')}
+        {renderInput(t('admin.fields.chargingDc', { defaultValue: 'Charging power (kW)' }), 'charge_power')}
+      </div>
+
+      <div className="flex items-center space-x-3">
+        <input
+          id="autocharge-supported"
+          name="autocharge_supported"
+          type="checkbox"
+          checked={formState.autocharge_supported}
+          onChange={handleChange}
+          className="h-4 w-4 rounded border-white/20 bg-gray-900 text-gray-cyan focus:ring-gray-cyan"
+        />
+        <label htmlFor="autocharge-supported" className="text-sm text-gray-200">
+          {t('admin.fields.autochargeSupported', { defaultValue: 'Autocharge supported' })}
+        </label>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        {renderInput(t('admin.fields.length', { defaultValue: 'Length (mm)' }), 'length_mm')}
+        {renderInput(t('admin.fields.width', { defaultValue: 'Width (mm)' }), 'width_mm')}
+        {renderInput(t('admin.fields.height', { defaultValue: 'Height (mm)' }), 'height_mm')}
+        {renderInput(t('admin.fields.wheelbase', { defaultValue: 'Wheelbase (mm)' }), 'wheelbase_mm')}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {renderInput(t('admin.fields.weight', { defaultValue: 'Weight (kg)' }), 'weight_kg')}
+        {renderInput(t('admin.fields.cargoVolume', { defaultValue: 'Cargo volume (L)' }), 'cargo_volume_l')}
       </div>
 
       {renderInput(t('modelDetails.notes', { defaultValue: 'Notes' }), 'notes', 'text', undefined, { isTextArea: true, rows: 4 })}

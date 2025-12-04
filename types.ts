@@ -78,6 +78,9 @@ interface ModelCore {
   model_name: string;
   year_start?: number;
   body_type?: string;
+  charge_port?: string;
+  charge_power?: number; // in kW
+  autocharge_supported?: boolean;
   battery_capacity?: number; // in kWh
   battery_useable_capacity?: number; // in kWh
   battery_type?: string;
@@ -86,11 +89,18 @@ interface ModelCore {
   power_kw?: number; // in kW
   torque_nm?: number; // in Nm
   acceleration_0_100?: number; // in s
+  acceleration_0_60?: number; // in s
   top_speed?: number; // in km/h
   drive_type?: string;
   seats?: number;
   charging_ac?: string;
   charging_dc?: string;
+  length_mm?: number;
+  width_mm?: number;
+  height_mm?: number;
+  wheelbase_mm?: number;
+  weight_kg?: number;
+  cargo_volume_l?: number;
   notes?: string;
   image_url?: string;
   isFeatured?: boolean;
