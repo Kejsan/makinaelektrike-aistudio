@@ -155,6 +155,7 @@ const normalizeElectricVehicle = (vehicle: ElectricVehicleResponse): Model => {
     id: toModelId(resolvedBrand, resolvedModelName),
     brand: resolvedBrand,
     model_name: resolvedModelName,
+    source: 'api',
     body_type: vehicle.body_style ?? vehicle.body_type,
     charge_port,
     charge_power,
