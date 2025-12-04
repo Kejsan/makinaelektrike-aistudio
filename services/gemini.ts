@@ -19,12 +19,6 @@ export const isGeminiEnabled = isGeminiConfigured && featureToggle !== 'false';
 
 let cachedClient: InstanceType<(typeof import('@google/genai'))['GoogleGenAI']> | null = null;
 
-const ensureServerContext = () => {
-  if (typeof window !== 'undefined') {
-    throw new Error('Gemini enrichment is only available on the server.');
-  }
-};
-
 const getClient = async () => {
   if (!isGeminiConfigured) {
     throw new Error('Gemini API key is not configured.');
@@ -32,8 +26,6 @@ const getClient = async () => {
   if (!isGeminiEnabled) {
     throw new Error('Gemini enrichment is disabled.');
   }
-
-  ensureServerContext();
 
   if (cachedClient) return cachedClient;
 
