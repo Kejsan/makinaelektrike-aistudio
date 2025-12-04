@@ -22,6 +22,9 @@ interface ElectricVehicleResponse {
   drive?: string;
   body_style?: string;
   body_type?: string;
+  charge_port?: string | null;
+  charge_power_kw?: number | string | null;
+  autocharge_supported?: boolean | string | null;
   seats?: number | string | null;
   range_km?: number | string | null;
   battery_capacity_kwh?: number | string | null;
@@ -30,6 +33,8 @@ interface ElectricVehicleResponse {
   torque_nm?: number | string | null;
   acceleration_seconds_0_to_100_kph?: number | string | null;
   acceleration_0_to_100?: number | string | null;
+  acceleration_seconds_0_to_60_mph?: number | string | null;
+  zero_to_sixty_mph?: number | string | null;
   top_speed_km_per_hour?: number | string | null;
   top_speed?: number | string | null;
   ac_charger_kw?: number | string | null;
@@ -37,6 +42,12 @@ interface ElectricVehicleResponse {
   fast_charge_power_kw?: number | string | null;
   fast_charge_km_per_min?: number | string | null;
   efficiency_wh_per_km?: number | string | null;
+  length_mm?: number | string | null;
+  width_mm?: number | string | null;
+  height_mm?: number | string | null;
+  wheelbase_mm?: number | string | null;
+  weight_kg?: number | string | null;
+  cargo_volume_l?: number | string | null;
 }
 
 export const API_NINJAS_CONFIG = {
@@ -54,7 +65,21 @@ const buildQueryString = (params: QueryParams) => {
   return searchParams.toString();
 };
 
+const isPremiumPlaceholder = (value: unknown) =>
+  typeof value === 'string' && value.toLowerCase().includes('premium');
+
+const sanitizeString = (value: string | null | undefined): string | undefined => {
+  const trimmed = value?.trim();
+  if (!trimmed || isPremiumPlaceholder(trimmed)) {
+    return undefined;
+  }
+  return trimmed;
+};
+
 const parseNumber = (value: unknown): number | undefined => {
+  if (isPremiumPlaceholder(value)) {
+    return undefined;
+  }
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : undefined;
   }
@@ -65,6 +90,28 @@ const parseNumber = (value: unknown): number | undefined => {
     }
     const parsed = Number(cleaned);
     return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+};
+
+const parseBooleanFlag = (value: unknown): boolean | undefined => {
+  if (isPremiumPlaceholder(value)) {
+    return false;
+  }
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      return undefined;
+    }
+    if (['yes', 'true', 'y', '1'].includes(normalized)) {
+      return true;
+    }
+    if (['no', 'false', '0'].includes(normalized)) {
+      return false;
+    }
   }
   return undefined;
 };
@@ -88,20 +135,36 @@ const normalizeElectricVehicle = (vehicle: ElectricVehicleResponse): Model => {
   const acceleration_0_100 = parseNumber(
     vehicle.acceleration_seconds_0_to_100_kph ?? vehicle.acceleration_0_to_100,
   );
+  const acceleration_0_60 = parseNumber(
+    vehicle.acceleration_seconds_0_to_60_mph ?? vehicle.zero_to_sixty_mph,
+  );
   const top_speed = parseNumber(vehicle.top_speed_km_per_hour ?? vehicle.top_speed);
   const acKw = parseNumber(vehicle.ac_charger_kw ?? vehicle.ac_charge_kw);
   const dcCharge = parseNumber(vehicle.fast_charge_power_kw ?? vehicle.fast_charge_km_per_min);
+  const charge_power = parseNumber(vehicle.charge_power_kw);
+  const length_mm = parseNumber(vehicle.length_mm);
+  const width_mm = parseNumber(vehicle.width_mm);
+  const height_mm = parseNumber(vehicle.height_mm);
+  const wheelbase_mm = parseNumber(vehicle.wheelbase_mm);
+  const weight_kg = parseNumber(vehicle.weight_kg);
+  const cargo_volume_l = parseNumber(vehicle.cargo_volume_l);
+  const charge_port = sanitizeString(vehicle.charge_port);
+  const autocharge_supported = parseBooleanFlag(vehicle.autocharge_supported) ?? false;
 
   return {
     id: toModelId(resolvedBrand, resolvedModelName),
     brand: resolvedBrand,
     model_name: resolvedModelName,
     body_type: vehicle.body_style ?? vehicle.body_type,
+    charge_port,
+    charge_power,
+    autocharge_supported,
     battery_capacity,
     range_wltp,
     power_kw,
     torque_nm,
     acceleration_0_100,
+    acceleration_0_60,
     top_speed,
     drive_type: vehicle.drive ?? vehicle.drivetrain,
     seats: parseNumber(vehicle.seats),
@@ -109,6 +172,12 @@ const normalizeElectricVehicle = (vehicle: ElectricVehicleResponse): Model => {
     charging_dc: dcCharge
       ? `${dcCharge} ${vehicle.fast_charge_power_kw ? 'kW' : 'km/min'}`
       : undefined,
+    length_mm,
+    width_mm,
+    height_mm,
+    wheelbase_mm,
+    weight_kg,
+    cargo_volume_l,
     isFeatured: false,
     imageGallery: [],
     image_url: undefined,
