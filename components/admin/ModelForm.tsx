@@ -884,7 +884,7 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
             <button
               type="button"
               onClick={handleAiEnrich}
-              disabled={isAiLoading || !isGeminiEnabled}
+              disabled={isAiLoading}
               className="inline-flex items-center gap-2 rounded-lg bg-gray-cyan px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isAiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
