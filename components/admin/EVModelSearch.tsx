@@ -16,6 +16,8 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
   const [modelInput, setModelInput] = useState('');
   const [isLoadingVehicle, setIsLoadingVehicle] = useState(false);
   const [error, setError] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [results, setResults] = useState<Model[]>([]);
 
   const vehicleControllerRef = useRef<AbortController | null>(null);
 
@@ -23,34 +25,56 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
     const make = makeInput.trim();
     const model = modelInput.trim();
 
-    if (!make || !model) {
+    if (!make && !model) {
       setError(
         t('admin.evSearch.missingInputs', {
-          defaultValue: 'Enter both a manufacturer and model to search.',
+          defaultValue: 'Enter a manufacturer or model to search.',
         }),
       );
+      setStatusMessage('');
+      setResults([]);
       return;
     }
 
     setError('');
+    setStatusMessage('');
+    setResults([]);
     setIsLoadingVehicle(true);
     vehicleControllerRef.current?.abort();
     const controller = new AbortController();
     vehicleControllerRef.current = controller;
 
     try {
-      const vehicles = await getElectricVehicle(make, model, controller.signal);
+      const vehicles = await getElectricVehicle(make || undefined, model || undefined, controller.signal);
       const firstVehicle = vehicles[0];
 
-      if (firstVehicle) {
-        onPrefill(firstVehicle);
-      } else {
+      if (!firstVehicle) {
         setError(
           t('admin.evSearch.noResults', {
             defaultValue: 'No electric vehicles found for this selection.',
           }),
         );
+        return;
       }
+
+      setResults(vehicles);
+
+      if (vehicles.length === 1) {
+        onPrefill(firstVehicle);
+        setStatusMessage(
+          t('admin.evSearch.singleResult', {
+            defaultValue: 'Found 1 vehicle. Prefilled the details automatically.',
+          }),
+        );
+        return;
+      }
+
+      setStatusMessage(
+        t('admin.evSearch.multipleResults', {
+          count: vehicles.length,
+          defaultValue: 'Found {{count}} vehicles. Select the exact match below.',
+        }),
+      );
     } catch (err) {
       if ((err as Error)?.name === 'AbortError') return;
       console.error('Failed to fetch EV details', err);
@@ -98,6 +122,8 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
               onChange={event => {
                 setMakeInput(event.target.value);
                 setError('');
+                setStatusMessage('');
+                setResults([]);
               }}
               placeholder={t('admin.evSearch.makePlaceholder', { defaultValue: 'e.g. Tesla' })}
               className="w-full rounded-lg border border-white/10 bg-white/5 py-2 pl-10 pr-3 text-white placeholder:text-gray-400 focus:border-gray-cyan focus:outline-none"
@@ -117,6 +143,8 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
               onChange={event => {
                 setModelInput(event.target.value);
                 setError('');
+                setStatusMessage('');
+                setResults([]);
               }}
               placeholder={t('admin.evSearch.modelPlaceholder', { defaultValue: 'e.g. Model 3' })}
               className="w-full rounded-lg border border-white/10 bg-white/5 py-2 pl-10 pr-3 text-white placeholder:text-gray-400 focus:border-gray-cyan focus:outline-none"
@@ -145,11 +173,45 @@ const EVModelSearch: React.FC<EVModelSearchProps> = ({ onPrefill, onLoadingChang
             {t('admin.evSearch.fetching', { defaultValue: 'Fetching vehicle data…' })}
           </p>
         )}
-        {isPrefillUsed && !isLoadingVehicle && !error && (
+        {isPrefillUsed && !isLoadingVehicle && !error && !results.length && (
           <p className="text-gray-300">{t('admin.prefillDisabled', { defaultValue: 'Prefill available once per new model.' })}</p>
         )}
         {error && <p className="text-red-300">{error}</p>}
+        {statusMessage && !error && <p className="text-gray-200">{statusMessage}</p>}
       </div>
+
+      {!!results.length && !error && (
+        <div className="space-y-2 rounded-lg border border-white/10 bg-white/5 p-3">
+          <p className="text-sm font-semibold text-white">
+            {t('admin.evSearch.resultsHeader', { defaultValue: 'Matching vehicles' })}
+          </p>
+          <ul className="space-y-2 text-sm text-gray-200">
+            {results.map(vehicle => (
+              <li
+                key={vehicle.id}
+                className="flex flex-col gap-2 rounded-md border border-white/10 bg-white/5 p-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <p className="font-medium text-white">{`${vehicle.brand ?? 'Unknown'} ${vehicle.model_name ?? ''}`.trim()}</p>
+                  {(vehicle.body_type || vehicle.drive_type) && (
+                    <p className="text-xs text-gray-400">
+                      {[vehicle.body_type, vehicle.drive_type].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onPrefill(vehicle)}
+                  disabled={isPrefillUsed}
+                  className="inline-flex items-center justify-center rounded-md bg-gray-cyan px-3 py-1 text-sm font-semibold text-white transition hover:bg-gray-cyan/90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {t('admin.evSearch.useResult', { defaultValue: 'Use this model' })}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
