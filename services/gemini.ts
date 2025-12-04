@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from '@google/genai';
 import type { Model } from '../types';
 
 const GEMINI_MODEL = 'gemini-2.0-flash-lite';
@@ -14,8 +13,30 @@ const featureToggle = (readEnvValue('VITE_ENABLE_GEMINI_PREFILL') ?? 'true').toS
 export const isGeminiConfigured = Boolean(apiKey);
 export const isGeminiEnabled = isGeminiConfigured && featureToggle !== 'false';
 
-const createClient = () => new GoogleGenerativeAI(apiKey);
-const client = isGeminiConfigured ? createClient() : null;
+let cachedClient: InstanceType<(typeof import('@google/genai'))['GoogleGenAI']> | null = null;
+
+const ensureServerContext = () => {
+  if (typeof window !== 'undefined') {
+    throw new Error('Gemini enrichment is only available on the server.');
+  }
+};
+
+const getClient = async () => {
+  if (!isGeminiConfigured) {
+    throw new Error('Gemini API key is not configured.');
+  }
+  if (!isGeminiEnabled) {
+    throw new Error('Gemini enrichment is disabled.');
+  }
+
+  ensureServerContext();
+
+  if (cachedClient) return cachedClient;
+
+  const { GoogleGenAI } = (await import('@google/genai')) as typeof import('@google/genai');
+  cachedClient = new GoogleGenAI({ apiKey });
+  return cachedClient;
+};
 
 const toModelId = (brand: string, modelName: string) =>
   `${brand}-${modelName}`
@@ -122,12 +143,7 @@ export const enrichModelWithGemini = async (
   modelName: string,
   signal?: AbortSignal,
 ): Promise<Model> => {
-  if (!isGeminiEnabled) {
-    throw new Error('Gemini enrichment is disabled.');
-  }
-  if (!client) {
-    throw new Error('Gemini API key is not configured.');
-  }
+  const client = await getClient();
 
   const model = client.getGenerativeModel({
     model: GEMINI_MODEL,

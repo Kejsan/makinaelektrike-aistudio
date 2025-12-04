@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 vi.mock('@google/genai', () => {
   const generateContent = vi.fn();
   const getGenerativeModel = vi.fn(() => ({ generateContent }));
-  const GoogleGenerativeAI = vi.fn(() => ({ getGenerativeModel }));
-  return { GoogleGenerativeAI, __private__: { generateContent, getGenerativeModel } };
+  const GoogleGenAI = vi.fn(() => ({ getGenerativeModel }));
+  return { GoogleGenAI, __private__: { generateContent, getGenerativeModel } };
 });
 
 const mockEnv = (key: string, value: string) => {
