@@ -4,7 +4,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { Model } from '../../types';
 import { MODEL_PLACEHOLDER_IMAGE } from '../../constants/media';
 import EVModelSearch from './EVModelSearch';
-import { enrichModelWithGemini, isGeminiEnabled } from '../../services/gemini';
+import { enrichModelWithGemini } from '../../services/gemini';
 
 export interface ModelFormValues extends Omit<Model, 'id'> {
   id?: string;
@@ -351,15 +351,6 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
       return;
     }
 
-    if (!isGeminiEnabled) {
-      setAiError(
-        t('admin.aiEnrich.disabled', {
-          defaultValue: 'Gemini enrichment is disabled or not configured.',
-        }),
-      );
-      return;
-    }
-
     const brand = formState.brand.trim();
     const modelName = formState.model_name.trim();
 
@@ -392,11 +383,16 @@ const ModelForm: React.FC<ModelFormProps> = ({ initialValues, onSubmit, onCancel
     } catch (error) {
       if ((error as Error)?.name === 'AbortError') return;
       console.error('Gemini enrichment failed', error);
-      setAiError(
-        t('admin.aiEnrich.error', {
-          defaultValue: 'Unable to fetch AI suggestions. Please try again.',
-        }),
-      );
+      const message = (error as Error)?.message ?? '';
+      const translated =
+        message.includes('disabled') || message.includes('not configured')
+          ? t('admin.aiEnrich.disabled', {
+              defaultValue: 'Gemini enrichment is disabled or not configured.',
+            })
+          : t('admin.aiEnrich.error', {
+              defaultValue: 'Unable to fetch AI suggestions. Please try again.',
+            });
+      setAiError(translated);
     } finally {
       setIsAiLoading(false);
     }
