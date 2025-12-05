@@ -6,7 +6,7 @@
 1. Install dependencies:
    `npm install`
 2. Set the following values in [.env.local](.env.local):
-   - `GEMINI_API_KEY` for Gemini access
+   - `GEMINI_API_KEY` for Gemini access (Gemini Flash Lite includes Google Search grounding)
    - `VITE_API_NINJAS_KEY` to enable EV data prefilling
 3. Run the app:
    `npm run dev`

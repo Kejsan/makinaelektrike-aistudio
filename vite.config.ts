@@ -9,14 +9,12 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
       },
-      envPrefix: ['VITE_', 'OCM_', 'GEMINI_', 'GOOGLE_'],
+      envPrefix: ['VITE_', 'OCM_', 'GEMINI_'],
       plugins: [react()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_KEY': JSON.stringify(env.GEMINI_KEY),
-        'process.env.GOOGLE_SEARCH_API_KEY': JSON.stringify(env.GOOGLE_SEARCH_API_KEY),
-        'process.env.GOOGLE_SEARCH_ENGINE_ID': JSON.stringify(env.GOOGLE_SEARCH_ENGINE_ID)
+        'process.env.GEMINI_KEY': JSON.stringify(env.GEMINI_KEY)
       },
       resolve: {
         alias: {

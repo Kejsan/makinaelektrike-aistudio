@@ -68,61 +68,12 @@ const parseBoolean = (value: unknown): boolean | undefined => {
 const cleanString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim() ? value.trim() : undefined;
 
-type WebSearchResult = {
-  title: string;
-  url: string;
-  snippet?: string;
-};
-
-const fetchSearchResults = async (brand: string, model: string): Promise<WebSearchResult[]> => {
-  if (!searchApiKey || !searchEngineId) return [];
-
-  const query = `${brand} ${model} EV specs`;
-  const searchUrl = new URL('https://www.googleapis.com/customsearch/v1');
-  searchUrl.searchParams.set('key', searchApiKey);
-  searchUrl.searchParams.set('cx', searchEngineId);
-  searchUrl.searchParams.set('q', query);
-  searchUrl.searchParams.set('num', '5');
-
-  try {
-    const response = await fetch(searchUrl.toString());
-    if (!response.ok) return [];
-
-    const payload = (await response.json()) as {
-      items?: { title?: string; link?: string; snippet?: string }[];
-    };
-
-    return (payload.items ?? [])
-      .map(item => ({
-        title: item.title?.trim() ?? 'Result',
-        url: item.link ?? '',
-        snippet: item.snippet?.trim(),
-      }))
-      .filter(result => Boolean(result.url));
-  } catch (error) {
-    console.warn('Gemini search enrichment failed', error);
-    return [];
-  }
-};
-
-const buildContextBlock = (brand: string, model: string, searchResults: WebSearchResult[]) => {
-  if (!searchResults.length) return '';
-
-  const bulletList = searchResults
-    .map(result => `- ${result.title}\n  URL: ${result.url}${result.snippet ? `\n  Snippet: ${result.snippet}` : ''}`)
-    .join('\n');
-
-  return `\nThe following recent web results were retrieved for ${brand} ${model}. Cross-check and rely on them for the latest specs when possible, but omit any field you cannot verify.\n${bulletList}\n`;
-};
-
-export const buildGeminiPrompt = (brand: string, model: string, searchResults: WebSearchResult[]) => {
-  const context = buildContextBlock(brand, model, searchResults);
+export const buildGeminiPrompt = (brand: string, model: string) => {
   return `You are an EV data expert.
-Provide concise technical specifications for the electric vehicle ${brand} ${model}.${context}
-Respond with a single JSON object using these keys only: brand, model_name, year_start, body_type, charge_port, charge_power,
-autocharge_supported, battery_capacity, battery_useable_capacity, battery_type, battery_voltage, range_wltp, power_kw, torque_nm,
-acceleration_0_100, acceleration_0_60, top_speed, drive_type, seats, charging_ac, charging_dc, length_mm, width_mm, height_mm,
-wheelbase_mm, weight_kg, cargo_volume_l, notes.
+Use Google Search to confirm up-to-date values when needed.
+Provide concise technical specifications for the electric vehicle ${brand} ${model}.
+Respond with a single JSON object using these keys only: brand, model_name, year_start, body_type, charge_port, charge_power, autocharge_supported, battery_capacity, battery_useable_capacity, battery_type, battery_voltage, range_wltp, power_kw, torque_nm,
+acceleration_0_100, acceleration_0_60, top_speed, drive_type, seats, charging_ac, charging_dc, length_mm, width_mm, height_mm, wheelbase_mm, weight_kg, cargo_volume_l, notes.
 If a value is unknown, omit that key entirely. Use numbers where appropriate.`;
 };
 
@@ -193,12 +144,12 @@ export const enrichModelWithGemini = async (
 ): Promise<Model> => {
   const client = await getClient();
 
-  const searchResults = await fetchSearchResults(brand, modelName);
-  const prompt = buildGeminiPrompt(brand, modelName, searchResults);
+  const prompt = buildGeminiPrompt(brand, modelName);
   const request = client.models.generateContent({
     model: GEMINI_MODEL.startsWith('models/') ? GEMINI_MODEL : `models/${GEMINI_MODEL}`,
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
     generationConfig: { responseMimeType: 'application/json', temperature: 0.35 },
+    tools: [{ googleSearch: {} }],
   });
 
   const abortPromise = signal
