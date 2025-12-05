@@ -14,6 +14,8 @@ const readEnvValue = (...keys: string[]): string | undefined => {
 
 const apiKey = (readEnvValue('GEMINI_API_KEY', 'GEMINI_KEY') ?? '').trim();
 const featureToggle = (readEnvValue('VITE_ENABLE_GEMINI_PREFILL') ?? 'true').toString().toLowerCase();
+const searchApiKey = readEnvValue('GOOGLE_SEARCH_API_KEY', 'VITE_GOOGLE_SEARCH_API_KEY');
+const searchEngineId = readEnvValue('GOOGLE_SEARCH_ENGINE_ID', 'VITE_GOOGLE_SEARCH_ENGINE_ID');
 export const isGeminiConfigured = Boolean(apiKey);
 export const isGeminiEnabled = isGeminiConfigured && featureToggle !== 'false';
 
