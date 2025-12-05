@@ -1127,6 +1127,7 @@ const AdminPage: React.FC = () => {
             onSubmit={handleModelSubmit}
             onCancel={closeAllModals}
             isSubmitting={modelSubmitting}
+            isAdmin={isAdmin}
           />
         </AdminModal>
       )}
