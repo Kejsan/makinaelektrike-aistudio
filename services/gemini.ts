@@ -1,25 +1,23 @@
 import type { Model } from '../types';
 
-const GEMINI_MODEL = 'gemini-2.0-flash-lite';
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 export const GEMINI_TIMEOUT_MS = 12000;
 
-const readEnvValue = (key: string): string | undefined => {
+const readEnvValue = (...keys: string[]): string | undefined => {
   const metaEnv = typeof import.meta !== 'undefined' ? (import.meta as { env?: Record<string, string> }).env : undefined;
-  return (process.env[key] ?? metaEnv?.[key]) as string | undefined;
+  for (const key of keys) {
+    const value = (process.env[key] ?? metaEnv?.[key]) as string | undefined;
+    if (value) return value;
+  }
+  return undefined;
 };
 
-const apiKey = (readEnvValue('GEMINI_API_KEY') ?? '').trim();
+const apiKey = (readEnvValue('GEMINI_API_KEY', 'GEMINI_KEY') ?? '').trim();
 const featureToggle = (readEnvValue('VITE_ENABLE_GEMINI_PREFILL') ?? 'true').toString().toLowerCase();
 export const isGeminiConfigured = Boolean(apiKey);
 export const isGeminiEnabled = isGeminiConfigured && featureToggle !== 'false';
 
 let cachedClient: InstanceType<(typeof import('@google/genai'))['GoogleGenAI']> | null = null;
-
-const ensureServerContext = () => {
-  if (typeof window !== 'undefined') {
-    throw new Error('Gemini enrichment is only available on the server.');
-  }
-};
 
 const getClient = async () => {
   if (!isGeminiConfigured) {
@@ -28,8 +26,6 @@ const getClient = async () => {
   if (!isGeminiEnabled) {
     throw new Error('Gemini enrichment is disabled.');
   }
-
-  ensureServerContext();
 
   if (cachedClient) return cachedClient;
 
@@ -70,13 +66,14 @@ const parseBoolean = (value: unknown): boolean | undefined => {
 const cleanString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim() ? value.trim() : undefined;
 
-export const buildGeminiPrompt = (brand: string, model: string) => `You are an EV data expert.
+export const buildGeminiPrompt = (brand: string, model: string) => {
+  return `You are an EV data expert.
+Use Google Search to confirm up-to-date values when needed.
 Provide concise technical specifications for the electric vehicle ${brand} ${model}.
-Respond with a single JSON object using these keys only: brand, model_name, year_start, body_type, charge_port, charge_power,
-autocharge_supported, battery_capacity, battery_useable_capacity, battery_type, battery_voltage, range_wltp, power_kw, torque_nm,
-acceleration_0_100, acceleration_0_60, top_speed, drive_type, seats, charging_ac, charging_dc, length_mm, width_mm, height_mm,
-wheelbase_mm, weight_kg, cargo_volume_l, notes.
-Omit any values you cannot confidently provide. Use numbers where appropriate.`;
+Respond with a single JSON object using these keys only: brand, model_name, year_start, body_type, charge_port, charge_power, autocharge_supported, battery_capacity, battery_useable_capacity, battery_type, battery_voltage, range_wltp, power_kw, torque_nm,
+acceleration_0_100, acceleration_0_60, top_speed, drive_type, seats, charging_ac, charging_dc, length_mm, width_mm, height_mm, wheelbase_mm, weight_kg, cargo_volume_l, notes.
+If a value is unknown, omit that key entirely. Use numbers where appropriate.`;
+};
 
 export const normalizeGeminiModel = (
   payload: Partial<Record<keyof Model, unknown>>,
@@ -145,14 +142,12 @@ export const enrichModelWithGemini = async (
 ): Promise<Model> => {
   const client = await getClient();
 
-  const model = client.getGenerativeModel({
-    model: GEMINI_MODEL,
-    generationConfig: { responseMimeType: 'application/json', temperature: 0.35 },
-  });
-
   const prompt = buildGeminiPrompt(brand, modelName);
-  const request = model.generateContent({
-    contents: [{ role: 'user', parts: [{ text: prompt }], },],
+  const request = client.models.generateContent({
+    model: GEMINI_MODEL.startsWith('models/') ? GEMINI_MODEL : `models/${GEMINI_MODEL}`,
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: 'application/json', temperature: 0.35 },
+    tools: [{ googleSearch: {} }],
   });
 
   const abortPromise = signal
@@ -162,9 +157,28 @@ export const enrichModelWithGemini = async (
     : null;
 
   const response = await withTimeout(abortPromise ? Promise.race([request, abortPromise]) : request, GEMINI_TIMEOUT_MS);
-  const text = (response as { response?: { text?: () => string } })?.response?.text?.();
 
-  if (!text) {
+  const text = (() => {
+    const structured =
+      (response as {
+        candidates?: { content?: { parts?: { text?: string }[] } }[];
+        response?: { candidates?: { content?: { parts?: { text?: string }[] } }[]; text?: () => string };
+      }) ?? {};
+
+    const candidateParts = structured.candidates ?? structured.response?.candidates;
+    const parts = candidateParts?.flatMap(candidate => candidate.content?.parts ?? []) ?? [];
+    const concatenated = parts
+      .map(part => part.text?.trim())
+      .filter((value): value is string => Boolean(value))
+      .join('\n')
+      .trim();
+
+    if (concatenated) return concatenated;
+
+    return structured.response?.text?.();
+  })();
+
+  if (!text || !text.trim()) {
     throw new Error('Gemini returned an empty response.');
   }
 
